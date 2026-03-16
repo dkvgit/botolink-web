@@ -518,25 +518,19 @@ async def root():
     # // Просто заглушка, чтобы главная страница не выдавала ошибку 500
     return {"status": "working", "message": "Bot is alive! Use /set_webhook to link Telegram"}
 
+# // web/main.py
+
 @app.get("/set_webhook")
 async def set_webhook():
-    # // Логируем попытку установки вебхука, чтобы видеть её в панели Railway
-    print(f"DEBUG: Попытка установить вебхук для URL: {APP_URL}")
-    
-    if not APP_URL:
-        return {"error": "APP_URL is not set in environment variables"}
-    
+    # // Используем переменные, которые уже есть в системе
     webhook_url = f"{APP_URL}/webhook"
-    url = f"https://api.telegram.org/bot{BOT_TOKEN}/setWebhook?url={webhook_url}"
+    tg_url = f"https://api.telegram.org/bot{BOT_TOKEN}/setWebhook?url={webhook_url}"
     
     async with httpx.AsyncClient() as client:
         try:
-            response = await client.get(url)
-            result = response.json()
-            print(f"DEBUG: Ответ от Telegram: {result}")
-            return result
+            r = await client.get(tg_url)
+            return r.json()
         except Exception as e:
-            print(f"DEBUG: Ошибка при запросе к TG: {e}")
             return {"error": str(e)}
 
 
