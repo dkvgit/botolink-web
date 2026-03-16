@@ -167,6 +167,22 @@ async def main():
 	"""Основная функция запуска бота"""
 	logger.info("🤖 Запуск бота...")
 	
+	
+# ===== 2. COMMAND HANDLERS =====
+	application.add_handler(CommandHandler("start", start_handler))
+	application.add_handler(CommandHandler("refresh_avatar", refresh_avatar_command))
+	application.add_handler(CommandHandler("help", help_handler))
+	application.add_handler(CommandHandler("mysite", mysite_handler))
+	application.add_handler(CommandHandler("qr", qr_handler))
+	application.add_handler(CommandHandler("links", links_handler))
+	application.add_handler(CommandHandler("stats", stats_handler))
+	application.add_handler(CommandHandler("upgrade", upgrade_handler))
+	application.add_handler(CommandHandler("profile", profile_handler))
+	application.add_handler(CommandHandler("templates", templates_command))
+	application.add_handler(CommandHandler("admin", admin_list_users))
+	
+	
+	
 	# ===== 1. CONVERSATION HANDLERS =====
 	
 	# СМЕНА НИКА
@@ -738,17 +754,7 @@ async def main():
 	)
 	application.add_handler(bank_world_conv)  # Сначала наш новый
 	
-	# ===== 2. COMMAND HANDLERS =====
-	application.add_handler(CommandHandler("start", start_handler))
-	application.add_handler(CommandHandler("refresh_avatar", refresh_avatar_command))
-	application.add_handler(CommandHandler("help", help_handler))
-	application.add_handler(CommandHandler("mysite", mysite_handler))
-	application.add_handler(CommandHandler("qr", qr_handler))
-	application.add_handler(CommandHandler("links", links_handler))
-	application.add_handler(CommandHandler("stats", stats_handler))
-	application.add_handler(CommandHandler("upgrade", upgrade_handler))
-	application.add_handler(CommandHandler("profile", profile_handler))
-	application.add_handler(CommandHandler("templates", templates_command))
+	
 	
 	# ===== 3. CALLBACK HANDLERS =====
 	# В main.py, в секции обычных CallbackQueryHandler (после всех ConversationHandler)
@@ -780,7 +786,7 @@ async def main():
 	application.add_handler(CallbackQueryHandler(admin_payment_callback, pattern="^admin_(approve|reject)_"))
 	
 	# АДМИН-ПАНЕЛЬ
-	application.add_handler(CommandHandler("admin", admin_list_users))
+	
 	application.add_handler(CallbackQueryHandler(admin_list_users, pattern="^admin_list_users$"))
 	application.add_handler(CallbackQueryHandler(admin_user_detail, pattern="^admin_user_"))
 	application.add_handler(CallbackQueryHandler(admin_give_pro_menu, pattern="^admin_give_pro_menu$"))
