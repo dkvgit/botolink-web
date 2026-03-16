@@ -19,7 +19,7 @@ from starlette.responses import RedirectResponse
 from fastapi import Request
 from telegram import Update
 import httpx
-from bot.main import ptb_application
+from bot.main import application as ptb_application
 
 
 
@@ -541,39 +541,26 @@ async def set_webhook():
 
 # // web/main.py
 
+# // web/main.py
+
 @app.post("/webhook")
 async def webhook(request: Request):
-    # // Получаем данные от Telegram
-    data = await request.json()
-    
-    # // Самый важный лог: покажет, что вообще прилетело
-    print(f"--- DEBUG WEBHOOK DATA: {data} ---")
-    
+    # // Читаем данные, которые прислал Telegram
     try:
+        data = await request.json()
+        # // Печатаем в логи всё, что пришло, чтобы видеть активность
+        print(f"--- ВХОДЯЩИЙ ЗАПРОС: {data} ---")
+        
         update = Update.de_json(data, ptb_application.bot)
         
-        # // Вычисляем ID того, кто написал
-        user_id = update.effective_user.id if update.effective_user else "Unknown"
-        user_name = update.effective_user.first_name if update.effective_user else "Unknown"
-        
-        print(f"--- DEBUG: Сообщение от {user_name} (ID: {user_id}) ---")
-        print(f"--- DEBUG: Список разрешенных ADMIN_IDS: {ADMIN_IDS} ---")
-
-        # // Проверка на админа (приводим всё к строкам и убираем пробелы)
-        allowed_ids = [str(aid).strip() for aid in ADMIN_IDS]
-        if str(user_id) not in allowed_ids:
-            print(f"--- DEBUG: Доступ отклонен! ID {user_id} нет в списке {allowed_ids} ---")
-            return {"status": "access_denied", "user_id": user_id}
-
-        # // Если админ — передаем апдейт в обработку python-telegram-bot
+        # // Обрабатываем сообщение через библиотеку
         await ptb_application.process_update(update)
-        print(f"--- DEBUG: Update обработан успешно для {user_id} ---")
-        return {"status": "ok"}
         
+        return {"status": "ok"}
     except Exception as e:
-        # // Если код упал — мы увидим ошибку здесь
-        print(f"--- ERROR IN WEBHOOK: {e} ---")
-        return {"status": "error", "detail": str(e)}
+        # // Если что-то пошло не так, увидим ошибку в логах Railway
+        print(f"--- ОШИБКА В WEBHOOK: {e} ---")
+        return {"status": "error", "message": str(e)}
     
     
     
