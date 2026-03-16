@@ -53,7 +53,8 @@ async def lifespan(app: FastAPI):
     await application.shutdown()
 
 
-
+# // ВАЖНО: app создается строго ПОСЛЕ функции lifespan
+app = FastAPI(lifespan=lifespan)
 
 
 
