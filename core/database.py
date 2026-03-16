@@ -34,3 +34,17 @@ async def get_db():
             yield session
         finally:
             await session.close()
+
+# core/database.py
+
+# Создаем движок с фиксом для PgBouncer
+engine = create_async_engine(
+    DATABASE_URL,
+    echo=False,
+    future=True,
+    # Добавляем эти параметры, чтобы убрать ошибку prepared statement
+    connect_args={
+        "statement_cache_size": 0,
+        "prepared_statement_cache_size": 0
+    }
+)
