@@ -161,25 +161,27 @@ application = Application.builder() \
 	.write_timeout(30) \
 	.pool_timeout(30) \
 	.build()
-	
+
+# ===== 2. COMMAND HANDLERS =====
+application.add_handler(CommandHandler("start", start_handler))
+application.add_handler(CommandHandler("refresh_avatar", refresh_avatar_command))
+application.add_handler(CommandHandler("help", help_handler))
+application.add_handler(CommandHandler("mysite", mysite_handler))
+application.add_handler(CommandHandler("qr", qr_handler))
+application.add_handler(CommandHandler("links", links_handler))
+application.add_handler(CommandHandler("stats", stats_handler))
+application.add_handler(CommandHandler("upgrade", upgrade_handler))
+application.add_handler(CommandHandler("profile", profile_handler))
+application.add_handler(CommandHandler("templates", templates_command))
+application.add_handler(CommandHandler("admin", admin_list_users))
+
 
 async def main():
 	"""Основная функция запуска бота"""
 	logger.info("🤖 Запуск бота...")
 	
 	
-# ===== 2. COMMAND HANDLERS =====
-	application.add_handler(CommandHandler("start", start_handler))
-	application.add_handler(CommandHandler("refresh_avatar", refresh_avatar_command))
-	application.add_handler(CommandHandler("help", help_handler))
-	application.add_handler(CommandHandler("mysite", mysite_handler))
-	application.add_handler(CommandHandler("qr", qr_handler))
-	application.add_handler(CommandHandler("links", links_handler))
-	application.add_handler(CommandHandler("stats", stats_handler))
-	application.add_handler(CommandHandler("upgrade", upgrade_handler))
-	application.add_handler(CommandHandler("profile", profile_handler))
-	application.add_handler(CommandHandler("templates", templates_command))
-	application.add_handler(CommandHandler("admin", admin_list_users))
+
 	
 	
 	
