@@ -16,7 +16,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.responses import RedirectResponse
-from bot.main import application
+
 
 from telegram import Update
 load_dotenv()
