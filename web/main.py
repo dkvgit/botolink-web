@@ -535,20 +535,46 @@ async def set_webhook():
 
 
 
+# // web/main.py
+
 @app.post("/webhook")
-async def telegram_webhook(request: Request):
-    # // Читаем входящий JSON от Telegram
+async def webhook(request: Request):
+    # // Получаем данные от Telegram
     data = await request.json()
     
-    # // Превращаем его в объект Update
-    update = Update.de_json(data, bot_app.bot)
+    # // Самый важный лог: покажет, что вообще прилетело
+    print(f"--- DEBUG WEBHOOK DATA: {data} ---")
     
-    # // ИСПРАВЛЕННЫЙ МЕТОД: .process_update(update) вместо .update(update)
-    # // Это скормит сообщение твоим хендлерам в bot/main.py
-    await bot_app.process_update(update)
-    
-    return {"status": "ok"}
+    try:
+        update = Update.de_json(data, ptb_application.bot)
+        
+        # // Вычисляем ID того, кто написал
+        user_id = update.effective_user.id if update.effective_user else "Unknown"
+        user_name = update.effective_user.first_name if update.effective_user else "Unknown"
+        
+        print(f"--- DEBUG: Сообщение от {user_name} (ID: {user_id}) ---")
+        print(f"--- DEBUG: Список разрешенных ADMIN_IDS: {ADMIN_IDS} ---")
 
+        # // Проверка на админа (приводим всё к строкам и убираем пробелы)
+        allowed_ids = [str(aid).strip() for aid in ADMIN_IDS]
+        if str(user_id) not in allowed_ids:
+            print(f"--- DEBUG: Доступ отклонен! ID {user_id} нет в списке {allowed_ids} ---")
+            return {"status": "access_denied", "user_id": user_id}
+
+        # // Если админ — передаем апдейт в обработку python-telegram-bot
+        await ptb_application.process_update(update)
+        print(f"--- DEBUG: Update обработан успешно для {user_id} ---")
+        return {"status": "ok"}
+        
+    except Exception as e:
+        # // Если код упал — мы увидим ошибку здесь
+        print(f"--- ERROR IN WEBHOOK: {e} ---")
+        return {"status": "error", "detail": str(e)}
+    
+    
+    
+    
+    
 if __name__ == "__main__":
     import uvicorn
     import os
