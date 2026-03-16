@@ -58,27 +58,24 @@ app = FastAPI(lifespan=lifespan)
 
 
 
-# ЭТОТ РОУТ НУЖЕН ДЛЯ РАБОТЫ БОТА В ОБЛАКЕ
-@app.post("/webhook")
-async def telegram_webhook(request: Request):
-    # # для Python
-    # Функция принимает POST запрос от Telegram
+# web/main.py
+
+@app.get("/set_webhook")
+async def set_webhook():
+    # Эта функция связывает твоего бота на Railway с серверами Telegram
+    import os
+    from bot.main import bot_app # Убедись, что импорт правильный исходя из твоей структуры
+    
+    # Берем адрес, по которому сейчас открывается твой сайт
+    base_url = "https://botolink-web-production.up.railway.app"
+    webhook_path = f"{base_url}/webhook"
+    
     try:
-        # Получаем данные сообщения в формате JSON
-        data = await request.json()
-        
-        # Превращаем JSON в объект Update, который понимает python-telegram-bot
-        update = Update.de_json(data, application.bot)
-        
-        # Запускаем обработку сообщения внутри асинхронного контекста бота
-        async with application:
-            await application.process_update(update)
-            
-        return {"status": "ok"}
+        # Отправляем команду Телеграму: "Шли все сообщения на этот адрес"
+        await bot_app.bot.set_webhook(url=webhook_path)
+        return {"status": "ok", "message": f"Webhook успешно установлен на {webhook_path}"}
     except Exception as e:
-        # Если что-то пошло не так, выводим ошибку, но отвечаем 200,
-        # чтобы Telegram не спамил повторами
-        print(f"🔥 Ошибка Webhook: {e}")
+        # Если что-то пошло не так (например, токен не подхватился)
         return {"status": "error", "message": str(e)}
 
 
