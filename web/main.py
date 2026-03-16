@@ -58,22 +58,6 @@ app = FastAPI(lifespan=lifespan)
 
 
 
-# web/main.py
-
-@app.get("/set_webhook")
-async def set_webhook():
-    import os
-    # Замени 'bot_app' на то имя, которое у тебя в bot/main.py (например, application)
-    from bot.main import application as bot_app
-    
-    base_url = "https://botolink-web-production.up.railway.app"
-    webhook_url = f"{base_url}/webhook"
-    
-    try:
-        await bot_app.bot.set_webhook(url=webhook_url)
-        return {"status": "ok", "message": f"Webhook set to {webhook_url}"}
-    except Exception as e:
-        return {"status": "error", "message": str(e)}
 
 
 
@@ -527,35 +511,44 @@ async def user_page(request: Request, username: str):
 		await conn.close()
 
 
-# web/main.py
+
+@app.get("/set_webhook")
+async def set_webhook():
+    import os
+    from bot.main import application as bot_app
+    base_url = "https://botolink-web-production.up.railway.app"
+    webhook_url = f"{base_url}/webhook"
+    try:
+        await bot_app.bot.set_webhook(url=webhook_url, drop_pending_updates=True)
+        return {
+            "status": "success",
+            "message": f"Webhook установлен на {webhook_url}",
+            "info": "Теперь Телеграм знает, куда слать сообщения"
+        }
+    except Exception as e:
+        return {"status": "error", "message": f"Ошибка установки: {str(e)}"}
+
 
 @app.post("/webhook")
 async def telegram_webhook(request: Request):
-    # Эта функция принимает сообщения от серверов Telegram
     from bot.main import application as bot_app
     from telegram import Update
-    
+    import json
+    print("📥 [WEBHOOK] Запрос получен от Telegram")
     try:
-        # Читаем JSON от Телеграма
         data = await request.json()
-        # Превращаем в объект апдейта
+        print(f"📦 [WEBHOOK] Данные апдейта: {data}")
         update = Update.de_json(data, bot_app.bot)
-        # Отдаем боту на обработку (команды, сообщения)
-        await bot_app.process_update(update)
+        # Обрабатываем асинхронно
+        asyncio.create_task(bot_app.process_update(update))
         return {"status": "ok"}
     except Exception as e:
-        # Если в коде бота ошибка — увидим в логах Railway
-        print(f"🔥 Ошибка вебхука: {e}")
+        print(f"🔥 [WEBHOOK] Ошибка обработки: {e}")
         return {"status": "error", "message": str(e)}
 
 
 if __name__ == "__main__":
-    # # Код для локального запуска или прямого вызова uvicorn
     import uvicorn
     import os
-    
-    # Railway передает порт через переменную окружения
     port = int(os.getenv("PORT", 8000))
-    
-    # Запускаем сервер. lifespan сам подцепит бота.
     uvicorn.run(app, host="0.0.0.0", port=port)
