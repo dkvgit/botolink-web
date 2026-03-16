@@ -529,25 +529,23 @@ async def user_page(request: Request, username: str):
 
 # web/main.py
 
-# web/main.py
-
 @app.post("/webhook")
 async def telegram_webhook(request: Request):
-    # Эта функция — "входная дверь" для всех сообщений из Telegram
+    # Эта функция принимает сообщения от серверов Telegram
     from bot.main import application as bot_app
     from telegram import Update
     
     try:
-        # Получаем сырые данные от Telegram
+        # Читаем JSON от Телеграма
         data = await request.json()
-        # Превращаем JSON в объект Update
+        # Превращаем в объект апдейта
         update = Update.de_json(data, bot_app.bot)
-        # Передаем обновление в обработчики бота (команды, кнопки)
+        # Отдаем боту на обработку (команды, сообщения)
         await bot_app.process_update(update)
         return {"status": "ok"}
     except Exception as e:
-        # Если прилетел кривой запрос или ошибка в логике бота
-        print(f"🔥 Ошибка при обработке вебхука: {e}")
+        # Если в коде бота ошибка — увидим в логах Railway
+        print(f"🔥 Ошибка вебхука: {e}")
         return {"status": "error", "message": str(e)}
 
 
