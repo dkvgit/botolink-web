@@ -1,19 +1,19 @@
+# # для Python
 import os
 import sys
 import logging
 import asyncio
-import subprocess
+import threading
+import uvicorn
 from dotenv import load_dotenv
-from web.main import app as application
-# Добавляем путь, чтобы Python видел папки web и bot
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+# Добавляем пути, чтобы модули 'web' и 'bot' были видны
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(BASE_DIR)
+if BASE_DIR not in sys.path:
+    sys.path.append(BASE_DIR)
 
 from web.main import app as application
-
-
-
+from bot.main import application as bot_app
 
 # Загружаем переменные окружения
 load_dotenv()
@@ -25,66 +25,43 @@ logging.basicConfig(
 )
 logger = logging.getLogger("BotoLinkPro")
 
-# Экспортируем приложение для Railway, чтобы uvicorn нашел его в этом файле
-try:
-    from web.main import app as application
-except ImportError:
-    # Если запуск идет в режиме только бота и папка web не нужна
-    application = None
-
-def run_bot():
-    """Запуск Telegram бота"""
-    try:
-        # Динамический импорт бота
-        from bot.main import main as bot_main
-        logger.info("🤖 Запуск Telegram бота...")
-        asyncio.run(bot_main())
-    except ImportError as e:
-        logger.error(f"❌ Ошибка импорта бота: {e}")
-    except KeyboardInterrupt:
-        logger.info("🛑 Бот остановлен")
-    except Exception as e:
-        logger.exception(f"❌ Критическая ошибка бота: {e}")
-
-def run_web():
-    """Запуск веб-сервера (локально)"""
-    try:
-        import uvicorn
-        # Берем порт из переменных окружения (важно для Railway) или 8000
-        port = int(os.getenv("PORT", 8000))
-        is_debug = os.getenv("DEBUG", "false").lower() == "true"
-
-        logger.info(f"🌐 Запуск веб-сервера на порту {port} (Debug: {is_debug})")
-        # Обращаемся к web.main:app
-        uvicorn.run("web.main:app", host="0.0.0.0", port=port, reload=is_debug)
-    except Exception as e:
-        logger.exception(f"❌ Ошибка запуска веб-сервера: {e}")
-
-def run_all():
-    """Параллельный запуск бота и веб-сервера через subprocess"""
-    logger.info("🚀 Запуск всех компонентов BotoLinkPro...")
+def run_bot_in_thread():
+    # # Внутренняя функция для запуска цикла событий бота в отдельном потоке
+    logger.info("🤖 Инициализация потока для Telegram бота...")
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
     
-    # Запускаем этот же файл с аргументом 'bot'
-    bot_process = subprocess.Popen([sys.executable, sys.argv[0], "bot"])
-
     try:
-        run_web()
-    except KeyboardInterrupt:
-        logger.info("🛑 Остановка...")
+        # Инициализируем и запускаем бота (polling или подготовка к webhook)
+        loop.run_until_complete(bot_app.initialize())
+        loop.run_until_complete(bot_app.start())
+        
+        # Если ты используешь Webhook, боту не нужно делать polling
+        # Но для работы всех внутренних хендлеров updater должен быть запущен
+        if bot_app.updater:
+            loop.run_until_complete(bot_app.updater.start_polling())
+            logger.info("✅ Бот запущен (Polling mode)")
+        
+        loop.run_forever()
+    except Exception as e:
+        logger.error(f"❌ Критическая ошибка в потоке бота: {e}")
     finally:
-        bot_process.terminate()
-        bot_process.wait(timeout=5)
-        logger.info("✅ Все процессы остановлены.")
+        loop.close()
 
 if __name__ == "__main__":
-    # Если аргументов нет, по умолчанию запускаем 'all'
-    command = sys.argv[1] if len(sys.argv) > 1 else "all"
-
-    if command == "bot":
-        run_bot()
-    elif command == "web":
-        run_web()
-    elif command == "all":
-        run_all()
-    else:
-        print(f"Использование: python main.py [bot|web|all]")
+    # # Определяем порт Railway
+    port = int(os.getenv("PORT", 8000))
+    
+    # # 1. Запускаем бота в фоновом потоке, чтобы он не блокировал Uvicorn
+    bot_thread = threading.Thread(target=run_bot_in_thread, daemon=True)
+    bot_thread.start()
+    
+    # # 2. Запускаем основной веб-сервер
+    logger.info(f"🌐 Запуск веб-сервера на порту {port}...")
+    try:
+        # Используем объект application напрямую для стабильности на Railway
+        uvicorn.run(application, host="0.0.0.0", port=port, log_level="info")
+    except KeyboardInterrupt:
+        logger.info("🛑 Остановка сервера пользователем")
+    except Exception as e:
+        logger.error(f"❌ Ошибка запуска Uvicorn: {e}")
