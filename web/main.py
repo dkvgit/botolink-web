@@ -532,22 +532,19 @@ async def set_webhook():
         return {"status": "error", "message": f"Ошибка установки: {str(e)}"}
 
 
+# web/main.py
+
 @app.post("/webhook")
 async def telegram_webhook(request: Request):
-
-    from telegram import Update
-    import json
-    print("📥 [WEBHOOK] Запрос получен от Telegram")
-    try:
-        data = await request.json()
-        print(f"📦 [WEBHOOK] Данные апдейта: {data}")
-        update = Update.de_json(data, bot_app.bot)
-        # Обрабатываем асинхронно
-        asyncio.create_task(bot_app.process_update(update))
-        return {"status": "ok"}
-    except Exception as e:
-        print(f"🔥 [WEBHOOK] Ошибка обработки: {e}")
-        return {"status": "error", "message": str(e)}
+    # // Получаем данные от Телеграма
+    data = await request.json()
+    update = Update.de_json(data, bot_app.bot)
+    
+    # // ВОТ ТУТ ДОЛЖЕН БЫТЬ await!
+    # // Без него бот не успеет сходить в базу и отправить тебе меню.
+    await bot_app.update(update)
+    
+    return {"status": "ok"}
 
 
 if __name__ == "__main__":

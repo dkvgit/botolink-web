@@ -268,6 +268,8 @@ logger = logging.getLogger(__name__)
 
 # Название файла: web/bot/handlers.py
 
+# bot/main.py
+
 async def start_handler(update, context):
     # # Используем # для Python комментариев
     from bot.utils import get_or_create_user, get_db_connection, check_subscription  # # ДОБАВИЛ ИМПОРТ check_subscription
@@ -275,9 +277,12 @@ async def start_handler(update, context):
     from telegram import InlineKeyboardButton, InlineKeyboardMarkup
     from core import config
     import logging
+    import os
 
     logger = logging.getLogger("BotoLinkPro")
     user = update.effective_user
+    if not user:
+        return
     print(f"\n--- [DEBUG] START HANDLER запущен для юзера: {user.id} ---")
 
     # # Флаг: было ли удалено сообщение
@@ -299,13 +304,14 @@ async def start_handler(update, context):
     conn = None
     try:
         conn = await get_db_connection()
+        print("--- [DEBUG] 1. Соединение с БД установлено")
         
         # # Синхронизируем пользователя
         db_user = await get_or_create_user(
             conn, user.id, user.username, user.first_name, user.last_name
         )
         
-        # # 2. ПРОВЕРЯЕМ ПОДПИСКУ (ВМЕСТО СТАТИЧНОГО ТЕКСТА)
+        # # 2. ПРОВЕРЯЕМ ПОДПИСКУ
         sub_status = await check_subscription(conn, user.id)
         
         if sub_status['active']:
@@ -321,7 +327,12 @@ async def start_handler(update, context):
             page_title, db_user['id']
         )
 
-        await setup_user_avatar(user.id, context.bot, conn)
+        # # Оборачиваем аватар, чтобы из-за него не падал весь старт
+        try:
+            await setup_user_avatar(user.id, context.bot, conn)
+            print("--- [DEBUG] 2. Аватар обработан")
+        except Exception as e:
+            print(f"--- [DEBUG] Ошибка аватара (не критично): {e}")
 
         page = await conn.fetchrow("""
             SELECT p.*, t.name as template_name, t.is_pro as template_is_pro
@@ -342,8 +353,8 @@ async def start_handler(update, context):
             page['id']
         ) or 0
 
-        # # status_text ТЕПЕРЬ ДИНАМИЧЕСКИЙ (ИЗ ПРОВЕРКИ ВЫШЕ)
-        base_url = "http://localhost:8000"
+        # # БЕРЕМ URL ИЗ ENV (для Railway)
+        base_url = os.getenv("APP_URL", "https://botolink-web-production.up.railway.app").rstrip('/')
 
         text_msg = (
             f"👋 Привет, <b>{db_user['first_name']}</b>!\n"
@@ -392,12 +403,13 @@ async def start_handler(update, context):
 
     except Exception as e:
         print(f"--- [DEBUG] !!! КРИТИЧЕСКАЯ ОШИБКА: {e}")
+        import traceback
+        traceback.print_exc()
         logger.error(f"❌ Ошибка в start_handler: {e}", exc_info=True)
     finally:
         if conn:
             await conn.close()
             print("--- [DEBUG] 8. Соединение закрыто")
-		    
 		    
 		    
 		    
