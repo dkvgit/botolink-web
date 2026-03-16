@@ -7,6 +7,11 @@ from dotenv import load_dotenv
 from web.main import app as application
 # Добавляем путь, чтобы Python видел папки web и bot
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(BASE_DIR)
+
+from web.main import app as application
+
 
 
 

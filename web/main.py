@@ -36,18 +36,20 @@ DATABASE_URL = RAW_DB_URL.replace("+asyncpg", "")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Код запуска бота
     print("🤖 Инициализация Telegram бота...")
     try:
         await application.initialize()
         await application.start()
         print("✅ Бот успешно запущен")
     except Exception as e:
-        print(f"❌ Ошибка: {e}")
+        print(f"❌ Ошибка старта: {e}")
     yield
+    # Код остановки
     await application.stop()
     await application.shutdown()
 
-# ВАЖНО: lifespan должен быть передан при создании
+# ВАЖНО: Создаем app строго ПОСЛЕ определения функции lifespan
 app = FastAPI(lifespan=lifespan)
 
 
