@@ -1,7 +1,8 @@
 import mimetypes  # ← ДОБАВЬ ЭТОТ ИМПОРТ
 import os
 from urllib.parse import urlparse
-
+import asyncio
+from contextlib import asynccontextmanager
 import asyncpg
 import uvicorn
 from bot.bankworld import COUNTRY_NAMES
@@ -12,6 +13,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.responses import RedirectResponse
 from bot.main import application
+
 from telegram import Update
 load_dotenv()
 
@@ -25,7 +27,30 @@ mimetypes.add_type('image/webp', '.webp')
 RAW_DB_URL = os.getenv("DATABASE_URL", "postgresql://postgres@localhost/botolinkpro")
 DATABASE_URL = RAW_DB_URL.replace("+asyncpg", "")
 
-app = FastAPI()
+# # для Python
+# Удали строку app = FastAPI() и вставь это вместо неё:
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Этот блок запускается ПЕРЕД стартом сайта
+    print("🤖 Инициализация Telegram бота...")
+    try:
+        # Важно: это запускает внутренние механизмы бота
+        await application.initialize()
+        await application.start()
+        print("✅ Бот успешно запущен в фоновом режиме")
+    except Exception as e:
+        print(f"❌ Ошибка при старте бота: {e}")
+    
+    yield  # В этой точке начинает работать сам сайт (FastAPI)
+    
+    # Этот блок запускается при выключении сервера
+    print("🛑 Остановка Telegram бота...")
+    await application.stop()
+    await application.shutdown()
+
+# Теперь создаем приложение и передаем ему настройки запуска бота
+app = FastAPI(lifespan=lifespan)
 
 
 # ЭТОТ РОУТ НУЖЕН ДЛЯ РАБОТЫ БОТА В ОБЛАКЕ
