@@ -529,43 +529,26 @@ async def user_page(request: Request, username: str):
 
 # web/main.py
 
-@app.get("/set_webhook")
-async def set_webhook():
-    import os
-    import traceback
+# web/main.py
+
+@app.post("/webhook")
+async def telegram_webhook(request: Request):
+    # Эта функция — "входная дверь" для всех сообщений из Telegram
+    from bot.main import application as bot_app
+    from telegram import Update
     
     try:
-        # 1. Проверяем наличие токена
-        token = os.getenv("BOT_TOKEN")
-        if not token:
-            return {"status": "error", "message": "BOT_TOKEN missing in environment variables"}
-
-        # 2. Пытаемся импортировать приложение
-        try:
-            from bot.main import application as bot_app
-        except ImportError as ie:
-            return {"status": "error", "message": f"Import error: {str(ie)}", "trace": traceback.format_exc()}
-
-        # 3. Устанавливаем адрес
-        base_url = "https://botolink-web-production.up.railway.app"
-        webhook_url = f"{base_url}/webhook"
-        
-        # 4. Выполняем запрос к Telegram
-        await bot_app.bot.set_webhook(url=webhook_url, drop_pending_updates=True)
-        
-        return {
-            "status": "success",
-            "webhook_url": webhook_url,
-            "bot_info": "Webhook successfully registered"
-        }
+        # Получаем сырые данные от Telegram
+        data = await request.json()
+        # Превращаем JSON в объект Update
+        update = Update.de_json(data, bot_app.bot)
+        # Передаем обновление в обработчики бота (команды, кнопки)
+        await bot_app.process_update(update)
+        return {"status": "ok"}
     except Exception as e:
-        # Если упало вообще всё — вернем детальное описание ошибки
-        return {
-            "status": "critical_error",
-            "error_type": str(type(e).__name__),
-            "message": str(e),
-            "stacktrace": traceback.format_exc()
-        }
+        # Если прилетел кривой запрос или ошибка в логике бота
+        print(f"🔥 Ошибка при обработке вебхука: {e}")
+        return {"status": "error", "message": str(e)}
 
 
 if __name__ == "__main__":
