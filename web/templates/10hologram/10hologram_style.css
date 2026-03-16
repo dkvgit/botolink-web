@@ -1,0 +1,138 @@
+/* web/templates/10hologram/10hologram_style.css */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif !important;
+    /* Яркий, но глубокий фон (смесь индиго и фиолетового) */
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%) !important;
+    margin: 0;
+    padding: 0;
+    display: block; /* Убираем flex с body для надежного скролла */
+    min-height: 100vh;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    color: #ffffff !important;
+}
+
+/* ЭФФЕКТЫ ФОНА - Статичные, чтобы не мешали скроллу */
+.hologram-bg {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.03) 0px, rgba(255, 255, 255, 0.03) 1px, transparent 1px, transparent 2px);
+    pointer-events: none; z-index: 1;
+}
+
+.rays {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: radial-gradient(circle at 10% 10%, rgba(0, 242, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 90% 90%, rgba(255, 0, 255, 0.1) 0%, transparent 50%);
+    z-index: 0;
+}
+
+/* ЦЕНТРАЛЬНЫЙ КОНТЕЙНЕР */
+.container {
+    max-width: 550px !important;
+    width: 95% !important;
+    margin: 40px auto !important; /* Центрируем через margin */
+    background: rgba(255, 255, 255, 0.07) !important;
+    backdrop-filter: blur(15px) !important;
+    -webkit-backdrop-filter: blur(15px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 30px !important;
+    padding: 40px 20px !important;
+    box-shadow: 0 0 40px rgba(0, 242, 255, 0.15) !important;
+    position: relative;
+    z-index: 5;
+}
+
+/* ПРОФИЛЬ */
+.profile { text-align: center; margin-bottom: 30px; }
+.avatar {
+    width: 100px !important; height: 100px !important;
+    margin: 0 auto 15px !important;
+    border-radius: 20px !important;
+    padding: 3px !important;
+    background: linear-gradient(135deg, #00f2ff, #ff00ff) !important;
+    box-shadow: 0 0 20px rgba(0, 242, 255, 0.4) !important;
+}
+.avatar-img { width: 100% !important; height: 100% !important; border-radius: 18px !important; object-fit: cover !important; }
+
+.username {
+    font-size: 24px !important;
+    font-weight: 700 !important;
+    text-shadow: 0 0 10px rgba(0, 242, 255, 0.8) !important;
+}
+
+/* КАТЕГОРИИ (Исправлено под твою верстку) */
+.category-title {
+    color: #00f2ff !important;
+    font-size: 11px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 4px !important;
+    text-align: center !important;
+    margin: 35px 0 15px 0 !important;
+    font-weight: 600 !important;
+    opacity: 0.9;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+}
+.category-title::before, .category-title::after {
+    content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, transparent, rgba(0, 242, 255, 0.3), transparent);
+}
+
+/* ССЫЛКИ */
+.link-card {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 15px !important;
+    padding: 14px 18px !important;
+    margin-bottom: 12px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    text-decoration: none !important;
+    transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+}
+.link-card:hover {
+    background: rgba(255, 255, 255, 0.12) !important;
+    border-color: #00f2ff !important;
+    transform: scale(1.02) !important;
+    box-shadow: 0 0 20px rgba(0, 242, 255, 0.2) !important;
+}
+
+.link-icon {
+    width: 42px !important; height: 42px !important;
+    min-width: 42px !important;
+    /*background: rgba(255, 255, 255, 0.1) !important;*/
+    border-radius: 12px !important;
+    display: flex !important; align-items: center !important; justify-content: center !important;
+}
+.link-icon img { width: 100% !important; height: 100% !important; object-fit: contain !important; }
+.link-icon i { color: #00f2ff !important; font-size: 18px !important; }
+
+.link-title {
+    flex: 1 !important;
+    color: #fff !important;
+    font-size: 15px !important;
+    font-weight: 400 !important;
+}
+.link-title small { display: block; font-size: 11px !important; opacity: 0.5; }
+
+/* СТРЕЛКА */
+.arrow-icon { color: rgba(255, 255, 255, 0.2) !important; font-size: 12px !important; }
+
+/* ФУТЕР */
+.footer {
+    margin-top: 40px !important;
+    padding-top: 20px !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
+    text-align: center !important;
+}
+.brand { font-size: 10px !important; letter-spacing: 2px !important; opacity: 0.5 !important; margin-top: 10px; }
+.views { color: #00f2ff !important; font-size: 14px !important; font-weight: 600 !important; }

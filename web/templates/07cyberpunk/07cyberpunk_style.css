@@ -1,0 +1,212 @@
+/* web/templates/07cyberpunk/07cyberpunk_style.css */
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+body {
+    font-family: 'Share Tech Mono', monospace !important;
+    background: #0a0f0f !important;
+    color: #00ff00 !important;
+    margin: 0;
+    padding: 40px 0; /* Отступы для прокрутки */
+    display: block !important; /* Лечим скролл */
+    min-height: 100vh;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+}
+
+/* ЭФФЕКТЫ ФОНА */
+.grid {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-image: linear-gradient(rgba(0, 255, 0, 0.1) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(0, 255, 0, 0.1) 1px, transparent 1px);
+    background-size: 50px 50px;
+    transform: perspective(500px) rotateX(60deg);
+    transform-origin: top;
+    animation: gridMove 10s linear infinite;
+    z-index: -2;
+}
+@keyframes gridMove { 0% { background-position: 0 0; } 100% { background-position: 0 50px; } }
+
+.glitch-bars {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: repeating-linear-gradient(0deg, rgba(255, 0, 255, 0.05) 0px, rgba(0, 255, 255, 0.05) 2px, transparent 2px, transparent 10px);
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* КОНТЕЙНЕР */
+.container {
+    max-width: 600px !important;
+    width: 92% !important;
+    margin: 0 auto !important; /* Центрируем */
+    background: rgba(10, 15, 15, 0.95) !important;
+    border: 2px solid #00ff00 !important;
+    border-radius: 0 !important; /* Острые углы */
+    padding: 40px 25px !important;
+    box-shadow: 0 0 25px rgba(0, 255, 0, 0.2), inset 0 0 15px rgba(0, 255, 0, 0.1) !important;
+    position: relative;
+    z-index: 10;
+}
+
+/* Угловые элементы декора (Cyberpunk style) */
+.container::before {
+    content: "RUN [SYSTEM.EXE]";
+    position: absolute;
+    top: -12px;
+    right: 20px;
+    background: #00ff00;
+    color: #000;
+    font-size: 10px;
+    padding: 2px 8px;
+    font-weight: bold;
+}
+
+/* ПРОФИЛЬ */
+.profile { text-align: center !important; margin-bottom: 35px !important; }
+.avatar {
+    width: 100px !important;
+    height: 100px !important;
+    margin: 0 auto 15px !important;
+    border: 3px solid #00ff00 !important;
+    border-radius: 0 !important;
+    overflow: hidden !important;
+    background: #000 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: 6px 6px 0 #ff00ff;
+}
+.avatar-img { width: 100% !important; height: 100% !important; object-fit: cover !important; }
+
+.username {
+    font-size: 28px !important;
+    text-align: center !important;
+    color: #00ff00 !important;
+    text-transform: uppercase !important;
+    text-shadow: 3px 3px 0 #ff00ff !important;
+    margin-bottom: 10px !important;
+}
+
+.description {
+    color: #00ff00 !important;
+    opacity: 0.7;
+    font-size: 14px !important;
+    text-align: center !important;
+}
+
+/* --- КАТЕГОРИИ С КИБЕР-ЛИНИЯМИ --- */
+.category-title {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 15px !important;
+    color: #ff00ff !important; /* Маджента сразу, не серый */
+    font-size: 12px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 4px !important;
+    margin: 40px 0 20px 0 !important;
+    font-weight: bold !important;
+    text-shadow: 2px 2px 0 rgba(0, 255, 255, 0.5) !important;
+}
+
+/* Линии-сканеры */
+.category-title::before,
+.category-title::after {
+    content: "" !important;
+    flex: 1 !important;
+    height: 2px !important;
+    background: linear-gradient(90deg, transparent, #ff00ff, transparent) !important;
+    box-shadow: 0 0 10px #ff00ff;
+}
+
+/* ССЫЛКИ */
+.category-links { display: flex !important; flex-direction: column !important; gap: 12px !important; }
+
+.link-card {
+    background: rgba(0, 255, 0, 0.03) !important;
+    border: 1px solid #00ff00 !important;
+    border-radius: 0 !important;
+    padding: 14px 20px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 15px !important;
+    text-decoration: none !important;
+    transition: all 0.2s ease !important;
+    position: relative;
+    overflow: hidden;
+}
+
+.link-card:hover {
+    background: rgba(0, 255, 0, 0.1) !important;
+    border-color: #ff00ff !important;
+    transform: translateX(8px) !important;
+    box-shadow: -6px 0 0 #00ffff !important;
+}
+
+/* Глитч-эффект на иконке при наведении */
+.link-card:hover .link-icon {
+    border-color: #ff00ff !important;
+    box-shadow: 0 0 10px #ff00ff;
+}
+
+/* ИКОНКИ */
+.link-icon {
+    width: 42px !important;
+    height: 42px !important;
+    min-width: 42px !important;
+    border: 1px solid #00ff00 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: #000 !important;
+    transition: all 0.2s ease;
+}
+.link-icon img { width: 100% !important; height: 100% !important; object-fit: contain !important; }
+.link-icon i { color: #00ff00 !important; font-size: 20px !important; }
+
+.link-title {
+    flex: 1 !important;
+    color: #00ff00 !important;
+    font-size: 15px !important;
+    text-transform: uppercase !important;
+    font-weight: bold !important;
+}
+
+/* МИКРОСХЕМА */
+.arrow-icon::before {
+    content: "\f2db" !important;
+    font-family: "Font Awesome 6 Free" !important;
+    font-weight: 900 !important;
+    color: #ff00ff !important;
+    font-size: 16px !important;
+}
+
+/* ФУТЕР */
+.footer {
+    border-top: 1px solid rgba(0, 255, 0, 0.3) !important;
+    margin-top: 40px !important;
+    padding-top: 20px !important;
+    text-align: center !important;
+}
+
+.views {
+    background: #00ff00 !important;
+    color: #000 !important;
+    font-weight: bold !important;
+    padding: 4px 12px !important;
+    text-transform: uppercase !important;
+    font-size: 13px !important;
+    display: inline-block !important;
+    margin-bottom: 10px !important;
+    clip-path: polygon(10% 0, 100% 0, 90% 100%, 0% 100%);
+}
+
+.brand {
+    display: block;
+    color: #00ff00 !important;
+    font-size: 10px !important;
+    opacity: 0.5 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 5px !important;
+}

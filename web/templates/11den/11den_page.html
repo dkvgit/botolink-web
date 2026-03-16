@@ -1,0 +1,1703 @@
+<!DOCTYPE html>
+
+<html lang="ru">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <!-- Настройки для мобильных устройств: ширина подстраивается под экран, разрешено масштабирование -->
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{{ page.username }} | 11den</title>
+
+
+    <!-- Подключаем Font Awesome для иконок (соцсети, стрелки и т.д.) -->
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/6.6.6/css/flag-icons.min.css">
+
+
+    <!-- Основные стили для страницы -->
+
+    <link rel="stylesheet" href="/templates/11den/11den_page.css">
+
+
+    <!-- JavaScript для интерактивности (копирование, модалки и т.д.) -->
+
+    <script src="/templates/11den/11den_page.js"></script>
+
+</head>
+
+<body>
+
+
+<!-- Градиентный фон для всей страницы -->
+
+<div class="gradient-bg">
+
+    <!-- Основной контейнер с контентом -->
+
+    <div class="container">
+
+
+        <!-- ========== ШАПКА ПРОФИЛЯ ========== -->
+
+        <div class="profile-header">
+
+            <!-- Блок с аватаром пользователя -->
+
+            <div class="avatar-container">
+                {% if page.avatar_path %}
+                <img src="{{ page.avatar_path }}" class="avatar-image">
+                {% else %}
+                <div class="avatar-placeholder">
+                    <i class="fas fa-user-astronaut"></i>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Имя пользователя (приоритет: first_name, если нет - username) -->
+
+            <h1 class="username">{{ user.first_name|string if user.first_name else page.username|string }}</h1>
+
+
+            <!-- Статистика просмотров страницы -->
+
+            <div class="stats">
+
+                <span class="views"><i class="fas fa-eye"></i> {{ page.view_count or 0 }}</span>
+
+            </div>
+
+
+            <!-- Описание страницы (если есть) -->
+
+            {% if page.description %}
+
+            <p class="description">{{ page.description }}</p>
+
+            {% endif %}
+
+        </div>
+
+
+        <!-- ========== КАТЕГОРИИ И ССЫЛКИ ========== -->
+
+        <div class="categories">
+
+
+            <!-- КАТЕГОРИЯ: Соцсети -->
+            {% if categories.social %}
+            <section class="category-card">
+                <h2 class="category-title"><i class="fas fa-hashtag"></i> Соцсети</h2>
+                <div class="category-content social-layout">
+                    {% for link in categories.social %}
+                    <!-- Соцсеть -->
+                    <div class="link-item">
+                        <div class="item-info-stack">
+
+                            <!-- СВЕРХУ: Название соцсети + иконка -->
+                            <div class="flex-row">
+                                <!-- Иконка соцсети -->
+                                {% if link.link_type == 'youtube' %}
+                                <img src="/static/icons/youtube.png" class="link-icon custom-link-icon" alt="YouTube">
+                                {% elif link.link_type == 'tiktok' %}
+                                <img src="/static/icons/tiktok.png" class="link-icon custom-link-icon" alt="TikTok">
+                                {% elif link.link_type == 'vk' %}
+                                <img src="/static/icons/vk.png" class="link-icon custom-link-icon" alt="VK">
+                                {% elif link.link_type == 'instagram' %}
+                                <img src="/static/icons/instagram.png" class="link-icon custom-link-icon"
+                                     alt="Instagram">
+                                {% elif link.link_type == 'ok' %}
+                                <img src="/static/icons/ok.png" class="link-icon custom-link-icon" alt="Одноклассники">
+                                {% elif link.link_type == 'facebook' %}
+                                <img src="/static/icons/facebook.png" class="link-icon custom-link-icon" alt="Facebook">
+                                {% elif link.link_type == 'twitter' %}
+                                <img src="/static/icons/twitter.png" class="link-icon custom-link-icon" alt="Twitter">
+                                {% elif link.link_type == 'twitch' %}
+                                <img src="/static/icons/twitch.png" class="link-icon custom-link-icon" alt="Twitch">
+                                {% elif link.link_type == 'rutube' %}
+                                <img src="/static/icons/rutube.png" class="link-icon custom-link-icon" alt="Rutube">
+                                {% elif link.link_type == 'dzen' %}
+                                <img src="/static/icons/dzen.png" class="link-icon custom-link-icon" alt="Дзен">
+                                {% elif link.link_type == 'snapchat' %}
+                                <img src="/static/icons/snapchat.png" class="link-icon custom-link-icon" alt="Snapchat">
+                                {% elif link.link_type == 'likee' %}
+                                <img src="/static/icons/likee.png" class="link-icon custom-link-icon" alt="Likee">
+                                {% elif link.link_type == 'threads' %}
+                                <img src="/static/icons/threads.png" class="link-icon custom-link-icon" alt="Threads">
+                                {% elif link.link_type == 'discord' %}
+                                <img src="/static/icons/discord.png" class="link-icon custom-link-icon" alt="Discord">
+                                {% else %}
+                                <i class="fas fa-link default-icon"></i>
+                                {% endif %}
+
+                                <span class="link-title">
+        {% if link.title and link.title != 'None' %}
+            {{ link.title }}
+
+        {% elif link.link_type == 'facebook' %}
+            {% if link.pay_details %}
+                {% if link.pay_details.group_title or link.pay_details.group_username %}
+                    Facebook Группа
+                {% elif link.pay_details.page_title or link.pay_details.page_username %}
+                    Facebook Страница
+                {% elif link.pay_details.username %}
+                    Facebook Профиль
+                {% else %}
+                    Facebook
+                {% endif %}
+            {% else %}
+                Facebook
+            {% endif %}
+        {% elif link.link_type == 'vk' %}
+            {% if link.pay_details and link.pay_details.group_id %}
+                VK Группа
+            {% elif link.pay_details and link.pay_details.public_id %}
+                VK Публичная страница
+            {% elif link.pay_details and link.pay_details.profile_id %}
+                VK Профиль
+            {% else %}
+                VK
+            {% endif %}
+        {% else %}
+            {{ link.title }}
+        {% endif %}
+    </span>
+                            </div>
+
+                            <!-- ПОСЕРЕДИНЕ: URL -->
+                            <div class="flex-center gap-4">
+                                <!-- Обработка специальных случаев -->
+                                {% if link.link_type == 'dzen' %}
+                                {% set clean_url = link.url.replace('dzen.ru/dzen.ru/', 'dzen.ru/') %}
+                                {% set display_url = clean_url.replace('https://', '').replace('http://', '') %}
+
+                                {% elif link.link_type == 'rutube' %}
+                                {% set clean_url = link.url.replace('rutube.ru/rutube.ru/', 'rutube.ru/') %}
+                                {% set display_url = clean_url.replace('https://', '').replace('http://', '') %}
+
+                                {% elif link.link_type == 'ok' and link.pay_details and link.pay_details.profile_input
+                                %}
+                                {% if link.pay_details.profile_input.startswith(('http://', 'https://')) or 'ok.ru' in
+                                link.pay_details.profile_input %}
+                                {% set display_url = link.pay_details.profile_input.replace('https://',
+                                '').replace('http://', '') %}
+                                {% else %}
+                                {% set display_url = 'ok.ru/' + link.pay_details.profile_input %}
+                                {% endif %}
+
+                                {% elif link.link_type == 'facebook' %}
+                                {% set display_url = link.url.replace('https://', '').replace('http://', '') %}
+
+                                {% elif link.link_type == 'vk' %}
+                                {% set display_url = link.url.replace('https://', '').replace('http://', '') %}
+
+                                {% elif link.link_type == 'youtube' and link.pay_details and
+                                link.pay_details.channel_input %}
+                                {% if link.pay_details.channel_input.startswith(('http://', 'https://')) or
+                                'youtube.com' in link.pay_details.channel_input %}
+                                {% set display_url = link.pay_details.channel_input.replace('https://',
+                                '').replace('http://', '') %}
+                                {% else %}
+                                {% set display_url = 'youtube.com/@' + link.pay_details.channel_input|replace('@', '')
+                                %}
+                                {% endif %}
+
+                                {% elif link.link_type == 'tiktok' and link.pay_details and link.pay_details.username %}
+                                {% if link.pay_details.username.startswith(('http://', 'https://')) or 'tiktok.com' in
+                                link.pay_details.username %}
+                                {% set display_url = link.pay_details.username.replace('https://',
+                                '').replace('http://', '') %}
+                                {% else %}
+                                {% set display_url = 'tiktok.com/@' + link.pay_details.username|replace('@', '') %}
+                                {% endif %}
+
+                                {% elif link.link_type == 'instagram' and link.pay_details and link.pay_details.username
+                                %}
+                                {% if link.pay_details.username.startswith(('http://', 'https://')) or 'instagram.com'
+                                in link.pay_details.username %}
+                                {% set display_url = link.pay_details.username.replace('https://',
+                                '').replace('http://', '') %}
+                                {% else %}
+                                {% set display_url = 'instagram.com/' + link.pay_details.username|replace('@', '') %}
+                                {% endif %}
+
+                                {% elif link.link_type == 'twitter' and link.pay_details and link.pay_details.username
+                                %}
+                                {% if link.pay_details.username.startswith(('http://', 'https://')) or 'twitter.com' in
+                                link.pay_details.username %}
+                                {% set display_url = link.pay_details.username.replace('https://',
+                                '').replace('http://', '') %}
+                                {% else %}
+                                {% set display_url = 'twitter.com/' + link.pay_details.username|replace('@', '') %}
+                                {% endif %}
+
+                                {% elif link.link_type == 'snapchat' and link.pay_details and link.pay_details.username
+                                %}
+                                {% set display_url = 'snapchat.com/@' + link.pay_details.username|replace('@', '') %}
+
+                                {% elif link.link_type == 'whatsapp' and link.pay_details and
+                                link.pay_details.phone_clean %}
+                                {% set display_url = 'wa.me/' + link.pay_details.phone_clean %}
+
+                                {% elif link.link_type == 'threads' and link.pay_details and link.pay_details.username
+                                %}
+                                {% if link.pay_details.username.startswith(('http://', 'https://')) or 'threads.net' in
+                                link.pay_details.username %}
+                                {% set display_url = link.pay_details.username.replace('https://',
+                                '').replace('http://', '') %}
+                                {% else %}
+                                {% set display_url = 'threads.net/@' + link.pay_details.username|replace('@', '') %}
+                                {% endif %}
+
+                                {% elif link.link_type == 'likee' and link.pay_details and link.pay_details.username %}
+                                {% if link.pay_details.username.startswith(('http://', 'https://')) or 'likee.com' in
+                                link.pay_details.username %}
+                                {% set display_url = link.pay_details.username.replace('https://',
+                                '').replace('http://', '') %}
+                                {% else %}
+                                {% set display_url = 'likee.com/@' + link.pay_details.username|replace('@', '') %}
+                                {% endif %}
+
+                                {% elif link.link_type == 'twitch' and link.pay_details and link.pay_details.username %}
+                                {% if link.pay_details.username.startswith(('http://', 'https://')) or 'twitch.tv' in
+                                link.pay_details.username %}
+                                {% set display_url = link.pay_details.username.replace('https://',
+                                '').replace('http://', '') %}
+                                {% else %}
+                                {% set display_url = 'twitch.tv/' + link.pay_details.username|replace('@', '') %}
+                                {% endif %}
+
+                                {% else %}
+                                {% set display_url = link.url.replace('https://', '').replace('http://', '') %}
+                                {% endif %}
+
+                                <span class="url-text">{{ display_url }}</span>
+                                <i class="far fa-copy action-icon" onclick="copyText('{{ link.url }}')"></i>
+                                <i class="fa-solid fa-qrcode action-icon"
+                                   onclick="openQRModal('{{ link.url }}', '{{ link.title }}', 'URL')"></i>
+                            </div>
+
+                            <!-- СНИЗУ: Показываем данные -->
+                            <div class="meta-container">
+                                <!-- Название поля -->
+                                <span class="meta-label">
+        {% if link.link_type == 'youtube' %}
+            Канал
+        {% elif link.link_type == 'facebook' %}
+            {% if link.pay_details and link.pay_details.group_title %}
+                Группа
+            {% elif link.pay_details and link.pay_details.page_title %}
+                Страница
+            {% else %}
+                Профиль
+            {% endif %}
+        {% elif link.link_type == 'vk' %}
+            {% if link.pay_details and link.pay_details.group_id %}
+                Группа
+            {% elif link.pay_details and link.pay_details.public_id %}
+                Публичная страница
+            {% elif link.pay_details and link.pay_details.profile_id %}
+                Профиль
+            {% else %}
+                ID
+            {% endif %}
+        {% elif link.link_type == 'dzen' %}
+            ID
+        {% elif link.link_type == 'rutube' %}
+            Канал
+        {% elif link.link_type == 'twitch' %}
+            Канал
+        {% elif link.link_type in ['instagram', 'tiktok', 'twitter', 'snapchat', 'likee', 'threads'] %}
+            ID
+        {% elif link.link_type == 'ok' %}
+            Профиль/Группа
+        {% else %}
+            Профиль
+        {% endif %}
+    </span>
+
+                                <!-- Значение - категории ссылки-->
+                                <span class="meta-value">
+                                    {% if link.link_type == 'telegram' %}
+                                        {% if link.pay_details and link.pay_details.username %}
+                                            {% if link.pay_details.username.startswith('@') %}
+                                                {{ link.pay_details.username }}
+                                            {% else %}
+                                                @{{ link.pay_details.username }}
+                                            {% endif %}
+                                        {% else %}
+                                            {% if link.pay_details.telegram_type == 'personal' %}
+                                                Личный аккаунт
+                                            {% elif link.pay_details.telegram_type == 'group' %}
+                                                Группа
+                                            {% elif link.pay_details.telegram_type == 'channel' %}
+                                                Канал
+                                            {% else %}
+                                                Не указано
+                                            {% endif %}
+                                        {% endif %}
+                                    {% elif link.link_type == 'facebook' %}
+                                        {% if link.pay_details %}
+                                            {% if link.pay_details.page_title %}
+                                                {{ link.pay_details.page_title }}
+                                            {% elif link.pay_details.group_title %}
+                                                {{ link.pay_details.group_title }}
+                                            {% elif link.pay_details.username %}
+                                                {% if link.pay_details.username.startswith('@') %}
+                                                    {{ link.pay_details.username }}
+                                                {% else %}
+                                                    @{{ link.pay_details.username }}
+                                                {% endif %}
+                                            {% elif link.pay_details.page_username %}
+                                                {% if link.pay_details.page_username.startswith('@') %}
+                                                    {{ link.pay_details.page_username }}
+                                                {% else %}
+                                                    @{{ link.pay_details.page_username }}
+                                                {% endif %}
+                                            {% elif link.pay_details.group_username %}
+                                                {% if link.pay_details.group_username.startswith('@') %}
+                                                    {{ link.pay_details.group_username }}
+                                                {% else %}
+                                                    @{{ link.pay_details.group_username }}
+                                                {% endif %}
+                                            {% else %}
+                                                Не указано
+                                            {% endif %}
+                                        {% else %}
+                                            Не указано
+                                        {% endif %}
+                                    {% elif link.link_type == 'vk' %}
+                                        {% if link.pay_details %}
+                                            {% if link.pay_details.profile_id %}
+                                                {{ link.pay_details.profile_id }}
+                                            {% elif link.pay_details.public_id %}
+                                                {{ link.pay_details.public_id }}
+                                            {% elif link.pay_details.group_id %}
+                                                {{ link.pay_details.group_id }}
+                                            {% else %}
+                                                Не указано
+                                            {% endif %}
+                                        {% else %}
+                                            Не указано
+                                        {% endif %}
+                                    {% elif link.link_type == 'discord' %}
+                                        {% if link.pay_details %}
+                                            {% if link.pay_details.invite_link %}
+                                                {{ link.pay_details.invite_link }}
+                                            {% elif link.pay_details.user_id %}
+                                                {{ link.pay_details.user_id }}
+                                            {% else %}
+                                                Не указано
+                                            {% endif %}
+                                        {% else %}
+                                            Не указано
+                                        {% endif %}
+                                    {% elif link.link_type == 'snapchat' and link.pay_details and link.pay_details.username %}
+                                        @{{ link.pay_details.username|replace('@', '') }}
+                                    {% elif link.link_type == 'whatsapp' and link.pay_details and link.pay_details.phone_display %}
+                                        {{ link.pay_details.phone_display }}
+                                    {% elif link.link_type == 'twitch' and link.pay_details and link.pay_details.username %}
+                                        {{ link.pay_details.username }}
+                                    {% elif link.pay_details and link.pay_details.channel_name %}
+                                        {{ link.pay_details.channel_name }}
+                                    {% elif link.pay_details and link.pay_details.username %}
+                                        {% if link.pay_details.username.startswith('@') %}
+                                            {{ link.pay_details.username }}
+                                        {% else %}
+                                            @{{ link.pay_details.username }}
+                                        {% endif %}
+                                    {% elif link.pay_details and link.pay_details.page_name %}
+                                        {{ link.pay_details.page_name }}
+                                    {% elif link.pay_details and link.pay_details.profile_input %}
+                                        {{ link.pay_details.profile_input }}
+                                    {% else %}
+                                        Не указано
+                                    {% endif %}
+                                </span>
+
+                                <!-- Кнопка копирования -->
+                                {% if link.link_type == 'facebook' and link.pay_details %}
+                                {% if link.pay_details.page_title %}
+                                <i class="far fa-copy meta-copy"
+                                   onclick="copyText('{{ link.pay_details.page_title }}')"></i>
+                                {% elif link.pay_details.group_title %}
+                                <i class="far fa-copy meta-copy"
+                                   onclick="copyText('{{ link.pay_details.group_title }}')"></i>
+                                {% elif link.pay_details.username %}
+                                {% set copy_value = '@' + link.pay_details.username|replace('@', '') %}
+                                <i class="far fa-copy meta-copy" onclick="copyText('{{ copy_value }}')"></i>
+                                {% elif link.pay_details.page_username %}
+                                {% set copy_value = '@' + link.pay_details.page_username|replace('@', '') %}
+                                <i class="far fa-copy meta-copy" onclick="copyText('{{ copy_value }}')"></i>
+                                {% elif link.pay_details.group_username %}
+                                {% set copy_value = '@' + link.pay_details.group_username|replace('@', '') %}
+                                <i class="far fa-copy meta-copy" onclick="copyText('{{ copy_value }}')"></i>
+                                {% endif %}
+
+                                {% elif link.link_type == 'vk' and link.pay_details %}
+                                {% if link.pay_details.profile_id %}
+                                <i class="far fa-copy meta-copy"
+                                   onclick="copyText('{{ link.pay_details.profile_id }}')"></i>
+                                {% elif link.pay_details.public_id %}
+                                <i class="far fa-copy meta-copy"
+                                   onclick="copyText('{{ link.pay_details.public_id }}')"></i>
+                                {% elif link.pay_details.group_id %}
+                                <i class="far fa-copy meta-copy"
+                                   onclick="copyText('{{ link.pay_details.group_id }}')"></i>
+                                {% endif %}
+
+                                {% elif link.pay_details and (link.pay_details.username or link.pay_details.channel_name
+                                or link.pay_details.page_name or link.pay_details.profile_id or
+                                link.pay_details.profile_input) %}
+                                {% set copy_value = link.pay_details.username or link.pay_details.channel_name or
+                                link.pay_details.page_name or link.pay_details.profile_id or
+                                link.pay_details.profile_input %}
+                                {% if link.link_type in ['tiktok', 'youtube', 'instagram', 'snapchat', 'threads',
+                                'likee', 'twitch'] and link.pay_details.username %}
+                                {% set copy_value = '@' + link.pay_details.username|replace('@', '') %}
+                                {% endif %}
+                                <i class="far fa-copy meta-copy" onclick="copyText('{{ copy_value }}')"></i>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Кнопка перехода -->
+                        <a href="/click/{{ link.id }}" target="_blank" class="details-btn full-width">
+                            Перейти по ссылке<i class="fas fa-arrow-right"></i>
+                        </a>
+
+
+                    </div>
+
+                    {% endfor %}
+                </div>
+            </section>
+            {% endif %}
+
+
+            <!-- КАТЕГОРИЯ: Мессенджеры -->
+            {% if categories.messengers %}
+            <section class="category-card">
+                <h2 class="category-title"><i class="fas fa-comment-dots"></i> Мессенджеры</h2>
+                <div class="category-content messengers-layout">
+                    {% for link in categories.messengers %}
+                    <!-- Мессенджер -->
+                    <div class="link-item">
+                        <div class="link-content">
+                            <!-- СВЕРХУ: Название мессенджера + иконка -->
+                            <div class="messenger-header">
+                                <!-- Иконка мессенджера -->
+                                {% if link.link_type == 'whatsapp' %}
+                                <img src="/static/icons/whatsapp.png" class="link-icon custom-link-icon" alt="WhatsApp">
+                                {% elif link.link_type == 'viber' %}
+                                <img src="/static/icons/viber.png" class="link-icon custom-link-icon" alt="Viber">
+                                {% elif link.link_type == 'telegram' %}
+                                <img src="/static/icons/telegram.png" class="link-icon custom-link-icon" alt="Telegram">
+                                {% elif link.link_type == 'signal' %}
+                                <img src="/static/icons/signal.png" class="link-icon custom-link-icon" alt="Signal">
+                                {% elif link.link_type == 'wechat' %}
+                                <img src="/static/icons/wechat.png" class="link-icon custom-link-icon" alt="WeChat">
+                                {% elif link.link_type == 'discord' %}
+                                <img src="/static/icons/discord.png" class="link-icon custom-link-icon" alt="Discord">
+                                {% elif link.link_type == 'zalo' %}
+                                <img src="/static/icons/zalo.png" class="link-icon custom-link-icon" alt="Zalo">
+                                {% elif link.link_type == 'max' %}
+                                <img src="/static/icons/max.png" class="link-icon custom-link-icon" alt="Max">
+                                {% elif link.link_type == 'facetime' %}
+                                <img src="/static/icons/facetime.png" class="link-icon custom-link-icon" alt="FaceTime">
+                                {% elif link.link_type == 'googlechat' %}
+                                <img src="/static/icons/googlechat.png" class="link-icon custom-link-icon"
+                                     alt="Google Chat">
+                                {% else %}
+                                <i class="fas fa-comment messenger-default-icon"></i>
+                                {% endif %}
+
+                                <span class="link-title">
+                                    {{ link.title }}
+                                </span>
+                            </div>
+
+                            <!-- ============================================= -->
+                            <!-- ПОСЕРЕДИНЕ: Контактные данные / URL           -->
+                            <!--  ВАЖНО: В ЭТОМ БЛОКЕ ВСЕГДА ПОКАЗЫВАЕМ ССЫЛКУ (URL) -->
+                            <!-- ============================================= -->
+                            <div class="messenger-contact">
+
+                                {# WhatsApp - формируем ссылку wa.me/номер #}
+                                {% if link.link_type == 'whatsapp' %}
+                                {% if link.pay_details and link.pay_details.phone %}
+                                <span class="contact-text">https://wa.me/{{ link.pay_details.phone|replace('+', '') }}</span>
+                                {% else %}
+                                <span class="contact-text">{{ display_url }}</span>
+                                {% endif %}
+
+                                {# Viber - формируем deep link viber://chat?number=... #}
+                                {% elif link.link_type == 'viber' %}
+                                {% if link.pay_details and link.pay_details.phone %}
+                                <span class="contact-text">viber://chat?number={{ link.pay_details.phone|replace('+', '') }}</span>
+                                {% else %}
+                                <span class="contact-text">{{ display_url }}</span>
+                                {% endif %}
+
+                                {# Telegram - отдельная логика для разных типов ссылок #}
+                                {% elif link.link_type == 'telegram' %}
+                                {% if link.pay_details and link.pay_details.identifier %}
+                                {% if link.pay_details.identifier.startswith('http') %}
+                                {# Для полных URL (https://t.me/...) показываем как есть #}
+                                <span class="contact-text">{{ link.pay_details.identifier }}</span>
+                                {% else %}
+                                {# Для username формируем t.me/username #}
+                                <span class="contact-text">https://t.me/{{ link.pay_details.identifier|replace('@', '') }}</span>
+                                {% endif %}
+                                {% else %}
+                                <span class="contact-text">{{ display_url }}</span>
+                                {% endif %}
+
+                                {# Signal - ссылка на профиль или номер #}
+                                {% elif link.link_type == 'signal' %}
+                                {% if link.pay_details and link.pay_details.username %}
+                                <span class="contact-text">https://signal.me/#u/{{ link.pay_details.username }}</span>
+                                {% elif link.pay_details and link.pay_details.phone %}
+                                <span class="contact-text">https://signal.me/#p/{{ link.pay_details.phone|replace('+', '') }}</span>
+                                {% else %}
+                                <span class="contact-text">{{ display_url }}</span>
+                                {% endif %}
+
+                                {# Zalo - ссылка на профиль #}
+                                {% elif link.link_type == 'zalo' %}
+                                {% if link.pay_details and link.pay_details.phone %}
+                                <span class="contact-text">https://zalo.me/{{ link.pay_details.phone|replace('+', '') }}</span>
+                                {% else %}
+                                <span class="contact-text">{{ display_url }}</span>
+                                {% endif %}
+
+                                {# Max - ссылка через Telegram бота #}
+                                {% elif link.link_type == 'max' %}
+                                {% if link.pay_details and link.pay_details.phone %}
+                                <span class="contact-text">https://t.me/max?start={{ link.pay_details.phone|replace('+', '') }}</span>
+                                {% else %}
+                                <span class="contact-text">{{ display_url }}</span>
+                                {% endif %}
+
+                                {# WeChat - если есть QR, показываем специальный текст #}
+                                {% elif link.link_type == 'wechat' %}
+                                {% if link.pay_details and link.pay_details.qr_image %}
+                                <span class="contact-text">🔗 QR-код (нажмите для получения ссылки)</span>
+                                {% elif link.pay_details and link.pay_details.wechat_id %}
+                                <span class="contact-text">https://wechat.com/{{ link.pay_details.wechat_id }}</span>
+                                {% else %}
+                                <span class="contact-text">{{ display_url }}</span>
+                                {% endif %}
+
+                                {# Google Chat - email или ссылка на чат #}
+                                {% elif link.link_type == 'googlechat' %}
+                                {% if link.pay_details and link.pay_details.email %}
+                                <span class="contact-text">mailto:{{ link.pay_details.email }}</span>
+                                {% elif link.pay_details and link.pay_details.chat_link %}
+                                <span class="contact-text">{{ link.pay_details.chat_link }}</span>
+                                {% else %}
+                                <span class="contact-text">{{ display_url }}</span>
+                                {% endif %}
+
+                                {# Для всех остальных типов - просто URL #}
+                                {% else %}
+                                <span class="contact-text">{{ display_url }}</span>
+                                {% endif %}
+
+                                <!-- ============================================= -->
+                                <!-- Кнопки копирования - здесь копируем ССЫЛКУ    -->
+                                <!-- (не контактные данные, а именно URL для перехода) -->
+                                <!-- ============================================= -->
+                                <div class="action-buttons">
+
+                                    {# Кнопка копирования ссылки #}
+                                    {% if link.link_type == 'whatsapp' and link.pay_details and link.pay_details.phone
+                                    %}
+                                    {% set copy_url = 'https://wa.me/' + link.pay_details.phone|replace('+', '') %}
+                                    <i class="far fa-copy action-btn" onclick="copyText('{{ copy_url }}')"
+                                       title="Копировать ссылку"></i>
+
+                                    {% elif link.link_type == 'viber' and link.pay_details and link.pay_details.phone %}
+                                    {% set copy_url = 'viber://chat?number=' + link.pay_details.phone|replace('+', '')
+                                    %}
+                                    <i class="far fa-copy action-btn" onclick="copyText('{{ copy_url }}')"
+                                       title="Копировать ссылку Viber"></i>
+
+                                    {% elif link.link_type == 'telegram' and link.pay_details and
+                                    link.pay_details.identifier %}
+                                    {% if link.pay_details.identifier.startswith('http') %}
+                                    {% set copy_url = link.pay_details.identifier %}
+                                    {% else %}
+                                    {% set copy_url = 'https://t.me/' + link.pay_details.identifier|replace('@', '') %}
+                                    {% endif %}
+                                    <i class="far fa-copy action-btn" onclick="copyText('{{ copy_url }}')"
+                                       title="Копировать ссылку Telegram"></i>
+
+                                    {% elif link.link_type == 'signal' and link.pay_details %}
+                                    {% if link.pay_details.username %}
+                                    {% set copy_url = 'https://signal.me/#u/' + link.pay_details.username %}
+                                    {% elif link.pay_details.phone %}
+                                    {% set copy_url = 'https://signal.me/#p/' + link.pay_details.phone|replace('+', '')
+                                    %}
+                                    {% endif %}
+                                    <i class="far fa-copy action-btn" onclick="copyText('{{ copy_url }}')"
+                                       title="Копировать ссылку Signal"></i>
+
+                                    {% elif link.link_type == 'zalo' and link.pay_details and link.pay_details.phone %}
+                                    {% set copy_url = 'https://zalo.me/' + link.pay_details.phone|replace('+', '') %}
+                                    <i class="far fa-copy action-btn" onclick="copyText('{{ copy_url }}')"
+                                       title="Копировать ссылку Zalo"></i>
+
+                                    {% elif link.link_type == 'max' and link.pay_details and link.pay_details.phone %}
+                                    {% set copy_url = 'https://t.me/max?start=' + link.pay_details.phone|replace('+',
+                                    '') %}
+                                    <i class="far fa-copy action-btn" onclick="copyText('{{ copy_url }}')"
+                                       title="Копировать ссылку Max"></i>
+
+                                    {% elif link.link_type == 'wechat' and link.pay_details and
+                                    link.pay_details.wechat_id %}
+                                    {% set copy_url = 'https://wechat.com/' + link.pay_details.wechat_id %}
+                                    <i class="far fa-copy action-btn" onclick="copyText('{{ copy_url }}')"
+                                       title="Копировать ссылку WeChat"></i>
+
+                                    {% elif link.link_type == 'googlechat' and link.pay_details and
+                                    link.pay_details.email %}
+                                    {% set copy_url = 'mailto:' + link.pay_details.email %}
+                                    <i class="far fa-copy action-btn" onclick="copyText('{{ copy_url }}')"
+                                       title="Копировать email"></i>
+
+                                    {% else %}
+                                    {# Для всех остальных случаев копируем оригинальный URL #}
+                                    <i class="far fa-copy action-btn" onclick="copyText('{{ link.url }}')"
+                                       title="Копировать ссылку"></i>
+                                    {% endif %}
+
+                                    <!-- Кнопка QR-кода для ссылки -->
+                                    <i class="fa-solid fa-qrcode action-btn"
+                                       onclick="openQRModal('{{ link.url }}', '{{ link.title }}', 'URL')"
+                                       title="Показать QR-код"></i>
+                                </div>
+                            </div>
+
+                            <!-- !!! ВНИМАНИЕ !!! -->
+                            <!-- Контактные данные (номер телефона, username, ID и т.д.) -->
+                            <!-- теперь показываются ТОЛЬКО в нижнем блоке "СНИЗУ: Детальная информация" -->
+                            <!-- Это сделано специально: ссылка для перехода - в середине, -->
+                            <!-- а детали для копирования - внизу -->
+
+                            <!-- СНИЗУ: Детальная информация -->
+                            <div class="messenger-details">
+                                <!-- ================================================================== -->
+                                <!-- НАЗВАНИЕ ПОЛЯ - показывает тип данных, которые отображаются ниже   -->
+                                <!-- ================================================================== -->
+                                <span class="details-label">
+                                    {# Для мессенджеров, где всегда номер телефона #}
+                                    {% if link.link_type == 'max' or link.link_type == 'zalo' or link.link_type == 'viber' or link.link_type == 'whatsapp' %}
+                                        Номер телефона
+
+                                    {# Signal может быть либо Signal ID (username), либо номер телефона #}
+                                    {% elif link.link_type == 'signal' %}
+                                        {% if link.pay_details and link.pay_details.username %}
+                                            Signal ID
+                                        {% elif link.pay_details and link.pay_details.phone_display %}
+                                            Номер телефона
+                                        {% else %}
+                                            Данные
+                                        {% endif %}
+
+                                    {# Telegram - определяем по наличию '+' в identifier #}
+                                    {% elif link.link_type == 'telegram' %}
+                                        {% if link.pay_details and link.pay_details.identifier %}
+                                            {% if '+' in link.pay_details.identifier or '/+' in link.pay_details.identifier %}
+                                                ID группы
+                                            {% else %}
+                                                ID
+                                            {% endif %}
+                                        {% else %}
+                                            Данные
+                                        {% endif %}
+
+                                    {# WeChat - может быть ID или QR-код #}
+                                    {% elif link.link_type == 'wechat' %}
+                                        {% if link.pay_details and link.pay_details.wechat_id %}
+                                            WeChat ID
+                                        {% elif link.pay_details and link.pay_details.qr_image %}
+                                            QR-код
+                                        {% else %}
+                                            Данные
+                                        {% endif %}
+
+                                    {# Google Chat - email или ссылка на чат #}
+                                    {% elif link.link_type == 'googlechat' %}
+                                        {% if link.pay_details and link.pay_details.email %}
+                                            Email
+                                        {% elif link.pay_details and link.pay_details.chat_link %}
+                                            Ссылка на чат
+                                        {% else %}
+                                            Данные
+                                        {% endif %}
+
+                                    {# Discord - всегда username #}
+                                    {% elif link.link_type == 'discord' %}
+                                        Discord
+
+                                    {# FaceTime - может быть email или телефон #}
+                                    {% elif link.link_type == 'facetime' %}
+                                        FaceTime
+
+                                    {# Для всех остальных случаев #}
+                                    {% else %}
+                                        Данные
+                                    {% endif %}
+                                </span>
+
+                                <!-- ================================================================== -->
+                                <!-- ЗНАЧЕНИЕ (салатовое) - показывает сами данные (номер, username, ID) -->
+                                <!-- ================================================================== -->
+                                <span class="details-value">
+                                    {# Для мессенджеров с номером телефона #}
+                                    {% if link.link_type == 'max' or link.link_type == 'zalo' or link.link_type == 'viber' or link.link_type == 'whatsapp' %}
+                                        {% if link.pay_details and link.pay_details.phone_display %}
+                                            {{ link.pay_details.phone_display }}
+                                        {% else %}
+                                            Не указано
+                                        {% endif %}
+
+                                    {# Signal - показываем username, если он есть, иначе номер телефона #}
+                                    {% elif link.link_type == 'signal' %}
+                                        {% if link.pay_details and link.pay_details.username %}
+                                            {{ link.pay_details.username }}
+                                        {% elif link.pay_details and link.pay_details.phone_display %}
+                                            {{ link.pay_details.phone_display }}
+                                        {% else %}
+                                            Не указано
+                                        {% endif %}
+
+                                    {# Telegram - сложная логика для разных типов ссылок #}
+                                    {% elif link.link_type == 'telegram' %}
+                                        {% if link.pay_details and link.pay_details.identifier %}
+                                            {% if '+' in link.pay_details.identifier or '/+' in link.pay_details.identifier %}
+                                                {# Извлекаем только ID группы из invite link #}
+                                                {% set invite_parts = link.pay_details.identifier.split('/+') %}
+                                                {% if invite_parts|length > 1 %}
+                                                    {{ invite_parts[-1] }}
+                                                {% else %}
+                                                    {{ link.pay_details.identifier }}
+                                                {% endif %}
+                                            {% elif 't.me/' in link.pay_details.identifier %}
+                                                {# Извлекаем username из ссылки t.me/username #}
+                                                @{{ link.pay_details.identifier.split('t.me/')[-1].split('/')[0].split('?')[0] }}
+                                            {% elif link.pay_details.identifier.startswith('http') %}
+                                                {{ link.pay_details.identifier.replace('https://', '').replace('http://', '') }}
+                                            {% elif link.pay_details.identifier.startswith('@') %}
+                                                {{ link.pay_details.identifier }}
+                                            {% else %}
+                                                @{{ link.pay_details.identifier }}
+                                            {% endif %}
+                                        {% else %}
+                                            Не указано
+                                        {% endif %}
+
+                                    {# WeChat - показываем ID или статус QR #}
+                                    {% elif link.link_type == 'wechat' %}
+                                        {% if link.pay_details and link.pay_details.wechat_display %}
+                                            {{ link.pay_details.wechat_display }}
+                                        {% elif link.pay_details and link.pay_details.qr_image %}
+                                            ✅ QR-код загружен
+                                        {% else %}
+                                            Не указано
+                                        {% endif %}
+
+                                    {# Google Chat - email или ссылка #}
+                                    {% elif link.link_type == 'googlechat' %}
+                                        {% if link.pay_details and link.pay_details.email %}
+                                            {{ link.pay_details.email }}
+                                        {% elif link.pay_details and link.pay_details.chat_link %}
+                                            🔗 Постоянная ссылка
+                                        {% else %}
+                                            Не указано
+                                        {% endif %}
+
+                                    {# Discord - username #}
+                                    {% elif link.link_type == 'discord' %}
+                                        {% if link.pay_details and link.pay_details.username %}
+                                            {{ link.pay_details.username }}
+                                        {% else %}
+                                            Не указано
+                                        {% endif %}
+
+                                    {# FaceTime - email или телефон #}
+                                    {% elif link.link_type == 'facetime' %}
+                                        {% if link.pay_details and link.pay_details.email %}
+                                            {{ link.pay_details.email }}
+                                        {% elif link.pay_details and link.pay_details.phone %}
+                                            {{ link.pay_details.phone }}
+                                        {% else %}
+                                            Не указано
+                                        {% endif %}
+
+                                    {# По умолчанию #}
+                                    {% else %}
+                                        Не указано
+                                    {% endif %}
+                                </span>
+
+                                <!-- ================================================================== -->
+                                <!-- КНОПКА КОПИРОВАНИЯ - копирует именно те данные, что показаны выше -->
+                                <!-- ================================================================== -->
+                                {% if link.link_type in ['max', 'zalo', 'viber', 'whatsapp'] %}
+                                {% if link.pay_details and link.pay_details.phone_display %}
+                                <i class="far fa-copy details-copy"
+                                   onclick="copyText('{{ link.pay_details.phone_display }}')"
+                                   title="Копировать номер"></i>
+                                {% endif %}
+
+                                {# Signal - копируем username, если он есть, иначе номер телефона #}
+                                {% elif link.link_type == 'signal' %}
+                                {% if link.pay_details and link.pay_details.username %}
+                                <i class="far fa-copy details-copy"
+                                   onclick="copyText('{{ link.pay_details.username }}')"
+                                   title="Копировать Signal ID"></i>
+                                {% elif link.pay_details and link.pay_details.phone_display %}
+                                <i class="far fa-copy details-copy"
+                                   onclick="copyText('{{ link.pay_details.phone_display }}')"
+                                   title="Копировать номер"></i>
+                                {% endif %}
+
+                                {# Telegram - копируем ID группы или username #}
+                                {% elif link.link_type == 'telegram' and link.pay_details and
+                                link.pay_details.identifier %}
+                                {% if '+' in link.pay_details.identifier or '/+' in link.pay_details.identifier %}
+                                {# Для invite links копируем только ID группы #}
+                                {% set invite_parts = link.pay_details.identifier.split('/+') %}
+                                {% if invite_parts|length > 1 %}
+                                <i class="far fa-copy details-copy" onclick="copyText('{{ invite_parts[-1] }}')"
+                                   title="Копировать ID группы"></i>
+                                {% else %}
+                                <i class="far fa-copy details-copy"
+                                   onclick="copyText('{{ link.pay_details.identifier }}')"
+                                   title="Копировать ссылку"></i>
+                                {% endif %}
+                                {% elif 't.me/' in link.pay_details.identifier %}
+                                {# Для ссылок t.me/username копируем только username #}
+                                {% set username =
+                                link.pay_details.identifier.split('t.me/')[-1].split('/')[0].split('?')[0] %}
+                                <i class="far fa-copy details-copy" onclick="copyText('{{ username }}')"
+                                   title="Копировать username"></i>
+                                {% else %}
+                                {# Для просто username копируем как есть (без @) #}
+                                <i class="far fa-copy details-copy"
+                                   onclick="copyText('{{ clean_id }}')"
+                                   title="Копировать username"
+                                   style="cursor: pointer; margin-left: 8px;"></i>
+                                {% endif %}
+
+                                {# WeChat - копируем ID #}
+                                {% elif link.link_type == 'wechat' and link.pay_details and
+                                link.pay_details.wechat_display %}
+                                <i class="far fa-copy details-copy"
+                                   onclick="copyText('{{ link.pay_details.wechat_display }}')"
+                                   title="Копировать WeChat ID"></i>
+
+                                {# Google Chat - копируем email #}
+                                {% elif link.link_type == 'googlechat' and link.pay_details and link.pay_details.email
+                                %}
+                                <i class="far fa-copy details-copy" onclick="copyText('{{ link.pay_details.email }}')"
+                                   title="Копировать email"></i>
+
+                                {# Discord - копируем username #}
+                                {% elif link.link_type == 'discord' and link.pay_details and link.pay_details.username
+                                %}
+                                <i class="far fa-copy details-copy"
+                                   onclick="copyText('{{ link.pay_details.username }}')"
+                                   title="Копировать username"></i>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Кнопка перехода -->
+                        <a href="/click/{{ link.id }}" target="_blank" class="details-btn">
+                            Перейти по ссылке<i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+            {% endif %}
+
+
+            <!-- КАТЕГОРИЯ: Банки и Переводы (финансовые системы) -->
+            {% if categories.transfers %}
+            <section class="category-card">
+                <h2 class="category-title"><i class="fas fa-exchange-alt"></i> Переводы</h2>
+                <div class="category-content">
+                    {% for link in categories.transfers %}
+
+                    {# PayPal - с градиентной кнопкой #}
+                    {% if link.link_type == 'paypal' %}
+                    {% set paypal_username = link.url.split('paypal.me/')[-1] %}
+                    <div class="link-item finance-item">
+                        <div class="finance-content">
+                            <!-- СВЕРХУ: Название + иконка -->
+                            <div class="finance-header">
+                                {% include 'icon_block.html' %}
+                                <span class="link-title">{{ link.title }}</span>
+                            </div>
+
+                            <!-- ПОСЕРЕДИНЕ: Ссылка (URL) -->
+                            <div class="pair-container">
+                                <span class="label-text">{{ link.url }}</span>
+                                <i class="far fa-copy icon-btn" onclick="copyText('{{ link.url }}')"
+                                   title="Копировать ссылку"></i>
+                            </div>
+
+                            <!-- СНИЗУ: Username (зеленый) отдельной строкой -->
+                            <div class="messenger-details" style="margin-top: 4px;">
+                                <span class="details-label">ID</span>
+                                <span class="details-value">@{{ paypal_username }}</span>
+                                <i class="far fa-copy details-copy" onclick="copyText('{{ paypal_username }}')"
+                                   title="Копировать username"></i>
+                            </div>
+                        </div>
+                        <a href="/click/{{ link.id }}" target="_blank" class="details-btn">
+                            Перейти по ссылке<i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+
+                    {# КАРТА (все типы card_* и старый card) #}
+                    {% elif link.link_type == 'card' or link.link_type.startswith('card_') %}
+                    <div class="link-item finance-item">
+                        <div class="finance-info">
+                            {% include 'icon_block.html' %}
+                            <div class="bank-details">
+                                {# Банк: название + страна #}
+                                <div class="bank-row">
+                                    <span class="link-title">
+                                        <span class="label-text">Банк:</span>
+                                        {% if link.pay_details and link.pay_details.bank_name %}
+                                            {{ link.pay_details.bank_name }}
+                                        {% else %}
+                                            не указан
+                                        {% endif %}
+                                    </span>
+                                    {% if link.pay_details and link.pay_details.country %}
+                                    {% set country_flag = {
+                                    'lithuania': 'lt', 'latvia': 'lv', 'estonia': 'ee',
+                                    'usa': 'us', 'russia': 'ru', 'ukraine': 'ua',
+                                    'belarus': 'by', 'kazakhstan': 'kz', 'armenia': 'am',
+                                    'azerbaijan': 'az', 'georgia': 'ge', 'moldova': 'md',
+                                    'uzbekistan': 'uz', 'tajikistan': 'tj', 'kyrgyzstan': 'kg',
+                                    'turkmenistan': 'tm', 'vietnam': 'vn'
+                                    } %}
+                                    <span class="flag-icon flag-icon-{{ country_flag[link.pay_details.country] }}"></span>
+                                    <span class="country-text">{{ COUNTRY_NAMES[link.pay_details.country] }}</span>
+                                    {% endif %}
+                                </div>
+                                {# Подсказка + номер карты #}
+                                {% if link.pay_details and link.pay_details.card_number %}
+                                <div class="mt-4">
+                                    <span class="label-light">перевод по карте • </span>
+                                    <code class="code-text">{{ link.pay_details.card_number }}</code>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="action-group">
+                            {% if link.pay_details and link.pay_details.card_number %}
+                            <button onclick="copyText('{{ link.pay_details.card_number }}')" class="icon-btn"
+                                    title="Копировать номер карты">
+                                <i class="far fa-copy"></i>
+                            </button>
+                            <button onclick="openQRModal('{{ link.pay_details.card_number }}', '{{ link.title }}', 'Card')"
+                                    class="icon-btn" title="Показать QR-код">
+                                <i class="fa-solid fa-qrcode"></i>
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {# IBAN (все типы iban_* и старый iban) #}
+                    {% elif link.link_type == 'iban' or link.link_type.startswith('iban_') %}
+                    <div class="link-item finance-item clickable" onclick="openModal('modal_{{ link.id }}')">
+                        <div class="finance-content">
+                            <div class="bank-row">
+                                {% include 'icon_block.html' %}
+                                <span class="link-title">
+                                    <span class="label-text">Банк:</span>
+                                    {% if link.pay_details and link.pay_details.bank_name %}
+                                        {{ link.pay_details.bank_name }}
+                                    {% else %}
+                                        не указан
+                                    {% endif %}
+                                </span>
+                                {% if link.pay_details and link.pay_details.country %}
+                                <span class="country-text">{{ COUNTRY_NAMES[link.pay_details.country] }}</span>
+                                {% endif %}
+                            </div>
+                            {# Подсказка + сокращенный IBAN #}
+                            {% if link.pay_details and link.pay_details.iban %}
+                            <div>
+                                <span class="label-light">перевод по IBAN • </span>
+                                <code class="code-text-sm">{{ link.pay_details.iban }}</code>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <button class="details-btn ml-16"
+                                onclick="event.stopPropagation(); openModal('modal_{{ link.id }}')">Реквизиты
+                        </button>
+                    </div>
+
+                    {# ТЕЛЕФОН (все типы phone_* и старый phone) #}
+                    {% elif link.link_type == 'phone' or link.link_type.startswith('phone_') %}
+                    <div class="link-item finance-item">
+                        <div class="finance-info">
+                            {% include 'icon_block.html' %}
+                            <div class="bank-details">
+                                {# Банк: название + страна #}
+                                <div class="bank-row">
+                                    <span class="link-title">
+                                        <span class="label-text">Банк:</span>
+                                        {% if link.pay_details and link.pay_details.bank_name %}
+                                            {{ link.pay_details.bank_name }}
+                                        {% else %}
+                                            не указан
+                                        {% endif %}
+                                    </span>
+                                    {% if link.pay_details and link.pay_details.country %}
+                                    <span class="country-text">{{ COUNTRY_NAMES[link.pay_details.country] }}</span>
+                                    {% endif %}
+                                </div>
+                                {# Подсказка + номер телефона #}
+                                {% if link.pay_details and link.pay_details.phone %}
+                                <div class="mt-4">
+                                    <span class="label-light">перевод по номеру • </span>
+                                    <code class="code-text">{{ link.pay_details.phone }}</code>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="action-group">
+                            {% if link.pay_details and link.pay_details.phone %}
+                            <button onclick="copyText('{{ link.pay_details.phone }}')" class="icon-btn"
+                                    title="Копировать номер">
+                                <i class="far fa-copy"></i>
+                            </button>
+                            <button onclick="openQRModal('{{ link.pay_details.phone }}', '{{ link.title }}', 'Phone')"
+                                    class="icon-btn" title="Показать QR-код">
+                                <i class="fa-solid fa-qrcode"></i>
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {# ACH (США) #}
+                    {% elif link.link_type == 'ach_usa' %}
+                    <div class="link-item finance-item clickable" onclick="openModal('modal_{{ link.id }}')">
+                        <div class="finance-content">
+                            <div class="bank-row">
+                                {% include 'icon_block.html' %}
+                                <span class="link-title">{{ link.title }}</span>
+                                {% if link.pay_details and link.pay_details.country %}
+                                <span class="country-text">{{ COUNTRY_NAMES[link.pay_details.country] }}</span>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <span class="label-light">ACH перевод • </span>
+                                <code class="code-text-sm">Routing: {{ link.pay_details.routing if link.pay_details and
+                                    link.pay_details.routing else '...' }}</code>
+                            </div>
+                        </div>
+                        <button class="details-btn ml-16"
+                                onclick="event.stopPropagation(); openModal('modal_{{ link.id }}')">Реквизиты
+                        </button>
+                    </div>
+
+                    {# WIRE (США) #}
+                    {% elif link.link_type == 'wire_usa' %}
+                    <div class="link-item finance-item clickable" onclick="openModal('modal_{{ link.id }}')">
+                        <div class="finance-content">
+                            <div class="bank-row">
+                                {% include 'icon_block.html' %}
+                                <span class="link-title">{{ link.title }}</span>
+                                {% if link.pay_details and link.pay_details.country %}
+                                <span class="country-text">{{ COUNTRY_NAMES[link.pay_details.country] }}</span>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <span class="label-light">WIRE перевод • </span>
+                                <code class="code-text-sm">SWIFT: {{ link.pay_details.swift if link.pay_details and
+                                    link.pay_details.swift else '...' }}</code>
+                            </div>
+                        </div>
+                        <button class="details-btn ml-16"
+                                onclick="event.stopPropagation(); trackDetailsClick('{{ link.id }}'); openModal('modal_{{ link.id }}')">
+                            Реквизиты
+                        </button>
+                    </div>
+
+                    {# СЧЕТА (account_*) #}
+                    {% elif link.link_type.startswith('account_') %}
+                    <div class="link-item finance-item clickable" onclick="openModal('modal_{{ link.id }}')">
+                        <div class="finance-content">
+                            <div class="bank-row">
+                                {% include 'icon_block.html' %}
+                                <span class="link-title">{{ link.title }}</span>
+                                {% if link.pay_details and link.pay_details.country %}
+                                <span class="country-text">{{ COUNTRY_NAMES[link.pay_details.country] }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <button class="details-btn ml-16"
+                                onclick="event.stopPropagation(); trackDetailsClick('{{ link.id }}'); openModal('modal_{{ link.id }}')">
+                            Реквизиты
+                        </button>
+                    </div>
+
+                    {# СЧЕТА НЕРЕЗИДЕНТА (non_res_vietnam) #}
+                    {% elif link.link_type == 'non_res_vietnam' %}
+                    <div class="link-item finance-item clickable" onclick="openModal('modal_{{ link.id }}')">
+                        <div class="finance-content">
+                            <div class="bank-row">
+                                {% include 'icon_block.html' %}
+                                <span class="link-title">{{ link.title }}</span>
+                                {% if link.pay_details and link.pay_details.country %}
+                                <span class="country-text">{{ COUNTRY_NAMES[link.pay_details.country] }}</span>
+                                {% endif %}
+                            </div>
+                            {# Показываем номер счета #}
+                            {% if link.pay_details and link.pay_details.account_number %}
+                            <div>
+                                <span class="label-light">счет нерезидента • </span>
+                                <code class="code-text">{{ link.pay_details.account_number }}</code>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <button class="details-btn ml-16"
+                                onclick="event.stopPropagation(); openModal('modal_{{ link.id }}')">Реквизиты
+                        </button>
+                    </div>
+
+                    {# УНИВЕРСАЛЬНЫЕ ПЛАТЕЖНЫЕ СИСТЕМЫ (PayPal, ЮMoney, VK Pay, Монобанк, Kaspi, Payme, Click, TBC Pay,
+                    Idram) #}
+                    {% elif link.link_type in ['paypal', 'yoomoney', 'vkpay', 'monobank', 'kaspi', 'payme', 'click',
+                    'tbcpay', 'idram'] %}
+                    <div class="link-item finance-item">
+                        <div class="finance-content">
+                            <div class="finance-header">
+                                {% include 'icon_block.html' %}
+                                <span class="link-title">{{ link.title }}</span>
+                            </div>
+
+                            {# ССЫЛКА (без https://) #}
+                            <div class="url-container">
+                                {% set display_url = link.url.replace('https://', '').replace('http://',
+                                '').replace('+', '') %}
+                                {% set clean_url = link.url.replace('+', '') %}
+
+                                <span class="primary-text">{{ display_url }}</span>
+                                <i class="far fa-copy icon-btn ml-8" onclick="copyText('{{ clean_url }}')"
+                                   title="Копировать ссылку"></i>
+                                <i class="fa-solid fa-qrcode icon-btn ml-8"
+                                   onclick="openQRModal('{{ clean_url }}', '{{ link.title }}', 'ССЫЛКА', '<i class=\'{{ link.icon_class }}\' style=\'font-size: 24px; color: #4a9eff;\'></i>')"
+                                   title="Показать QR-код"></i>
+                            </div>
+
+                            {# ID (если есть) #}
+                            {% if link.pay_details and (link.pay_details.username or link.pay_details.number or
+                            link.pay_details.phone or (link.pay_details.clean_data and
+                            link.pay_details.clean_data.value)) %}
+                            <div class="id-container">
+                                <span class="label-text">ID</span>
+                                <span class="accent-text">
+                                    {% if link.pay_details.username %}@{{ link.pay_details.username }}
+                                    {% elif link.pay_details.number %}{{ link.pay_details.number }}
+                                    {% elif link.pay_details.phone %}{{ link.pay_details.phone|replace('+', '') }}
+                                    {% elif link.pay_details.clean_data and link.pay_details.clean_data.value %}{{ link.pay_details.clean_data.value|replace('+', '') }}
+                                    {% endif %}
+                                </span>
+                                <i class="far fa-copy icon-btn ml-8"
+                                   onclick="copyText('{{ link.pay_details.username or link.pay_details.number or link.pay_details.phone or (link.pay_details.clean_data and link.pay_details.clean_data.value) }}')"
+                                   title="Копировать ID"></i>
+
+                                <!-- КНОПКА QR-КОДА -->
+                                {% set qr_value = (link.pay_details.username or link.pay_details.number or
+                                link.pay_details.phone or link.pay_details.clean_data.value or '') | replace('+', '') %}
+                                <i class="fa-solid fa-qrcode icon-btn ml-8"
+                                   onclick="openQRModal('{{ qr_value }}', '{{ link.title }}', '{{ link.link_type|upper }}', '<i class=\'{{ link.icon_class }}\' style=\'font-size: 24px; color: #00ff88;\'></i>')"
+                                   title="Показать QR-код"></i>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <a href="/click/{{ link.id }}" target="_blank" class="details-btn">
+                            Перейти по ссылке<i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+
+                    {% endif %}
+
+                    {% endfor %}
+                </div>
+            </section>
+            {% endif %}
+
+
+            <!-- КАТЕГОРИЯ: Донат -->
+            {% if categories.donate %}
+            <section class="category-card">
+                <h2 class="category-title"><i class="fas fa-heart"></i> Донат</h2>
+                <div class="category-content">
+                    {% for link in categories.donate %}
+                    <div class="link-item donate-item">
+                        <div class="donate-content">
+                            <!-- СВЕРХУ: Название платформы + иконка -->
+                            <div class="donate-header">
+                                <!-- Иконка -->
+                                {% if link.link_type == 'patreon' %}
+                                <img src="/static/icons/patreon.png" class="link-icon custom-link-icon" alt="Patreon">
+                                {% elif link.link_type == 'boosty' %}
+                                <img src="/static/icons/boosty.png" class="link-icon custom-link-icon" alt="Boosty">
+                                {% elif link.link_type == 'donationalerts' %}
+                                <img src="/static/icons/donationalerts.png" class="link-icon custom-link-icon"
+                                     alt="Donation Alerts">
+                                {% elif link.link_type == 'kofi' %}
+                                <img src="/static/icons/kofi.png" class="link-icon custom-link-icon" alt="Ko-fi">
+                                {% elif link.link_type == 'buymeacoffee' %}
+                                <img src="/static/icons/buymeacoffee.png" class="link-icon custom-link-icon"
+                                     alt="Buy Me a Coffee">
+                                {% else %}
+                                <i class="fas fa-heart donate-default-icon"></i>
+                                {% endif %}
+
+                                <span class="link-title">{{ link.title }}</span>
+                            </div>
+
+                            <!-- ПОСЕРЕДИНЕ: URL / Профиль -->
+                            <div class="donate-url">
+                                {# Определяем username из ссылки #}
+                                {% if link.link_type == 'patreon' %}
+                                {% set full_url = link.url %}
+                                {% set username = link.url.split('patreon.com/')[-1].split('/')[0].split('?')[0] %}
+                                {% set display_url = 'patreon.com/' + username %}
+                                {% elif link.link_type == 'boosty' %}
+                                {% set full_url = link.url %}
+                                {% set username = link.url.split('boosty.to/')[-1].split('/')[0].split('?')[0] %}
+                                {% set display_url = 'boosty.to/' + username %}
+                                {% elif link.link_type == 'donationalerts' %}
+                                {% set full_url = link.url %}
+                                {% if '/r/' in link.url %}
+                                {% set username = link.url.split('/r/')[-1].split('/')[0].split('?')[0] %}
+                                {% else %}
+                                {% set username = link.url.split('donationalerts.com/')[-1].split('/')[0].split('?')[0]
+                                %}
+                                {% endif %}
+                                {% set display_url = 'donationalerts.com/r/' + username %}
+                                {% elif link.link_type == 'kofi' %}
+                                {% set full_url = link.url %}
+                                {% set username = link.url.split('ko-fi.com/')[-1].split('/')[0].split('?')[0] %}
+                                {% set display_url = 'ko-fi.com/' + username %}
+                                {% elif link.link_type == 'buymeacoffee' %}
+                                {% set full_url = link.url %}
+                                {% set username = link.url.split('buymeacoffee.com/')[-1].split('/')[0].split('?')[0] %}
+                                {% set display_url = 'buymeacoffee.com/' + username %}
+                                {% else %}
+                                {% set full_url = link.url %}
+                                {% set username = '' %}
+                                {% set display_url = link.url.replace('https://', '').replace('http://', '') %}
+                                {% endif %}
+
+                                <span class="url-display">{{ display_url }}</span>
+                                <i class="far fa-copy icon-btn ml-8"
+                                   onclick="trackDetailsClick('{{ link.id }}'); copyText('{{ full_url }}')"
+                                   title="Копировать ссылку"></i>
+                                <i class="fa-solid fa-qrcode icon-btn ml-8"
+                                   onclick="trackDetailsClick('{{ link.id }}'); openQRModal('{{ full_url }}', '{{ link.title }}', 'URL')"
+                                   title="Показать QR-код"></i>
+                            </div>
+
+                            <!-- СНИЗУ: Username -->
+                            {% if username and username not in ['https:', 'http:', ''] %}
+                            <div class="donate-username">
+                                <!-- Название поля -->
+                                <span class="username-label">Username</span>
+
+                                <!-- Значение - ТЕПЕРЬ БЕЗ @ -->
+                                <span class="username-value">{{ username }}</span>
+
+                                <!-- Кнопка копирования - копируем чистый username -->
+                                <i class="far fa-copy username-copy"
+                                   onclick="trackDetailsClick('{{ link.id }}'); copyText('{{ username }}')"
+                                   title="Копировать username"></i>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Кнопка перехода -->
+                        <a href="/click/{{ link.id }}" target="_blank" class="details-btn"
+                           onclick="trackClick('{{ link.id }}')">
+                            Перейти по ссылке<i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+            {% endif %}
+
+
+            <!-- КАТЕГОРИЯ: Крипта -->
+            {% if categories.crypto %}
+            <section class="category-card">
+                <h2 class="category-title"><i class="fas fa-coins"></i> Крипта</h2>
+                <div class="category-content">
+                    {% for link in categories.crypto %}
+
+                    {# БИРЖА #}
+                    {% if link.is_exchange or link.link_type in ['binance', 'bybit', 'okx', 'kucoin', 'gateio',
+                    'metamask'] %}
+                    <div class="wallet-widget-item clickable"
+                         onclick="trackDetailsClick('{{ link.id }}'); openModal('modal_{{ link.id }}')">
+                        <div class="wallet-top-line">
+                            <!-- БЕЙДЖ -->
+                            <span class="exchange-badge">
+                                <i class="fa-solid fa-arrow-right-arrow-left"></i> Биржа
+                            </span>
+
+                            <!-- ЛОГОТИП -->
+                            <img src="/static/icons/{{ link.link_type }}.png" class="link-icon custom-link-icon"
+                                 alt="{{ link.title }}">
+
+                            <!-- НАЗВАНИЕ -->
+                            <span class="wallet-title-text">{{ link.title }}</span>
+                        </div>
+
+                        <div class="wallet-address-box">
+                            <code class="wallet-code-addr wallet-placeholder">Нажмите для получения реквизитов</code>
+                            <div class="wallet-actions">
+                                <button class="wallet-btn" title="Открыть"
+                                        onclick="event.stopPropagation(); trackDetailsClick('{{ link.id }}'); openModal('modal_{{ link.id }}')">
+                                    <i class="fa-solid fa-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {# КОШЕЛЕК #}
+                    {% else %}
+                    {% set wallet = link.pay_details.tabs[0] if link.pay_details and link.pay_details.tabs else null %}
+                    <div class="wallet-widget-item">
+                        <div class="wallet-top-line">
+                            <!-- БЕЙДЖ -->
+                            <span class="wallet-badge">
+                                <i class="fa-solid fa-wallet"></i> Кошелек
+                            </span>
+
+                            <!-- ЛОГОТИП -->
+                            {% include 'icon_block.html' %}
+
+                            <!-- НАЗВАНИЕ -->
+                            <span class="wallet-title-text">{{ link.title }}</span>
+
+                            <!-- СЕТЬ -->
+                            {% if wallet and wallet.network %}
+                            <span class="wallet-network-info">
+                                <span>🌐</span>
+                                <span class="network-label">Сеть:</span>
+                                <span class="network-value">{{ wallet.network_full or wallet.network }}</span>
+                            </span>
+                            {% endif %}
+                        </div>
+
+                        <!-- ================================================== -->
+                        <!-- БЛОК АДРЕСА КОШЕЛЬКА -->
+                        <!-- ================================================== -->
+                        <!-- Структура: в одной строке подпись + кликабельный адрес + кнопки -->
+                        <!-- ПРИ НАЖАТИИ НА АДРЕС - копируется в буфер обмена -->
+                        <!-- ================================================== -->
+                        <div class="wallet-address-box">
+                            <div class="wallet-address-clickable"
+                                 onclick="copyWalletAddr('{{ wallet.address }}', this)">
+                                <span class="details-label">Адрес кошелька:</span>
+                                <code class="wallet-code-addr">{{ wallet.address }}</code>
+                            </div>
+
+                            <div class="wallet-actions">
+                                <button class="wallet-btn"
+                                        onclick="event.stopPropagation(); copyWalletAddr('{{ wallet.address }}', this)">
+                                    <i class="fa-regular fa-copy"></i>
+                                </button>
+                                <button class="wallet-btn"
+                                        onclick="event.stopPropagation(); openQRModal('{{ wallet.address }}', '{{ link.title }}')">
+                                    <i class="fa-solid fa-qrcode"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <!-- ================================================== -->
+                        <!-- КОНЕЦ БЛОКА АДРЕСА КОШЕЛЬКА -->
+                        <!-- ================================================== -->
+                    </div>
+                    {% endif %}
+
+                    {% endfor %}
+                </div>
+            </section>
+            {% endif %}
+
+
+            <!-- КАТЕГОРИЯ: Магазины -->
+            {% if categories.shops %}
+            <section class="category-card">
+                <h2 class="category-title"><i class="fas fa-shopping-bag"></i> Магазины</h2>
+                <div class="category-content">
+                    {% for link in categories.shops %}
+                    <div class="link-item shop-item">
+                        <div class="shop-content">
+                            <!-- СВЕРХУ: Название магазина + иконка -->
+                            <div class="shop-header">
+                                <!-- Иконка магазина -->
+                                {% if link.link_type == 'ozon' %}
+                                <img src="/static/icons/ozon.png" class="link-icon custom-link-icon" alt="Ozon">
+                                {% elif link.link_type == 'wildberries' %}
+                                <img src="/static/icons/wildberries.png" class="link-icon custom-link-icon"
+                                     alt="Wildberries">
+                                {% elif link.link_type == 'avito' %}
+                                <img src="/static/icons/avito.png" class="link-icon custom-link-icon" alt="Avito">
+                                {% elif link.link_type == 'yandex_market' %}
+                                <img src="/static/icons/yandex_market.png" class="link-icon custom-link-icon"
+                                     alt="Яндекс Маркет">
+                                {% elif link.link_type == 'aliexpress' %}
+                                <img src="/static/icons/aliexpress.png" class="link-icon custom-link-icon"
+                                     alt="AliExpress">
+                                {% elif link.link_type == 'kazanexpress' %}
+                                <img src="/static/icons/kazanexpress.png" class="link-icon custom-link-icon"
+                                     alt="KazanExpress">
+                                {% elif link.link_type == 'amazon' %}
+                                <img src="/static/icons/amazon.png" class="link-icon custom-link-icon" alt="Amazon">
+                                {% elif link.link_type == 'ebay' %}
+                                <img src="/static/icons/ebay.png" class="link-icon custom-link-icon" alt="eBay">
+                                {% elif link.link_type == 'etsy' %}
+                                <img src="/static/icons/etsy.png" class="link-icon custom-link-icon" alt="Etsy">
+                                {% elif link.link_type == 'shopify' %}
+                                <img src="/static/icons/shopify.png" class="link-icon custom-link-icon" alt="Shopify">
+                                {% else %}
+                                <i class="fas fa-store shop-default-icon"></i>
+                                {% endif %}
+
+                                <span class="link-title">{{ link.title }}</span>
+                            </div>
+
+                            <!-- ПОСЕРЕДИНЕ: URL / Магазин -->
+                            <div class="shop-url-container">
+                                {% set display_url = link.url.replace('https://', '').replace('http://',
+                                '').replace('www.', '') %}
+
+                                <span class="shop-url">{{ display_url }}</span>
+                                <i class="far fa-copy icon-btn ml-8"
+                                   onclick="trackDetailsClick('{{ link.id }}'); copyText('{{ link.url }}')"
+                                   title="Копировать ссылку"></i>
+                                <i class="fa-solid fa-qrcode icon-btn ml-8"
+                                   onclick="trackDetailsClick('{{ link.id }}'); openQRModal('{{ link.url }}', '{{ link.title }}', 'URL')"
+                                   title="Показать QR-код"></i>
+                            </div>
+
+                            <!-- СНИЗУ: Информация о магазине/продавце (если есть) -->
+                            {% if link.pay_details and (link.pay_details.seller_name or link.pay_details.shop_name or
+                            link.pay_details.store_url) %}
+                            <div class="shop-info">
+                                <!-- Название поля -->
+                                <span class="shop-info-label">
+                                    {% if link.pay_details.seller_name %}
+                                        Продавец
+                                    {% elif link.pay_details.shop_name %}
+                                        Магазин
+                                    {% elif link.pay_details.store_url %}
+                                        Ссылка
+                                    {% endif %}
+                                </span>
+
+                                <!-- Значение -->
+                                <span class="shop-info-value">
+                                    {% if link.pay_details.seller_name %}
+                                        {{ link.pay_details.seller_name }}
+                                    {% elif link.pay_details.shop_name %}
+                                        {{ link.pay_details.shop_name }}
+                                    {% elif link.pay_details.store_url %}
+                                        {{ link.pay_details.store_url }}
+                                    {% endif %}
+                                </span>
+
+                                <!-- Кнопка копирования -->
+                                {% if link.pay_details.seller_name %}
+                                <i class="far fa-copy shop-info-copy"
+                                   onclick="trackDetailsClick('{{ link.id }}'); copyText('{{ link.pay_details.seller_name }}')"
+                                   title="Копировать имя продавца"></i>
+                                {% elif link.pay_details.shop_name %}
+                                <i class="far fa-copy shop-info-copy"
+                                   onclick="trackDetailsClick('{{ link.id }}'); copyText('{{ link.pay_details.shop_name }}')"
+                                   title="Копировать название магазина"></i>
+                                {% elif link.pay_details.store_url %}
+                                <i class="far fa-copy shop-info-copy"
+                                   onclick="trackDetailsClick('{{ link.id }}'); copyText('{{ link.pay_details.store_url }}')"
+                                   title="Копировать ссылку"></i>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Кнопка перехода -->
+                        <a href="/click/{{ link.id }}" target="_blank" class="details-btn"
+                           onclick="trackClick('{{ link.id }}')">
+                            Перейти по ссылке<i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+            {% endif %}
+
+
+            <!-- КАТЕГОРИЯ: Партнерки -->
+
+            {% if categories.partner %}
+
+            <section class="category-card">
+
+                <h2 class="category-title"><i class="fas fa-handshake"></i> Партнерки</h2>
+
+                <div class="category-content">
+
+                    {% for link in categories.partner %}
+
+                    <a href="{{ link.url }}" class="link-item track-link" data-link-id="{{ link.id }}" target="_blank">
+
+                        {% include 'icon_block.html' %}
+
+                        <span class="link-title">{{ link.title }}</span>
+
+                        <i class="fas fa-arrow-right"></i>
+
+                    </a>
+
+                    {% endfor %}
+
+                </div>
+
+            </section>
+
+            {% endif %}
+
+
+            <!-- КАТЕГОРИЯ: Разное (здесь могут быть как ссылки, так и модалки) -->
+
+            {% if categories.other %}
+
+            <section class="category-card">
+
+                <h2 class="category-title"><i class="fas fa-archive"></i> Разное</h2>
+
+                <div class="category-content">
+
+                    {% for link in categories.other %}
+
+
+                    <!-- ИСПРАВЛЕНИЕ: Добавляем 'crypto' в список типов для модальных окон -->
+
+                    {% if link.link_type in ['text', 'binance', 'bybit', 'okx', 'kucoin', 'gateio', 'metamask',
+                    'trustwallet', 'crypto'] %}
+
+
+                    <!-- Элемент с модальным окном (для текста и криптобирж) -->
+
+                    <div class="link-item text-item" onclick="openModal('modal_{{ link.id }}')"
+                         style="cursor: pointer;">
+
+                        <div class="link-left">
+
+                            {% include 'icon_block.html' %}
+
+                            <span class="link-title">{{ link.title }}</span>
+
+                        </div>
+
+                        <button class="details-btn">подробнее</button>
+
+                    </div>
+
+                    {% else %}
+
+                    <!-- Обычная ссылка (для всего остального) -->
+
+                    <a href="{{ link.url }}" class="link-item track-link" data-link-id="{{ link.id }}" target="_blank">
+
+                        {% include 'icon_block.html' %}
+
+                        <span class="link-title">{{ link.title }}</span>
+
+                        <i class="fas fa-arrow-right"></i>
+
+                    </a>
+
+                    {% endif %}
+
+                    {% endfor %}
+
+                </div>
+
+            </section>
+
+            {% endif %}
+
+        </div>
+
+
+        <!-- Подвал страницы -->
+
+        <div class="footer">
+
+            <p>made in BotoLinkPro</p>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- Уведомление (тост) при копировании -->
+
+<div id="toast" class="toast hidden">Скопировано!</div>
+
+
+<!-- ========== ПОДКЛЮЧЕНИЕ МОДАЛЬНЫХ ОКОН ========== -->
+{% include '11den/11den_modal.html' %}      <!-- для крипты -->
+{% include '11den/11den_modal_bank.html' %}  <!-- для банков (Revolut, Wise, IBAN) -->
+{% include '11den/11den_modal_usa.html' %}   <!-- для американских карт -->
+
+
+<!-- ДОПОЛНИТЕЛЬНАЯ ПРОВЕРКА: Добавим скрытый элемент для отладки (можно удалить после исправления) -->
+
+<!--
+
+{% if categories.other %}
+
+{% for link in categories.other %}
+
+{% if link.link_type == 'crypto' %}
+
+<div style="display:none;">Найдена crypto ссылка: {{ link.title }} (ID: {{ link.id }})</div>
+
+{% endif %}
+
+{% endfor %}
+
+{% endif %}
+
+-->
+
+
+</body>
+
+</html>

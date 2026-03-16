@@ -1,0 +1,473 @@
+/* D:\aRabota\TelegaBoom\030_botolinkpro\web\templates\base\base.css */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-content .link-title {
+    color: #1e293b !important;
+}
+
+
+/* Общие стили для категорий (которые мы делали) */
+.link-group {
+    margin-top: 30px;
+}
+
+.category-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #6f6db5;
+}
+
+.category-title::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, rgba(0, 0, 0, 0.1), transparent);
+}
+
+.category-title::before {
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    font-size: 14px;
+}
+
+/* Иконки категорий */
+.cat-messengers::before {
+    content: "\f086";
+}
+
+.cat-crypto::before {
+    content: "\f51e";
+}
+
+.cat-social::before {
+    content: "\f0c0";
+}
+
+.cat-transfers::before {
+    content: "\f09d";
+}
+
+.cat-shops::before {
+    content: "\f291";
+}
+
+.cat-donate::before {
+    content: "\f004";
+}
+
+/* Базовый футер */
+.footer {
+    margin-top: auto;
+    padding-top: 40px;
+    text-align: center;
+    font-size: 14px;
+}
+
+
+/* Базовые стили для модалок */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 99999;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-overlay.active {
+    display: flex !important; /* Переопределяем inline display:none */
+}
+
+.modal-content {
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 350px;
+    position: relative;
+    color: #000;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+/* Стили для закрытия */
+.close {
+    cursor: pointer;
+    font-size: 28px;
+    color: #999;
+}
+
+.close:hover {
+    color: #000;
+}
+
+
+/* D:\aRabota\TelegaBoom\030_botolinkpro\web\templates\base\base.css */
+
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 99999;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 350px;
+}
+
+.modal-content h3 {
+    margin: 0 0 15px 0;
+    font-size: 18px;
+}
+
+.modal-content p {
+    margin: 8px 0;
+    font-size: 14px;
+}
+
+.modal-content strong {
+    color: #6c757d;
+    font-weight: 600;
+}
+
+.copy-btn {
+    width: 100%;
+    background: #0070ba;
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    margin: 5px 0;
+    font-size: 14px;
+}
+
+.close-btn {
+    width: 100%;
+    background: #eee;
+    color: #333;
+    border: none;
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+
+/* ===== СТИЛИ ДЛЯ МОДАЛОК ===== */
+/* ========== МОДАЛЬНЫЕ ОКНА ========== */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.modal-overlay.active {
+    display: flex;
+    animation: fadeIn 0.3s;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 30px;
+    padding: 25px;
+    max-width: 350px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    margin: auto;
+    animation: slideUp 0.4s;
+    color: #333;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+/* Табы валют */
+.currency-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    background: #f4fffe;
+    padding: 5px;
+    border-radius: 40px;
+}
+
+.currency-tab {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 30px;
+    background: transparent;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.currency-tab.active {
+    background: #F0B90B;
+    color: black;
+}
+
+
+/* Вставь это сразу после стилей .currency-tab.active */
+
+/* Скрываем контент вкладок по умолчанию */
+.currency-tab-content {
+    display: none !important;
+}
+
+/* Показываем контент, если у него есть класс active */
+.currency-tab-content.active {
+    display: block !important;
+}
+
+/* --- Твои существующие стили пойдут дальше --- */
+
+
+/* Информационный блок */
+.info-block {
+    background: #f8fafc;
+    border-radius: 20px;
+    padding: 20px;
+    margin: 20px 0;
+    border: 1px solid #eef2f6;
+}
+
+.info-currency {
+    color: #1a1a2e;
+    font-weight: 600;
+    font-size: 1rem;
+    margin-bottom: 12px;
+}
+
+.info-address {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: white;
+    padding: 12px 15px;
+    border-radius: 12px;
+    border: 1px solid #e0e4e8;
+    margin-bottom: 12px;
+}
+
+.address-text {
+    font-family: 'Monaco', 'Menlo', monospace;
+    font-size: 0.9rem;
+    color: #2d3748;
+    word-break: break-all;
+    flex: 1;
+    margin-right: 10px;
+}
+
+/* Кнопка копирования */
+.copy-btn-press {
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.1s ease;
+}
+
+.copy-btn-press:active {
+    transform: scale(0.85);
+}
+
+/* D:\aRabota\TelegaBoom\030_botolinkpro\web\templates\base\base.css */
+
+.toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.85);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 50px;
+    font-size: 14px;
+    z-index: 10000;
+    transition: all 0.3s ease;
+    max-width: 90vw;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+#toast, .toast {
+    z-index: 999999 !important; /* Ставим максимально возможное число */
+}
+
+.toast.hidden {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+    pointer-events: none;
+}
+
+.toast.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.toast.success {
+    background: #10b981;
+}
+
+.toast.error {
+    background: #ef4444;
+}
+
+
+/* Эффект при наведении на кнопку копирования в модалках */
+.copy-btn-press {
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+}
+
+.copy-btn-press:hover {
+    background-color: #f0f4ff !important; /* Светло-голубой фон */
+    transform: scale(1.1); /* Легкое увеличение */
+}
+
+.copy-btn-press:hover svg path {
+    fill: #2557d6; /* Цвет иконки становится насыщеннее */
+}
+
+.copy-btn-press:active {
+    transform: scale(0.95); /* Эффект нажатия */
+}
+
+
+/* Общие стили для кнопок в модалке */
+.modal-content button {
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Кнопка копирования (иконка) */
+.copy-btn-press:hover {
+    background-color: #f0f4ff !important;
+    transform: translateY(-1px);
+}
+
+.copy-btn-press:active {
+    transform: scale(0.92);
+}
+
+/* Кнопки Сохранить и Поделиться */
+.qr-action-btn {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.qr-action-btn:hover {
+    background: #f8fafc !important;
+    border-color: #cbd5e1 !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* Главная кнопка Закрыть внизу */
+.close-btn-main {
+    background: #1e293b !important; /* Глубокий темный цвет */
+    color: #ffffff !important;
+    border: none;
+    letter-spacing: 0.5px;
+}
+
+.close-btn-main:hover {
+    background: #0f172a !important;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px);
+}
+
+.close-btn-main:active {
+    transform: translateY(0);
+}
+
+/* Крестик в углу */
+.close-modal:hover {
+    color: #ef4444 !important;
+    transform: rotate(90deg);
+}
+
+
+/* D:\aRabota\TelegaBoom\030_botolinkpro\web\static\css\style.css */
+
+.qr-wrapper {
+    position: relative;
+    display: inline-block;
+    background: white;
+    padding: 10px;
+    border-radius: 16px;
+}
+
+.qr-logo-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 35px; /* Размер иконки внутри QR */
+    height: 35px;
+    background: white;
+    padding: 3px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.qr-logo-overlay img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}

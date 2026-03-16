@@ -1,0 +1,530 @@
+<!--# D:\aRabota\TelegaBoom\030_botolinkpro\web\templates\base\blocks\base_modal_bank.html-->
+
+<!-- ========== МОДАЛЬНОЕ ОКНО ДЛЯ БАНКОВСКИХ РЕКВИЗИТОВ ========== -->
+{% for link in categories.transfers %}
+{% if (link.link_type in ['revolut', 'wise', 'swift', 'iban', 'ach_usa', 'wire_usa', 'non_res_vietnam'] or
+link.link_type.startswith('iban_') or
+link.link_type.startswith('account_') or
+link.link_type.startswith('card_usa')) and link.pay_details %}
+
+{% set details = link.pay_details %}
+{% set username = details.login or details.username or link.url.split('/')[-1] %}
+
+<div id="modal_{{ link.id }}" class="modal-overlay">
+    <div class="modal-content"
+         style="max-width:340px; width:90%; max-height:80vh; overflow-y:auto; padding:16px; background:#ffffff; border-radius:0; box-shadow:0 10px 40px rgba(0,0,0,0.2);">
+
+        <!-- Шапка с логотипом и названием -->
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+            {% include 'icon_block.html' %}
+            <span style="font-size:1.2rem; font-weight:600; color:#1a1a1a;">{{ link.title }}</span>
+        </div>
+
+        <!-- QR-код (для всех кроме счета нерезидента) -->
+        {% if link.link_type != 'non_res_vietnam' %}
+        <div style="text-align:center; margin:8px 0; min-height:120px;">
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data={{ link.url }}"
+                 alt="QR Code"
+                 style="width:120px; height:120px; border-radius:0; margin:0 auto; display:block; background:white; padding:8px; border:1px solid #e0e0e0;">
+        </div>
+        {% endif %}
+
+        <!-- Кнопки под QR-кодом (для всех кроме счета нерезидента) -->
+        {% if link.link_type != 'non_res_vietnam' %}
+        <div style="display:flex; gap:8px; justify-content:center; margin:8px 0; min-height:32px;">
+            <button onclick="saveQR('https://api.qrserver.com/v1/create-qr-code/?size=120x120&data={{ link.url }}')"
+                    style="background:#0070ba; border:none; color:white; padding:6px 12px; border-radius:0; font-size:0.75rem; display:flex; align-items:center; gap:4px; cursor:pointer; transition:all 0.1s ease;"
+                    onmousedown="this.style.transform='scale(0.95)'"
+                    onmouseup="this.style.transform='scale(1)'"
+                    onmouseleave="this.style.transform='scale(1)'">
+                💾 Сохранить
+            </button>
+            <button onclick="shareQR('https://api.qrserver.com/v1/create-qr-code/?size=120x120&data={{ link.url }}', '{{ link.title }}')"
+                    style="background:#0070ba; border:none; color:white; padding:6px 12px; border-radius:0; font-size:0.75rem; display:flex; align-items:center; gap:4px; cursor:pointer; transition:all 0.1s ease;"
+                    onmousedown="this.style.transform='scale(0.95)'"
+                    onmouseup="this.style.transform='scale(1)'"
+                    onmouseleave="this.style.transform='scale(1)'">
+                📤 Поделиться
+            </button>
+        </div>
+        {% endif %}
+
+        <!-- Username отдельно и по центру (ТОЛЬКО для Revolut/Wise) -->
+        {% if username and link.link_type in ['revolut', 'wise'] %}
+        <div style="text-align:center; margin-bottom:12px;">
+            <div style="background:#f5f5f5; border-radius:0; padding:6px 12px; display:inline-flex; align-items:center; gap:8px;">
+                <span style="font-size:0.8rem; color:#0070ba; font-weight:500;">@{{ username }}</span>
+                <button onclick="copyText('{{ username }}')"
+                        style="background:none; border:none; color:#666; cursor:pointer; font-size:1rem; transition:all 0.1s ease;"
+                        onmousedown="this.style.transform='scale(0.85)'"
+                        onmouseup="this.style.transform='scale(1)'"
+                        onmouseleave="this.style.transform='scale(1)'">
+                    ⧉
+                </button>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Блок с реквизитами -->
+        <div style="background:#f8f9fa; border-radius:0; padding:12px; margin-bottom:12px; border:1px solid #e9ecef;">
+
+            <!-- Для IBAN и банковских счетов -->
+            {% if link.link_type == 'iban' or link.link_type.startswith('iban_') %}
+            <div style="font-weight:600; color:#003366; margin-bottom:8px; font-size:0.9rem;">💶 Euro (SEPA)</div>
+
+            <!-- Beneficiary / Получатель -->
+            {% if details.beneficiary and details.beneficiary != 'null' %}
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <span style="color:#6c757d; font-size:0.7rem; width:90px;">Получатель:</span>
+                <div style="display:flex; align-items:center; gap:6px; flex:1; justify-content:flex-end;">
+                    <span style="font-size:0.75rem; color:#003366;">{{ details.beneficiary }}</span>
+                    <button onclick="copyText('{{ details.beneficiary }}')"
+                            style="background:none; border:none; color:#003366; cursor:pointer; font-size:0.9rem; transition:all 0.1s ease;"
+                            onmousedown="this.style.transform='scale(0.85)'"
+                            onmouseup="this.style.transform='scale(1)'"
+                            onmouseleave="this.style.transform='scale(1)'">
+                        ⧉
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- IBAN -->
+            {% if details.iban and details.iban != 'null' %}
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <span style="color:#6c757d; font-size:0.7rem; width:90px;">IBAN:</span>
+                <div style="display:flex; align-items:center; gap:6px; flex:1; justify-content:flex-end;">
+                    <span style="font-size:0.7rem; color:#003366;">{{ details.iban }}</span>
+                    <button onclick="copyText('{{ details.iban }}')"
+                            style="background:none; border:none; color:#003366; cursor:pointer; font-size:0.9rem; transition:all 0.1s ease;"
+                            onmousedown="this.style.transform='scale(0.85)'"
+                            onmouseup="this.style.transform='scale(1)'"
+                            onmouseleave="this.style.transform='scale(1)'">
+                        ⧉
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- BIC/SWIFT -->
+            {% if details.bic and details.bic != 'null' %}
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <span style="color:#6c757d; font-size:0.7rem; width:90px;">BIC:</span>
+                <div style="display:flex; align-items:center; gap:6px; flex:1; justify-content:flex-end;">
+                    <span style="font-size:0.7rem; color:#003366;">{{ details.bic }}</span>
+                    <button onclick="copyText('{{ details.bic }}')"
+                            style="background:none; border:none; color:#003366; cursor:pointer; font-size:0.9rem; transition:all 0.1s ease;"
+                            onmousedown="this.style.transform='scale(0.85)'"
+                            onmouseup="this.style.transform='scale(1)'"
+                            onmouseleave="this.style.transform='scale(1)'">
+                        ⧉
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Для ACH USA -->
+            {% elif link.link_type == 'ach_usa' %}
+            <div style="font-weight:600; color:#003366; margin-bottom:8px; font-size:0.9rem;">🇺🇸 ACH Transfer</div>
+
+            <!-- Банк -->
+            {% if details.bank_name and details.bank_name != 'null' %}
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <span style="color:#6c757d; font-size:0.7rem; width:90px;">Банк:</span>
+                <div style="display:flex; align-items:center; gap:6px; flex:1; justify-content:flex-end;">
+                    <span style="font-size:0.75rem; color:#003366;">{{ details.bank_name }}</span>
+                    <button onclick="copyText('{{ details.bank_name }}')"
+                            style="background:none; border:none; color:#003366; cursor:pointer; font-size:0.9rem; transition:all 0.1s ease;"
+                            onmousedown="this.style.transform='scale(0.85)'"
+                            onmouseup="this.style.transform='scale(1)'"
+                            onmouseleave="this.style.transform='scale(1)'">
+                        ⧉
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Routing Number -->
+            {% if details.routing and details.routing != 'null' %}
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <span style="color:#6c757d; font-size:0.7rem; width:90px;">Routing:</span>
+                <div style="display:flex; align-items:center; gap:6px; flex:1; justify-content:flex-end;">
+                    <span style="font-size:0.7rem; color:#003366;">{{ details.routing }}</span>
+                    <button onclick="copyText('{{ details.routing }}')"
+                            style="background:none; border:none; color:#003366; cursor:pointer; font-size:0.9rem; transition:all 0.1s ease;"
+                            onmousedown="this.style.transform='scale(0.85)'"
+                            onmouseup="this.style.transform='scale(1)'"
+                            onmouseleave="this.style.transform='scale(1)'">
+                        ⧉
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Account Number -->
+            {% if details.account and details.account != 'null' %}
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <span style="color:#6c757d; font-size:0.7rem; width:90px;">Account:</span>
+                <div style="display:flex; align-items:center; gap:6px; flex:1; justify-content:flex-end;">
+                    <span style="font-size:0.7rem; color:#003366;">{{ details.account }}</span>
+                    <button onclick="copyText('{{ details.account }}')"
+                            style="background:none; border:none; color:#003366; cursor:pointer; font-size:0.9rem; transition:all 0.1s ease;"
+                            onmousedown="this.style.transform='scale(0.85)'"
+                            onmouseup="this.style.transform='scale(1)'"
+                            onmouseleave="this.style.transform='scale(1)'">
+                        ⧉
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Beneficiary -->
+            {% if details.beneficiary and details.beneficiary != 'null' %}
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <span style="color:#6c757d; font-size:0.7rem; width:90px;">Получатель:</span>
+                <div style="display:flex; align-items:center; gap:6px; flex:1; justify-content:flex-end;">
+                    <span style="font-size:0.75rem; color:#003366;">{{ details.beneficiary }}</span>
+                    <button onclick="copyText('{{ details.beneficiary }}')"
+                            style="background:none; border:none; color:#003366; cursor:pointer; font-size:0.9rem; transition:all 0.1s ease;"
+                            onmousedown="this.style.transform='scale(0.85)'"
+                            onmouseup="this.style.transform='scale(1)'"
+                            onmouseleave="this.style.transform='scale(1)'">
+                        ⧉
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Для WIRE USA -->
+            {% elif link.link_type == 'wire_usa' %}
+            <div style="font-weight:600; color:#003366; margin-bottom:8px; font-size:0.9rem;">🇺🇸 Wire Transfer</div>
+
+            <!-- Банк -->
+            {% if details.bank_name and details.bank_name != 'null' %}
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <span style="color:#6c757d; font-size:0.7rem; width:90px;">Банк:</span>
+                <div style="display:flex; align-items:center; gap:6px; flex:1; justify-content:flex-end;">
+                    <span style="font-size:0.75rem; color:#003366;">{{ details.bank_name }}</span>
+                    <button onclick="copyText('{{ details.bank_name }}')"
+                            style="background:none; border:none; color:#003366; cursor:pointer; font-size:0.9rem; transition:all 0.1s ease;"
+                            onmousedown="this.style.transform='scale(0.85)'"
+                            onmouseup="this.style.transform='scale(1)'"
+                            onmouseleave="this.style.transform='scale(1)'">
+                        ⧉
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- SWIFT -->
+            {% if details.swift and details.swift != 'null' %}
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <span style="color:#6c757d; font-size:0.7rem; width:90px;">SWIFT:</span>
+                <div style="display:flex; align-items:center; gap:6px; flex:1; justify-content:flex-end;">
+                    <span style="font-size:0.7rem; color:#003366;">{{ details.swift }}</span>
+                    <button onclick="copyText('{{ details.swift }}')"
+                            style="background:none; border:none; color:#003366; cursor:pointer; font-size:0.9rem; transition:all 0.1s ease;"
+                            onmousedown="this.style.transform='scale(0.85)'"
+                            onmouseup="this.style.transform='scale(1)'"
+                            onmouseleave="this.style.transform='scale(1)'">
+                        ⧉
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Account Number -->
+            {% if details.account and details.account != 'null' %}
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <span style="color:#6c757d; font-size:0.7rem; width:90px;">Account:</span>
+                <div style="display:flex; align-items:center; gap:6px; flex:1; justify-content:flex-end;">
+                    <span style="font-size:0.7rem; color:#003366;">{{ details.account }}</span>
+                    <button onclick="copyText('{{ details.account }}')"
+                            style="background:none; border:none; color:#003366; cursor:pointer; font-size:0.9rem; transition:all 0.1s ease;"
+                            onmousedown="this.style.transform='scale(0.85)'"
+                            onmouseup="this.style.transform='scale(1)'"
+                            onmouseleave="this.style.transform='scale(1)'">
+                        ⧉
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Beneficiary -->
+            {% if details.beneficiary and details.beneficiary != 'null' %}
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <span style="color:#6c757d; font-size:0.7rem; width:90px;">Получатель:</span>
+                <div style="display:flex; align-items:center; gap:6px; flex:1; justify-content:flex-end;">
+                    <span style="font-size:0.75rem; color:#003366;">{{ details.beneficiary }}</span>
+                    <button onclick="copyText('{{ details.beneficiary }}')"
+                            style="background:none; border:none; color:#003366; cursor:pointer; font-size:0.9rem; transition:all 0.1s ease;"
+                            onmousedown="this.style.transform='scale(0.85)'"
+                            onmouseup="this.style.transform='scale(1)'"
+                            onmouseleave="this.style.transform='scale(1)'">
+                        ⧉
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Для счетов (account_*) -->
+            {% elif link.link_type.startswith('account_') %}
+            <div style="font-weight:600; color:#003366; margin-bottom:8px; font-size:0.9rem;">🏦 Банковский счет</div>
+
+            <!-- Банк -->
+            {% if details.bank_name and details.bank_name != 'null' %}
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <span style="color:#6c757d; font-size:0.7rem; width:90px;">Банк:</span>
+                <div style="display:flex; align-items:center; gap:6px; flex:1; justify-content:flex-end;">
+                    <span style="font-size:0.75rem; color:#003366;">{{ details.bank_name }}</span>
+                    <button onclick="copyText('{{ details.bank_name }}')"
+                            style="background:none; border:none; color:#003366; cursor:pointer; font-size:0.9rem; transition:all 0.1s ease;"
+                            onmousedown="this.style.transform='scale(0.85)'"
+                            onmouseup="this.style.transform='scale(1)'"
+                            onmouseleave="this.style.transform='scale(1)'">
+                        ⧉
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Номер счета -->
+            {% if details.account and details.account != 'null' %}
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <span style="color:#6c757d; font-size:0.7rem; width:90px;">Счет:</span>
+                <div style="display:flex; align-items:center; gap:6px; flex:1; justify-content:flex-end;">
+                    <span style="font-size:0.7rem; color:#003366;">{{ details.account }}</span>
+                    <button onclick="copyText('{{ details.account }}')"
+                            style="background:none; border:none; color:#003366; cursor:pointer; font-size:0.9rem; transition:all 0.1s ease;"
+                            onmousedown="this.style.transform='scale(0.85)'"
+                            onmouseup="this.style.transform='scale(1)'"
+                            onmouseleave="this.style.transform='scale(1)'">
+                        ⧉
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- БИК / MFO и т.д. -->
+            {% if details.bic and details.bic != 'null' %}
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <span style="color:#6c757d; font-size:0.7rem; width:90px;">БИК:</span>
+                <div style="display:flex; align-items:center; gap:6px; flex:1; justify-content:flex-end;">
+                    <span style="font-size:0.7rem; color:#003366;">{{ details.bic }}</span>
+                    <button onclick="copyText('{{ details.bic }}')"
+                            style="background:none; border:none; color:#003366; cursor:pointer; font-size:0.9rem; transition:all 0.1s ease;"
+                            onmousedown="this.style.transform='scale(0.85)'"
+                            onmouseup="this.style.transform='scale(1)'"
+                            onmouseleave="this.style.transform='scale(1)'">
+                        ⧉
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Получатель -->
+            {% if details.beneficiary and details.beneficiary != 'null' %}
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <span style="color:#6c757d; font-size:0.7rem; width:90px;">Получатель:</span>
+                <div style="display:flex; align-items:center; gap:6px; flex:1; justify-content:flex-end;">
+                    <span style="font-size:0.75rem; color:#003366;">{{ details.beneficiary }}</span>
+                    <button onclick="copyText('{{ details.beneficiary }}')"
+                            style="background:none; border:none; color:#003366; cursor:pointer; font-size:0.9rem; transition:all 0.1s ease;"
+                            onmousedown="this.style.transform='scale(0.85)'"
+                            onmouseup="this.style.transform='scale(1)'"
+                            onmouseleave="this.style.transform='scale(1)'">
+                        ⧉
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- MFO для Узбекистана -->
+            {% if details.mfo and details.mfo != 'null' %}
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <span style="color:#6c757d; font-size:0.7rem; width:90px;">МФО:</span>
+                <div style="display:flex; align-items:center; gap:6px; flex:1; justify-content:flex-end;">
+                    <span style="font-size:0.7rem; color:#003366;">{{ details.mfo }}</span>
+                    <button onclick="copyText('{{ details.mfo }}')"
+                            style="background:none; border:none; color:#003366; cursor:pointer; font-size:0.9rem; transition:all 0.1s ease;"
+                            onmousedown="this.style.transform='scale(0.85)'"
+                            onmouseup="this.style.transform='scale(1)'"
+                            onmouseleave="this.style.transform='scale(1)'">
+                        ⧉
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+
+
+            <!-- Для счетов нерезидента -->
+            {% elif link.link_type == 'non_res_vietnam' %}
+
+
+            <!-- QR-код из статической папки -->
+            <div style="text-align:center; margin:15px 0 10px;">
+                <img src="/static/icons/bidv_qr.png"
+                     alt="QR Code"
+                     style="width:150px; height:180px; border-radius:8px; margin:0 auto; display:block; background:white; padding:5px; border:1px solid #e0e0e0; cursor:pointer;"
+                     onclick="openQRImageModal('/static/icons/bidv_qr.png', 'Счет нерезидента')">
+            </div>
+
+
+            <!-- Банк -->
+            {% if details.bank_name and details.bank_name != 'null' %}
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <span style="color:#6c757d; font-size:0.7rem; width:90px;">Банк:</span>
+                <div style="display:flex; align-items:center; gap:6px; flex:1; justify-content:flex-end;">
+                    <span style="font-size:0.75rem; color:#003366;">{{ details.bank_name }}</span>
+                    <button onclick="copyText('{{ details.bank_name }}')"
+                            style="background:none; border:none; color:#003366; cursor:pointer; font-size:0.9rem; transition:all 0.1s ease;"
+                            onmousedown="this.style.transform='scale(0.85)'"
+                            onmouseup="this.style.transform='scale(1)'"
+                            onmouseleave="this.style.transform='scale(1)'">
+                        ⧉
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Номер счета (account_number) -->
+            {% if details.account_number and details.account_number != 'null' %}
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <span style="color:#6c757d; font-size:0.7rem; width:90px;">Счет:</span>
+                <div style="display:flex; align-items:center; gap:6px; flex:1; justify-content:flex-end;">
+                    <span style="font-size:0.7rem; color:#003366;">{{ details.account_number }}</span>
+                    <button onclick="copyText('{{ details.account_number }}')"
+                            style="background:none; border:none; color:#003366; cursor:pointer; font-size:0.9rem; transition:all 0.1s ease;"
+                            onmousedown="this.style.transform='scale(0.85)'"
+                            onmouseup="this.style.transform='scale(1)'"
+                            onmouseleave="this.style.transform='scale(1)'">
+                        ⧉
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+
+
+            <!-- Страна -->
+            {% if details.country %}
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0px;">
+                <span style="color:#6c757d; font-size:0.7rem; width:90px;">Страна:</span>
+                <div style="display:flex; align-items:center; gap:6px; flex:1; justify-content:flex-end;">
+                    <span style="font-size:0.7rem; color:#003366;">{{ COUNTRY_NAMES[details.country] }}</span>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Для Revolut/Wise -->
+            {% else %}
+            <!-- Beneficiary -->
+            {% if details.beneficiary and details.beneficiary != 'null' %}
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <span style="color:#6c757d; font-size:0.7rem; width:90px;">Получатель:</span>
+                <div style="display:flex; align-items:center; gap:6px; flex:1; justify-content:flex-end;">
+                    <span style="font-size:0.75rem; color:#003366;">{{ details.beneficiary }}</span>
+                    <button onclick="copyText('{{ details.beneficiary }}')"
+                            style="background:none; border:none; color:#003366; cursor:pointer; font-size:0.9rem; transition:all 0.1s ease;"
+                            onmousedown="this.style.transform='scale(0.85)'"
+                            onmouseup="this.style.transform='scale(1)'"
+                            onmouseleave="this.style.transform='scale(1)'">
+                        ⧉
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- IBAN -->
+            {% if details.iban and details.iban != 'null' %}
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <span style="color:#6c757d; font-size:0.7rem; width:90px;">IBAN:</span>
+                <div style="display:flex; align-items:center; gap:6px; flex:1; justify-content:flex-end;">
+                    <span style="font-size:0.7rem; color:#003366;">{{ details.iban }}</span>
+                    <button onclick="copyText('{{ details.iban }}')"
+                            style="background:none; border:none; color:#003366; cursor:pointer; font-size:0.9rem; transition:all 0.1s ease;"
+                            onmousedown="this.style.transform='scale(0.85)'"
+                            onmouseup="this.style.transform='scale(1)'"
+                            onmouseleave="this.style.transform='scale(1)'">
+                        ⧉
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- BIC -->
+            {% if details.bic and details.bic != 'null' %}
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <span style="color:#6c757d; font-size:0.7rem; width:90px;">BIC:</span>
+                <div style="display:flex; align-items:center; gap:6px; flex:1; justify-content:flex-end;">
+                    <span style="font-size:0.7rem; color:#003366;">{{ details.bic }}</span>
+                    <button onclick="copyText('{{ details.bic }}')"
+                            style="background:none; border:none; color:#003366; cursor:pointer; font-size:0.9rem; transition:all 0.1s ease;"
+                            onmousedown="this.style.transform='scale(0.85)'"
+                            onmouseup="this.style.transform='scale(1)'"
+                            onmouseleave="this.style.transform='scale(1)'">
+                        ⧉
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+            {% endif %}
+
+            <!-- Correspondent (для всех где есть) -->
+            {% if details.correspondent and details.correspondent != 'null' and details.correspondent != '' %}
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <span style="color:#6c757d; font-size:0.7rem; width:90px;">Корреспондент:</span>
+                <div style="display:flex; align-items:center; gap:6px; flex:1; justify-content:flex-end;">
+                    <span style="font-size:0.7rem; color:#003366;">{{ details.correspondent }}</span>
+                    <button onclick="copyText('{{ details.correspondent }}')"
+                            style="background:none; border:none; color:#003366; cursor:pointer; font-size:0.9rem; transition:all 0.1s ease;"
+                            onmousedown="this.style.transform='scale(0.85)'"
+                            onmouseup="this.style.transform='scale(1)'"
+                            onmouseleave="this.style.transform='scale(1)'">
+                        ⧉
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Адрес -->
+            {% if details.address and details.address != 'null' and details.address|trim != '' %}
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <span style="color:#6c757d; font-size:0.7rem; width:90px;">Адрес:</span>
+                <div style="display:flex; align-items:center; gap:6px; flex:1; justify-content:flex-end;">
+                    <span style="font-size:0.7rem; color:#003366;">{{ details.address }}</span>
+                    <button onclick="copyText('{{ details.address }}')"
+                            style="background:none; border:none; color:#003366; cursor:pointer; font-size:0.9rem; transition:all 0.1s ease;"
+                            onmousedown="this.style.transform='scale(0.85)'"
+                            onmouseup="this.style.transform='scale(1)'"
+                            onmouseleave="this.style.transform='scale(1)'">
+                        ⧉
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+
+
+        </div>
+
+        <!-- Кнопка копировать всё -->
+        <button onclick="copyAllBankDetails('{{ link.id }}')"
+                style="width:100%; background:#0070ba; border:none; color:white; padding:10px; border-radius:0; font-size:0.85rem; font-weight:600; cursor:pointer; margin-bottom:8px; display:flex; align-items:center; justify-content:center; gap:6px; transition:all 0.1s ease;"
+                onmousedown="this.style.transform='scale(0.97)'"
+                onmouseup="this.style.transform='scale(1)'"
+                onmouseleave="this.style.transform='scale(1)'">
+            ⧉ Копировать всё
+        </button>
+
+        <!-- Кнопка закрыть -->
+        <button onclick="closeModal('modal_{{ link.id }}')"
+                style="width:100%; background:transparent; border:1px solid #dee2e6; color:#495057; padding:8px; border-radius:0; font-size:0.8rem; cursor:pointer; transition:all 0.1s ease;"
+                onmousedown="this.style.transform='scale(0.97)'"
+                onmouseup="this.style.transform='scale(1)'"
+                onmouseleave="this.style.transform='scale(1)'">
+            Закрыть
+        </button>
+
+    </div>
+</div>
+{% endif %}
+{% endfor %}

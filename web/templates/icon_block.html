@@ -1,0 +1,10 @@
+<!-- templates/11den/icon_block.html -->
+{% if link.icon %}
+{% if link.icon.startswith('fa-') or link.icon.startswith('fab ') or link.icon.startswith('fas ') or link.icon.startswith('far ') %}
+<i class="{{ link.icon }} link-icon"></i>
+{% else %}
+<img src="/static/icons/{{ link.icon }}.png" class="link-icon custom-link-icon" alt="{{ link.title }}">
+{% endif %}
+{% else %}
+<i class="fas fa-link link-icon"></i>
+{% endif %}

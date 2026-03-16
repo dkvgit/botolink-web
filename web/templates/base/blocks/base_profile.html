@@ -1,0 +1,13 @@
+<div class="profile">
+    <div class="avatar">
+        {% if page.avatar_path %}
+        <img src="{{ page.avatar_path }}" class="avatar-img" alt="avatar">
+        {% else %}
+        <i class="fas fa-user-astronaut"></i>
+        {% endif %}
+    </div>
+    <h1 class="username">@{{ page.username }}</h1>
+    {% if page.description %}
+    <p class="description">{{ page.description }}</p>
+    {% endif %}
+</div>

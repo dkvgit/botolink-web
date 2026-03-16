@@ -1,0 +1,82 @@
+<!--D:\aRabota\TelegaBoom\030_botolinkpro\web\templates\base\blocks\base_links.html-->
+
+<div class="links-container">
+    {# Подготавливаем список: объединяем биржи (stocks) и крипту в одну группу #}
+    {% set processed_links = [] %}
+    {% for l in links %}
+    {# Если это биржа (stocks) или крипта — пихаем в общую категорию crypto для отображения #}
+    {% if l.category == 'stocks' or l.category == 'exchanges' or l.category == 'crypto' or l.link_type == 'binance' %}
+    {% set _ = l.update({'temp_category': 'crypto'}) %}
+    {% else %}
+    {% set _ = l.update({'temp_category': l.category or 'other'}) %}
+    {% endif %}
+    {% set _ = processed_links.append(l) %}
+    {% endfor %}
+
+    {# Группируем по нашему временному полю temp_category #}
+    {% for category, group in processed_links|groupby('temp_category') %}
+    <div class="link-group" data-category="{{ category }}">
+        {% if category != 'other' %}
+        <h3 class="category-title cat-{{ category }}">
+                    <span>
+                    {% if category == 'crypto' %}Криптовалюта
+                    {% elif category == 'messengers' %}Мессенджеры
+                    {% elif category == 'social' %}Соцсети
+                    {% elif category == 'transfers' %}Переводы
+                    {% elif category == 'shops' %}Магазины
+                    {% elif category == 'donate' %}Донаты
+                    {% else %}{{ category | capitalize }}
+                    {% endif %}
+                    </span>
+        </h3>
+        {% endif %}
+
+        <div class="category-links">
+            {% for link in group %}
+            {# Проверяем, должна ли ссылка открывать модалку вместо перехода #}
+            {# Добавляем проверку на url == '#modal', чтобы точно работало для бирж #}
+            {% set is_modal_type = (category == 'crypto' or link.url == '#modal' or category == 'transfers' or
+            link.link_type in ['revolut', 'wise', 'sber', 'iban']) %}
+
+            <a href="{{ link.url if not is_modal_type else 'javascript:void(0)' }}"
+               class="link-card track-link"
+               data-link-id="{{ link.id }}"
+               {% if is_modal_type %}
+               onclick="openModal(event, '{{ link.id }}')"
+               {% else %}
+               target="_blank"
+               {% endif %}>
+                <div class="link-icon">
+                    {%- set icon_name = link.icon or link.link_type -%}
+                    {%- if icon_name -%}
+                    <img src="/static/icons/{{ icon_name }}.png" class="main-icon-img"
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"
+                         alt="icon">
+                    <i class="{{ link.icon_class or 'fas fa-link' }}" style="display: none;"></i>
+                    {%- else -%}
+                    <i class="{{ link.icon_class or 'fas fa-link' }}"></i>
+                    {%- endif -%}
+                </div>
+
+                <span class="link-title">
+                            {{ link.title }}
+                            {# Теперь проверяем оригинальную категорию или url для подписи #}
+                            {% if category == 'crypto' %}
+                                <small style="opacity: 0.6; font-size: 0.8em; margin-left: 5px;">
+                                    {# Если в базе категория stocks или url ведет в модалку — это Биржа #}
+                                    {% if link.category == 'stocks' or link.category == 'exchanges' or link.url == '#modal' or link.is_exchange %}
+                                        (Биржа)
+                                    {% else %}
+                                        (Кошелек)
+                                    {% endif %}
+                                </small>
+                            {% endif %}
+                        </span>
+
+                <i class="fas fa-chevron-right arrow-icon"></i>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+</div>

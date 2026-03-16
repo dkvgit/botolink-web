@@ -1,0 +1,170 @@
+/* web/templates/06deepspace/06deepspace_style.css */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+
+body {
+    font-family: 'Orbitron', sans-serif !important;
+    background: #0B0C10 !important;
+    color: #FFFFFF !important;
+    margin: 0;
+    padding: 40px 0; /* Отступы для прокрутки */
+    display: block !important; /* Лечим скролл */
+    min-height: 100vh;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+}
+
+/* Фон космоса */
+.stars, .twinkling {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    z-index: -2;
+}
+.stars { background: #000 url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMiIgaGVpZ2h0PSIyIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxjaXJjbGUgY3g9IjEiIGN5PSIxIiByPSIxIiBmaWxsPSJ3aGl0ZSIvPjwvc3ZnPg==') repeat; }
+.twinkling {
+    background: transparent url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNCIgaGVpZ2h0PSI0IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxjaXJjbGUgY3g9IjIiIGN5PSIyIiByPSIxIiBmaWxsPSJ3aGl0ZSIvPjwvc3ZnPg==') repeat;
+    animation: twinkling 10s linear infinite;
+    opacity: 0.3;
+}
+@keyframes twinkling { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.6; } }
+
+/* Планеты */
+.planet { position: fixed; border-radius: 50%; z-index: -1; opacity: 0.4; }
+.planet-1 { width: 150px; height: 150px; top: 5%; left: 5%; background: radial-gradient(circle at 30% 30%, #4a90e2, #1a4a8a); box-shadow: 0 0 30px #4a90e2; }
+.planet-2 { width: 250px; height: 250px; bottom: 5%; right: 5%; background: radial-gradient(circle at 70% 70%, #e25555, #8a1a1a); box-shadow: 0 0 40px #e25555; }
+
+/* КОНТЕЙНЕР */
+.container {
+    max-width: 600px !important;
+    width: 92% !important;
+    background: rgba(11, 12, 16, 0.8) !important;
+    backdrop-filter: blur(15px) !important;
+    -webkit-backdrop-filter: blur(15px) !important;
+    border: 1px solid rgba(74, 144, 226, 0.2) !important;
+    border-radius: 30px !important;
+    padding: 40px 25px !important;
+    margin: 0 auto !important;
+    box-shadow: 0 0 50px rgba(0,0,0,0.8) !important;
+    position: relative;
+    z-index: 10;
+}
+
+/* ПРОФИЛЬ */
+.profile { text-align: center !important; margin-bottom: 35px !important; }
+.avatar {
+    width: 100px !important;
+    height: 100px !important;
+    margin: 0 auto 15px !important;
+    border-radius: 50% !important;
+    border: 2px solid #4a90e2 !important;
+    overflow: hidden !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: #000 !important;
+    box-shadow: 0 0 20px rgba(74, 144, 226, 0.4);
+}
+.avatar-img { width: 100% !important; height: 100% !important; object-fit: cover !important; }
+.username {
+    font-size: 26px !important;
+    letter-spacing: 3px !important;
+    color: #fff !important;
+    text-shadow: 0 0 15px #4a90e2 !important;
+    margin: 0 !important;
+    font-weight: 900 !important;
+}
+
+/* --- КАТЕГОРИИ С КОСМИЧЕСКИМИ ЛИНИЯМИ --- */
+.category-title {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 20px !important;
+    color: #4a90e2 !important; /* Яркий синий космос */
+    font-size: 12px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 5px !important;
+    margin: 40px 0 20px 0 !important;
+    font-weight: 700 !important;
+    text-shadow: 0 0 10px rgba(74, 144, 226, 0.5) !important;
+}
+
+/* Тонкие квантовые линии */
+.category-title::before,
+.category-title::after {
+    content: "" !important;
+    flex: 1 !important;
+    height: 1px !important;
+    /* Градиент в цвет плазмы */
+    background: linear-gradient(90deg, transparent, rgba(74, 144, 226, 0.4), transparent) !important;
+}
+
+/* ГРУППЫ ССЫЛОК */
+.category-links { display: flex !important; flex-direction: column !important; gap: 12px !important; }
+
+/* КАРТОЧКА ССЫЛКИ */
+.link-card {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(74, 144, 226, 0.1) !important;
+    border-radius: 15px !important;
+    padding: 14px 20px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 15px !important;
+    text-decoration: none !important;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+}
+.link-card:hover {
+    background: rgba(74, 144, 226, 0.1) !important;
+    border-color: #4a90e2 !important;
+    transform: scale(1.02) translateX(5px) !important;
+    box-shadow: 0 0 20px rgba(74, 144, 226, 0.2) !important;
+}
+
+/* ИКОНКИ */
+.link-icon {
+    width: 42px !important;
+    height: 42px !important;
+    min-width: 42px !important;
+    /*background: rgba(74, 144, 226, 0.1) !important;*/
+    border: 1px solid rgba(74, 144, 226, 0.2) !important;
+    border-radius: 10px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+.link-icon img { width: 100% !important; height: 100% !important; object-fit: contain !important; }
+.link-icon i { font-size: 20px !important; color: #4a90e2 !important; }
+
+.link-title {
+    flex: 1 !important;
+    color: #fff !important;
+    font-size: 15px !important;
+    font-weight: 400 !important;
+    letter-spacing: 1px !important;
+}
+.link-title small { display: block !important; opacity: 0.5; font-size: 11px !important; margin-top: 3px; }
+
+/* СТРЕЛКА */
+.arrow-icon {
+    color: rgba(74, 144, 226, 0.3) !important;
+    font-size: 14px !important;
+}
+
+/* ФУТЕР */
+.footer {
+    margin-top: 50px !important;
+    text-align: center !important;
+}
+.views {
+    color: #4a90e2 !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    background: rgba(74, 144, 226, 0.1);
+    padding: 6px 16px;
+    border-radius: 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+.brand { color: #444 !important; font-size: 10px !important; text-transform: uppercase !important; letter-spacing: 4px !important; }

@@ -1,0 +1,367 @@
+<!-- КАТЕГОРИЯ: Соцсети -->
+{% if categories.social %}
+<section class="category-card">
+    <h2 class="category-title"><i class="fas fa-hashtag"></i> Соцсети</h2>
+    <div class="category-content social-layout">
+        {% for link in categories.social %}
+        <!-- Соцсеть -->
+        <div class="link-item">
+            <div class="item-info-stack">
+
+                <!-- СВЕРХУ: Название соцсети + иконка -->
+                <div class="flex-row">
+                    <!-- Иконка соцсети -->
+                    {% if link.link_type == 'youtube' %}
+                    <img src="/static/icons/youtube.png" class="link-icon custom-link-icon" alt="YouTube">
+                    {% elif link.link_type == 'tiktok' %}
+                    <img src="/static/icons/tiktok.png" class="link-icon custom-link-icon" alt="TikTok">
+                    {% elif link.link_type == 'vk' %}
+                    <img src="/static/icons/vk.png" class="link-icon custom-link-icon" alt="VK">
+                    {% elif link.link_type == 'instagram' %}
+                    <img src="/static/icons/instagram.png" class="link-icon custom-link-icon" alt="Instagram">
+                    {% elif link.link_type == 'ok' %}
+                    <img src="/static/icons/ok.png" class="link-icon custom-link-icon" alt="Одноклассники">
+                    {% elif link.link_type == 'facebook' %}
+                    <img src="/static/icons/facebook.png" class="link-icon custom-link-icon" alt="Facebook">
+                    {% elif link.link_type == 'twitter' %}
+                    <img src="/static/icons/twitter.png" class="link-icon custom-link-icon" alt="Twitter">
+                    {% elif link.link_type == 'twitch' %}
+                    <img src="/static/icons/twitch.png" class="link-icon custom-link-icon" alt="Twitch">
+                    {% elif link.link_type == 'rutube' %}
+                    <img src="/static/icons/rutube.png" class="link-icon custom-link-icon" alt="Rutube">
+                    {% elif link.link_type == 'dzen' %}
+                    <img src="/static/icons/dzen.png" class="link-icon custom-link-icon" alt="Дзен">
+                    {% elif link.link_type == 'snapchat' %}
+                    <img src="/static/icons/snapchat.png" class="link-icon custom-link-icon" alt="Snapchat">
+                    {% elif link.link_type == 'likee' %}
+                    <img src="/static/icons/likee.png" class="link-icon custom-link-icon" alt="Likee">
+                    {% elif link.link_type == 'threads' %}
+                    <img src="/static/icons/threads.png" class="link-icon custom-link-icon" alt="Threads">
+                    {% elif link.link_type == 'discord' %}
+                    <img src="/static/icons/discord.png" class="link-icon custom-link-icon" alt="Discord">
+                    {% else %}
+                    <i class="fas fa-link default-icon"></i>
+                    {% endif %}
+
+                    <span class="link-title">
+        {% if link.title and link.title != 'None' %}
+            {{ link.title }}
+
+        {% elif link.link_type == 'facebook' %}
+            {% if link.pay_details %}
+                {% if link.pay_details.group_title or link.pay_details.group_username %}
+                    Facebook Группа
+                {% elif link.pay_details.page_title or link.pay_details.page_username %}
+                    Facebook Страница
+                {% elif link.pay_details.username %}
+                    Facebook Профиль
+                {% else %}
+                    Facebook
+                {% endif %}
+            {% else %}
+                Facebook
+            {% endif %}
+        {% elif link.link_type == 'vk' %}
+            {% if link.pay_details and link.pay_details.group_id %}
+                VK Группа
+            {% elif link.pay_details and link.pay_details.public_id %}
+                VK Публичная страница
+            {% elif link.pay_details and link.pay_details.profile_id %}
+                VK Профиль
+            {% else %}
+                VK
+            {% endif %}
+        {% else %}
+            {{ link.title }}
+        {% endif %}
+    </span>
+                </div>
+
+                <!-- ПОСЕРЕДИНЕ: URL -->
+                <div class="flex-center gap-4">
+                    <!-- Обработка специальных случаев -->
+                    {% if link.link_type == 'dzen' %}
+                    {% set clean_url = link.url.replace('dzen.ru/dzen.ru/', 'dzen.ru/') %}
+                    {% set display_url = clean_url.replace('https://', '').replace('http://', '') %}
+
+                    {% elif link.link_type == 'rutube' %}
+                    {% set clean_url = link.url.replace('rutube.ru/rutube.ru/', 'rutube.ru/') %}
+                    {% set display_url = clean_url.replace('https://', '').replace('http://', '') %}
+
+                    {% elif link.link_type == 'ok' and link.pay_details and link.pay_details.profile_input %}
+                    {% if link.pay_details.profile_input.startswith(('http://', 'https://')) or 'ok.ru' in
+                    link.pay_details.profile_input %}
+                    {% set display_url = link.pay_details.profile_input.replace('https://', '').replace('http://', '')
+                    %}
+                    {% else %}
+                    {% set display_url = 'ok.ru/' + link.pay_details.profile_input %}
+                    {% endif %}
+
+                    {% elif link.link_type == 'facebook' %}
+                    {% set display_url = link.url.replace('https://', '').replace('http://', '') %}
+
+                    {% elif link.link_type == 'vk' %}
+                    {% set display_url = link.url.replace('https://', '').replace('http://', '') %}
+
+                    {% elif link.link_type == 'youtube' and link.pay_details and link.pay_details.channel_input %}
+                    {% if link.pay_details.channel_input.startswith(('http://', 'https://')) or 'youtube.com' in
+                    link.pay_details.channel_input %}
+                    {% set display_url = link.pay_details.channel_input.replace('https://', '').replace('http://', '')
+                    %}
+                    {% else %}
+                    {% set display_url = 'youtube.com/@' + link.pay_details.channel_input|replace('@', '') %}
+                    {% endif %}
+
+                    {% elif link.link_type == 'tiktok' and link.pay_details and link.pay_details.username %}
+                    {% if link.pay_details.username.startswith(('http://', 'https://')) or 'tiktok.com' in
+                    link.pay_details.username %}
+                    {% set display_url = link.pay_details.username.replace('https://', '').replace('http://', '') %}
+                    {% else %}
+                    {% set display_url = 'tiktok.com/@' + link.pay_details.username|replace('@', '') %}
+                    {% endif %}
+
+                    {% elif link.link_type == 'instagram' and link.pay_details and link.pay_details.username %}
+                    {% if link.pay_details.username.startswith(('http://', 'https://')) or 'instagram.com' in
+                    link.pay_details.username %}
+                    {% set display_url = link.pay_details.username.replace('https://', '').replace('http://', '') %}
+                    {% else %}
+                    {% set display_url = 'instagram.com/' + link.pay_details.username|replace('@', '') %}
+                    {% endif %}
+
+                    {% elif link.link_type == 'twitter' and link.pay_details and link.pay_details.username %}
+                    {% if link.pay_details.username.startswith(('http://', 'https://')) or 'twitter.com' in
+                    link.pay_details.username %}
+                    {% set display_url = link.pay_details.username.replace('https://', '').replace('http://', '') %}
+                    {% else %}
+                    {% set display_url = 'twitter.com/' + link.pay_details.username|replace('@', '') %}
+                    {% endif %}
+
+                    {% elif link.link_type == 'snapchat' and link.pay_details and link.pay_details.username %}
+                    {% set display_url = 'snapchat.com/@' + link.pay_details.username|replace('@', '') %}
+
+                    {% elif link.link_type == 'whatsapp' and link.pay_details and link.pay_details.phone_clean %}
+                    {% set display_url = 'wa.me/' + link.pay_details.phone_clean %}
+
+                    {% elif link.link_type == 'threads' and link.pay_details and link.pay_details.username %}
+                    {% if link.pay_details.username.startswith(('http://', 'https://')) or 'threads.net' in
+                    link.pay_details.username %}
+                    {% set display_url = link.pay_details.username.replace('https://', '').replace('http://', '') %}
+                    {% else %}
+                    {% set display_url = 'threads.net/@' + link.pay_details.username|replace('@', '') %}
+                    {% endif %}
+
+                    {% elif link.link_type == 'likee' and link.pay_details and link.pay_details.username %}
+                    {% if link.pay_details.username.startswith(('http://', 'https://')) or 'likee.com' in
+                    link.pay_details.username %}
+                    {% set display_url = link.pay_details.username.replace('https://', '').replace('http://', '') %}
+                    {% else %}
+                    {% set display_url = 'likee.com/@' + link.pay_details.username|replace('@', '') %}
+                    {% endif %}
+
+                    {% elif link.link_type == 'twitch' and link.pay_details and link.pay_details.username %}
+                    {% if link.pay_details.username.startswith(('http://', 'https://')) or 'twitch.tv' in
+                    link.pay_details.username %}
+                    {% set display_url = link.pay_details.username.replace('https://', '').replace('http://', '') %}
+                    {% else %}
+                    {% set display_url = 'twitch.tv/' + link.pay_details.username|replace('@', '') %}
+                    {% endif %}
+
+                    {% else %}
+                    {% set display_url = link.url.replace('https://', '').replace('http://', '') %}
+                    {% endif %}
+
+                    <span class="url-text">{{ display_url }}</span>
+                    <i class="far fa-copy action-icon" onclick="copyText('{{ link.url }}')"></i>
+                    <i class="fa-solid fa-qrcode action-icon"
+                       onclick="openQRModal('{{ link.url }}', '{{ link.title }}', 'URL')"></i>
+                </div>
+
+                <!-- СНИЗУ: Показываем данные -->
+                <div class="meta-container">
+                    <!-- Название поля -->
+                    <span class="meta-label">
+        {% if link.link_type == 'youtube' %}
+            Канал
+        {% elif link.link_type == 'facebook' %}
+            {% if link.pay_details and link.pay_details.group_title %}
+                Группа
+            {% elif link.pay_details and link.pay_details.page_title %}
+                Страница
+            {% else %}
+                Профиль
+            {% endif %}
+        {% elif link.link_type == 'vk' %}
+            {% if link.pay_details and link.pay_details.group_id %}
+                Группа
+            {% elif link.pay_details and link.pay_details.public_id %}
+                Публичная страница
+            {% elif link.pay_details and link.pay_details.profile_id %}
+                Профиль
+            {% else %}
+                ID
+            {% endif %}
+        {% elif link.link_type == 'dzen' %}
+            ID
+        {% elif link.link_type == 'rutube' %}
+            Канал
+        {% elif link.link_type == 'twitch' %}
+            Канал
+        {% elif link.link_type in ['instagram', 'tiktok', 'twitter', 'snapchat', 'likee', 'threads'] %}
+            ID
+        {% elif link.link_type == 'ok' %}
+            Профиль/Группа
+        {% else %}
+            Профиль
+        {% endif %}
+    </span>
+
+                    <!-- Значение - категории ссылки-->
+                    <span class="meta-value">
+                                    {% if link.link_type == 'telegram' %}
+                                        {% if link.pay_details and link.pay_details.username %}
+                                            {% if link.pay_details.username.startswith('@') %}
+                                                {{ link.pay_details.username }}
+                                            {% else %}
+                                                @{{ link.pay_details.username }}
+                                            {% endif %}
+                                        {% else %}
+                                            {% if link.pay_details.telegram_type == 'personal' %}
+                                                Личный аккаунт
+                                            {% elif link.pay_details.telegram_type == 'group' %}
+                                                Группа
+                                            {% elif link.pay_details.telegram_type == 'channel' %}
+                                                Канал
+                                            {% else %}
+                                                Не указано
+                                            {% endif %}
+                                        {% endif %}
+                                    {% elif link.link_type == 'facebook' %}
+                                        {% if link.pay_details %}
+                                            {% if link.pay_details.page_title %}
+                                                {{ link.pay_details.page_title }}
+                                            {% elif link.pay_details.group_title %}
+                                                {{ link.pay_details.group_title }}
+                                            {% elif link.pay_details.username %}
+                                                {% if link.pay_details.username.startswith('@') %}
+                                                    {{ link.pay_details.username }}
+                                                {% else %}
+                                                    @{{ link.pay_details.username }}
+                                                {% endif %}
+                                            {% elif link.pay_details.page_username %}
+                                                {% if link.pay_details.page_username.startswith('@') %}
+                                                    {{ link.pay_details.page_username }}
+                                                {% else %}
+                                                    @{{ link.pay_details.page_username }}
+                                                {% endif %}
+                                            {% elif link.pay_details.group_username %}
+                                                {% if link.pay_details.group_username.startswith('@') %}
+                                                    {{ link.pay_details.group_username }}
+                                                {% else %}
+                                                    @{{ link.pay_details.group_username }}
+                                                {% endif %}
+                                            {% else %}
+                                                Не указано
+                                            {% endif %}
+                                        {% else %}
+                                            Не указано
+                                        {% endif %}
+                                    {% elif link.link_type == 'vk' %}
+                                        {% if link.pay_details %}
+                                            {% if link.pay_details.profile_id %}
+                                                {{ link.pay_details.profile_id }}
+                                            {% elif link.pay_details.public_id %}
+                                                {{ link.pay_details.public_id }}
+                                            {% elif link.pay_details.group_id %}
+                                                {{ link.pay_details.group_id }}
+                                            {% else %}
+                                                Не указано
+                                            {% endif %}
+                                        {% else %}
+                                            Не указано
+                                        {% endif %}
+                                    {% elif link.link_type == 'discord' %}
+                                        {% if link.pay_details %}
+                                            {% if link.pay_details.invite_link %}
+                                                {{ link.pay_details.invite_link }}
+                                            {% elif link.pay_details.user_id %}
+                                                {{ link.pay_details.user_id }}
+                                            {% else %}
+                                                Не указано
+                                            {% endif %}
+                                        {% else %}
+                                            Не указано
+                                        {% endif %}
+                                    {% elif link.link_type == 'snapchat' and link.pay_details and link.pay_details.username %}
+                                        @{{ link.pay_details.username|replace('@', '') }}
+                                    {% elif link.link_type == 'whatsapp' and link.pay_details and link.pay_details.phone_display %}
+                                        {{ link.pay_details.phone_display }}
+                                    {% elif link.link_type == 'twitch' and link.pay_details and link.pay_details.username %}
+                                        {{ link.pay_details.username }}
+                                    {% elif link.pay_details and link.pay_details.channel_name %}
+                                        {{ link.pay_details.channel_name }}
+                                    {% elif link.pay_details and link.pay_details.username %}
+                                        {% if link.pay_details.username.startswith('@') %}
+                                            {{ link.pay_details.username }}
+                                        {% else %}
+                                            @{{ link.pay_details.username }}
+                                        {% endif %}
+                                    {% elif link.pay_details and link.pay_details.page_name %}
+                                        {{ link.pay_details.page_name }}
+                                    {% elif link.pay_details and link.pay_details.profile_input %}
+                                        {{ link.pay_details.profile_input }}
+                                    {% else %}
+                                        Не указано
+                                    {% endif %}
+                                </span>
+
+                    <!-- Кнопка копирования -->
+                    {% if link.link_type == 'facebook' and link.pay_details %}
+                    {% if link.pay_details.page_title %}
+                    <i class="far fa-copy meta-copy" onclick="copyText('{{ link.pay_details.page_title }}')"></i>
+                    {% elif link.pay_details.group_title %}
+                    <i class="far fa-copy meta-copy" onclick="copyText('{{ link.pay_details.group_title }}')"></i>
+                    {% elif link.pay_details.username %}
+                    {% set copy_value = '@' + link.pay_details.username|replace('@', '') %}
+                    <i class="far fa-copy meta-copy" onclick="copyText('{{ copy_value }}')"></i>
+                    {% elif link.pay_details.page_username %}
+                    {% set copy_value = '@' + link.pay_details.page_username|replace('@', '') %}
+                    <i class="far fa-copy meta-copy" onclick="copyText('{{ copy_value }}')"></i>
+                    {% elif link.pay_details.group_username %}
+                    {% set copy_value = '@' + link.pay_details.group_username|replace('@', '') %}
+                    <i class="far fa-copy meta-copy" onclick="copyText('{{ copy_value }}')"></i>
+                    {% endif %}
+
+                    {% elif link.link_type == 'vk' and link.pay_details %}
+                    {% if link.pay_details.profile_id %}
+                    <i class="far fa-copy meta-copy" onclick="copyText('{{ link.pay_details.profile_id }}')"></i>
+                    {% elif link.pay_details.public_id %}
+                    <i class="far fa-copy meta-copy" onclick="copyText('{{ link.pay_details.public_id }}')"></i>
+                    {% elif link.pay_details.group_id %}
+                    <i class="far fa-copy meta-copy" onclick="copyText('{{ link.pay_details.group_id }}')"></i>
+                    {% endif %}
+
+                    {% elif link.pay_details and (link.pay_details.username or link.pay_details.channel_name or
+                    link.pay_details.page_name or link.pay_details.profile_id or link.pay_details.profile_input) %}
+                    {% set copy_value = link.pay_details.username or link.pay_details.channel_name or
+                    link.pay_details.page_name or link.pay_details.profile_id or link.pay_details.profile_input %}
+                    {% if link.link_type in ['tiktok', 'youtube', 'instagram', 'snapchat', 'threads', 'likee', 'twitch']
+                    and link.pay_details.username %}
+                    {% set copy_value = '@' + link.pay_details.username|replace('@', '') %}
+                    {% endif %}
+                    <i class="far fa-copy meta-copy" onclick="copyText('{{ copy_value }}')"></i>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Кнопка перехода -->
+            <a href="/click/{{ link.id }}" target="_blank" class="details-btn full-width">
+                Перейти по ссылке<i class="fas fa-arrow-right"></i>
+            </a>
+
+
+        </div>
+
+        {% endfor %}
+    </div>
+</section>
+{% endif %}

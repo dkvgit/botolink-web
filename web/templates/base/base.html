@@ -1,0 +1,32 @@
+<!-- D:\aRabota\TelegaBoom\030_botolinkpro\web\templates\base\base.html -->
+
+<!DOCTYPE html>
+<html lang="ru">
+{# Подключаем отдельный файл с head #}
+{% include 'base/blocks/base_head.html' %}
+
+<!-- D:\aRabota\TelegaBoom\030_botolinkpro\web\templates\base\base.html -->
+
+<body>
+
+<div class="gradient-bg">
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+</div>
+
+<!-- УНИКАЛЬНЫЙ МАРКЕР: НАЧАЛО КОНТЕЙНЕРА МОДАЛОК -->
+<div id="modals-container">
+    {% include 'base/blocks/base_modal_bank.html' ignore missing %}
+    {% include 'base/blocks/base_modal_crypto.html' ignore missing %}
+    {% include 'base/blocks/base_modal_usa.html' ignore missing %}
+</div>
+<!-- УНИКАЛЬНЫЙ МАРКЕР: КОНЕЦ КОНТЕЙНЕРА МОДАЛОК -->
+
+<div id="toast" class="toast hidden"></div>
+<script src="/templates/base/base.js"></script>
+{% block extra_js %}{% endblock %}
+
+
+</body>
+</html>

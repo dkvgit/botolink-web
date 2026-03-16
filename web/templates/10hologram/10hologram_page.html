@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+{% with template_path = '10hologram/10hologram_style.css' %}
+    {% include 'base/blocks/base_head.html' %}
+{% endwith %}
+
+<body>
+<div class="aurora">
+    <div class="aurora-wave"></div>
+    <div class="aurora-wave"></div>
+    <div class="aurora-wave"></div>
+    <div class="aurora-wave"></div>
+</div>
+
+<div class="stars"></div>
+<div class="shooting-stars"></div>
+
+<div class="container">
+    {# Профиль #}
+    {% include 'base/blocks/base_profile.html' %}
+
+    {# Ссылки с категориями #}
+    {% include 'base/blocks/base_links.html' %}
+
+    {# Подвал #}
+    {% include 'base/blocks/base_footer.html' %}
+</div>
+
+<script src="/templates/base/base.js"></script>
+</body>
+</html>

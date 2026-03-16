@@ -1,0 +1,233 @@
+/* web/templates/08royalgold/08royalgold_style.css */
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&display=swap');
+
+body {
+    font-family: 'Cormorant Garamond', serif !important;
+    /* Уходим от критического черного к темно-темно коричневому, чтобы убрать лаги OLED */
+    background: #1d1111 !important;
+    color: #FFD700 !important;
+    margin: 0;
+    padding: 40px 0;
+    display: block !important;
+    min-height: 100vh;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    /* Оптимизация шрифтов для мобилок */
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ФОНОВЫЕ ЭЛЕМЕНТЫ */
+.texture {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-image: repeating-linear-gradient(45deg, rgba(255, 215, 0, 0.02) 0px, rgba(255, 215, 0, 0.02) 2px, transparent 2px, transparent 10px);
+    z-index: -2;
+    pointer-events: none;
+}
+
+.sparkles {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: radial-gradient(circle at 50% 50%, rgba(255, 215, 0, 0.05) 0%, transparent 80%);
+    z-index: -1;
+    pointer-events: none;
+}
+
+.ornament {
+    position: fixed;
+    width: 300px;
+    height: 300px;
+    border: 1px solid rgba(255, 215, 0, 0.1);
+    border-radius: 50%;
+    z-index: -1;
+    pointer-events: none;
+    /* Аппаратное ускорение для анимации вращения */
+    will-change: transform;
+    backface-visibility: hidden;
+}
+.ornament-1 { top: -100px; left: -100px; border-top: 2px solid rgba(255, 215, 0, 0.2); animation: rotate 40s linear infinite; }
+.ornament-2 { bottom: -100px; right: -100px; border-bottom: 2px solid rgba(255, 215, 0, 0.2); animation: rotate 50s linear infinite reverse; }
+
+@keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+/* КОНТЕЙНЕР */
+.container {
+    max-width: 600px !important;
+    width: 92% !important;
+    margin: 0 auto !important;
+    background: rgba(29, 17, 17, 0.96) !important; /* Чуть плотнее фон */
+    border: 2px solid #FFD700 !important;
+    border-radius: 15px !important;
+    padding: 45px 25px !important;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.6) !important;
+    position: relative;
+    z-index: 10;
+    /* Убираем тяжелый блюр, если телефон подглючивает, или оптимизируем его */
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    /* Выносим на отдельный слой видеокарты */
+    transform: translateZ(0);
+    backface-visibility: hidden;
+}
+
+.container::before {
+    content: ''; position: absolute; top: 8px; left: 8px; right: 8px; bottom: 8px;
+    border: 1px solid rgba(255, 215, 0, 0.15); pointer-events: none;
+}
+
+/* ПРОФИЛЬ */
+.profile { text-align: center !important; margin-bottom: 35px !important; }
+
+.avatar {
+    width: 110px !important;
+    height: 110px !important;
+    margin: 0 auto 20px !important;
+    background: linear-gradient(135deg, #FFD700, #B8860B) !important;
+    border-radius: 50% !important;
+    padding: 4px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: 0 0 25px rgba(255, 215, 0, 0.3) !important;
+}
+
+.avatar-img {
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 50% !important;
+    object-fit: cover !important;
+    border: 2px solid #1d1111 !important;
+}
+
+.username {
+    font-size: 32px !important;
+    color: #FFD700 !important;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5) !important;
+    letter-spacing: 2px !important;
+    font-weight: 700 !important;
+}
+
+.description {
+    font-size: 16px !important;
+    color: #DAA520 !important;
+    opacity: 0.9;
+    max-width: 400px;
+    margin: 10px auto 0;
+}
+
+/* --- КАТЕГОРИИ С ЗОЛОТЫМИ ЛИНИЯМИ --- */
+.category-title {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 20px !important;
+    text-align: center !important;
+    margin: 40px 0 20px 0 !important;
+    font-size: 13px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 5px !important;
+    font-weight: 600 !important;
+    color: #FFD700 !important;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+}
+
+.category-title::before,
+.category-title::after {
+    content: "" !important;
+    flex: 1 !important;
+    height: 1px !important;
+    background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.5), transparent) !important;
+}
+
+/* ССЫЛКИ */
+.category-links { display: flex !important; flex-direction: column !important; gap: 12px !important; }
+
+.link-card {
+    background: rgba(255, 215, 0, 0.04) !important;
+    border: 1px solid rgba(255, 215, 0, 0.25) !important;
+    border-radius: 8px !important;
+    padding: 14px 20px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 15px !important;
+    text-decoration: none !important;
+    transition: transform 0.3s ease, background 0.3s ease !important;
+    /* Предотвращаем мерцание при скролле и наведении */
+    will-change: transform;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.link-card:hover {
+    background: rgba(255, 215, 0, 0.1) !important;
+    border-color: #FFD700 !important;
+    transform: translateY(-3px);
+}
+
+/* ИКОНКИ ССЫЛОК */
+.link-icon {
+    width: 46px !important;
+    height: 46px !important;
+    min-width: 46px !important;
+    background: #1d1111 !important;
+    border: 1px solid #FFD700 !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    overflow: hidden !important;
+}
+
+.link-icon img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important;
+}
+
+.link-icon i { color: #FFD700 !important; font-size: 18px !important; }
+
+.link-title {
+    flex: 1 !important;
+    color: #FFD700 !important;
+    font-size: 17px !important;
+    font-weight: 500 !important;
+    letter-spacing: 1px !important;
+}
+
+/* ГЕМ */
+.arrow-icon::before {
+    content: "\f3a5" !important;
+    font-family: "Font Awesome 6 Free" !important;
+    font-weight: 900 !important;
+    color: #DAA520 !important;
+    font-size: 14px !important;
+}
+
+/* ФУТЕР */
+.footer {
+    border-top: 1px solid rgba(255, 215, 0, 0.1) !important;
+    margin-top: 50px !important;
+    padding-top: 25px !important;
+    text-align: center !important;
+}
+
+.views {
+    color: #FFD700 !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    background: rgba(218, 165, 32, 0.15);
+    padding: 6px 18px;
+    border-radius: 30px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    margin-bottom: 15px;
+}
+
+.brand {
+    display: block;
+    color: #554422 !important;
+    letter-spacing: 5px !important;
+    font-size: 11px !important;
+    text-transform: uppercase !important;
+}

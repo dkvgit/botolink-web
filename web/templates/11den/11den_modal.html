@@ -1,0 +1,134 @@
+<!-- D:\aRabota\TelegaBoom\030_botolinkpro\web\templates\11den\base_modal_crypto.html -->
+
+<!-- Перебираем все ссылки (links), фильтруя только крипту -->
+{% for link in links if link.link_type in [
+'bybit',
+'binance',
+'okx',
+'metamask',
+'kucoin',
+'gateio',
+'sber',
+'text'
+]
+%}
+
+<!-- Модальное окно для каждой ссылки с уникальным ID на основе идентификатора ссылки -->
+<div id="modal_{{ link.id }}" class="modal-overlay">
+    <!-- Контейнер с содержимым модального окна -->
+    <div class="modal-content">
+
+        <!-- Заголовок модального окна с названием платежной системы и кнопкой закрытия -->
+        <div class="modal-header">
+            <h3>{{ link.title }}</h3>  <!-- Название платежной системы/метода -->
+            <button onclick="closeModal('modal_{{ link.id }}')" class="close-modal">&times;</button>  <!-- Кнопка закрытия -->
+        </div>
+
+        <!-- Основное содержимое модального окна -->
+        <div class="modal-body">
+            <!-- Проверяем наличие платежных реквизитов -->
+            {% if link.pay_details %}
+
+            <!-- БЛОК 1: Криптобиржи и кошельки с поддержкой нескольких валют/сетей -->
+            {% if link.link_type in ['binance', 'bybit', 'okx', 'metamask', 'kucoin', 'gateio'] %}
+
+            <!-- Табы для переключения между разными валютами/сетями -->
+            {% if link.pay_details.tabs %}
+            <div class="currency-tabs">
+                {% for tab in link.pay_details.tabs %}
+                <!-- Каждая вкладка - отдельная валюта/сеть, первая активна по умолчанию -->
+                <button class="currency-tab {% if loop.first %}active{% endif %}"
+                        onclick="switchCurrencyTab('{{ link.id }}', '{{ loop.index0 }}')">
+                    {{ tab.name }}  <!-- Название валюты/сети -->
+                </button>
+                {% endfor %}
+            </div>
+
+            <!-- Содержимое для каждой вкладки (по одной на валюту/сеть) -->
+            {% for tab in link.pay_details.tabs %}
+            <div id="currency-tab-{{ link.id }}-{{ loop.index0 }}"
+                 class="currency-tab-content {% if loop.first %}active{% endif %}">
+
+                <!-- Блок с QR-кодом для оплаты/пополнения -->
+                {% if tab.qr_code %}
+                <div class="qr-section">
+                    <img src="{{ tab.qr_code }}" class="qr-code" alt="QR">  <!-- Изображение QR-кода -->
+                    <div class="qr-actions-inline">
+                        <button onclick="saveQR('{{ tab.qr_code }}')" class="qr-mini-btn">💾 Сохранить</button>  <!-- Кнопка сохранения QR -->
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Информационный блок с реквизитами -->
+                <div class="info-block">
+                    <!-- Название валюты и сети (полное название сети или сокращенное) -->
+                    <div class="info-currency">{{ tab.name }} ({{ tab.network_full or tab.network }})</div>
+                    <!-- Блок с адресом кошелька для перевода -->
+                    <div class="info-address">
+                        <code class="address-text">{{ tab.address }}</code>  <!-- Адрес кошелька -->
+                        <!-- Кнопка копирования адреса с SVG-иконкой -->
+                        <button onclick="copyText('{{ tab.address }}')" class="copy-btn-press">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <!-- Иконка копирования (два прямоугольника) -->
+                                <path d="M19 3H9C7.89543 3 7 3.89543 7 5V7H5C3.89543 7 3 7.89543 3 9V19C3 20.1046 3.89543 21 5 21H15C16.1046 21 17 20.1046 17 19V17H19C20.1046 17 21 16.1046 21 15V5C21 3.89543 20.1046 3 19 3ZM15 19H5V9H15V19ZM19 15H17V9C17 7.89543 16.1046 7 15 7H9V5H19V15Z" fill="#3B71FE"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+
+            <!-- Альтернативный вариант для бирж без табов (просто детали) -->
+            {% elif link.pay_details.details %}
+            <div class="info-block">
+                <div class="info-currency">{{ link.title }} UID</div>  <!-- Метка с UID пользователя -->
+                <div class="info-address">
+                    <code class="address-text">{{ link.pay_details.details }}</code>  <!-- Детали (UID) -->
+                    <!-- Кнопка копирования UID -->
+                    <button onclick="copyText('{{ link.pay_details.details }}')" class="copy-btn-press">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M19 3H9C7.89543 3 7 3.89543 7 5V7H5C3.89543 7 3 7.89543 3 9V19C3 20.1046 3.89543 21 5 21H15C16.1046 21 17 20.1046 17 19V17H19C20.1046 17 21 16.1046 21 15V5C21 3.89543 20.1046 3 19 3ZM15 19H5V9H15V19ZM19 15H17V9C17 7.89543 16.1046 7 15 7H9V5H19V15Z" fill="#3B71FE"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Если нет ни табов, ни деталей -->
+            {% else %}
+            <p class="no-details">Нет данных о кошельке</p>
+            {% endif %}
+
+            <!-- БЛОК 2: Сбербанк (отображение номера карты) -->
+            {% elif link.link_type == 'sber' %}
+            <div class="info-block">
+                <div class="info-currency">Номер карты (Сбербанк)</div>  <!-- Метка для карты Сбера -->
+                <div class="info-address">
+                    <code class="address-text">{{ link.pay_details.card_number }}</code>  <!-- Номер карты -->
+                    <!-- Кнопка копирования номера карты -->
+                    <button onclick="copyText('{{ link.pay_details.card_number }}')" class="copy-btn-press">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M19 3H9C7.89543 3 7 3.89543 7 5V7H5C3.89543 7 3 7.89543 3 9V19C3 20.1046 3.89543 21 5 21H15C16.1046 21 17 20.1046 17 19V17H19C20.1046 17 21 16.1046 21 15V5C21 3.89543 20.1046 3 19 3ZM15 19H5V9H15V19ZM19 15H17V9C17 7.89543 16.1046 7 15 7H9V5H19V15Z" fill="#3B71FE"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- БЛОК 3: Текстовые реквизиты (произвольный текст) -->
+            {% elif link.link_type == 'text' %}
+            <div class="text-content">
+                {{ link.pay_details.text|safe if link.pay_details.text else '' }}  <!-- Отображаем текст с поддержкой HTML -->
+            </div>
+            {% endif %}
+
+            <!-- Если платежных реквизитов нет вообще -->
+            {% else %}
+            <p class="no-details">Реквизиты отсутствуют</p>
+            {% endif %}
+        </div>
+
+        <!-- Дополнительная кнопка закрытия внизу модального окна -->
+        <button onclick="closeModal('modal_{{ link.id }}')" class="close-btn" style="margin-top: 15px;">Закрыть</button>
+
+    </div>
+</div>
+{% endfor %}

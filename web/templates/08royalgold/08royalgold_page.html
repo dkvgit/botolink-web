@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+{% with template_path = '08royalgold/08royalgold_style.css' %}
+    {% include 'base/blocks/base_head.html' %}
+{% endwith %}
+
+
+
+
+<body>
+<div class="container">
+    {# Профиль #}
+    {% include 'base/blocks/base_profile.html' %}
+
+    {# Ссылки #}
+    {% include 'base/blocks/base_links.html' %}
+
+    {# Подвал #}
+    {% include 'base/blocks/base_footer.html' %}
+</div>
+
+{# МОДАЛКИ #}
+<div id="modals-container">
+    {% include 'base/blocks/base_modal_bank.html' ignore missing %}
+    {% include 'base/blocks/base_modal_crypto.html' ignore missing %}
+    {% include 'base/blocks/base_modal_usa.html' ignore missing %}
+</div>
+
+<div id="toast" class="toast hidden"></div>
+<script src="/templates/base/base.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,30 @@
+{% if categories.finance %}
+<section class="category-section">
+    <h2 class="category-title">Финансы и переводы</h2>
+    <div class="links-list">
+        {% for link in categories.finance %}
+        {% if 'revolut' in link.url.lower() or 'wise' in link.url.lower() %}
+        <div class="link-item modal-trigger" data-modal="modal-bank" data-title="{{ link.title }}"
+             data-url="{{ link.url }}">
+            {% include 'icon_block.html' %}
+            <span class="link-title">{{ link.title }}</span>
+            <i class="fas fa-university"></i>
+        </div>
+        {% elif 'usa' in link.url.lower() or 'zelle' in link.url.lower() %}
+        <div class="link-item modal-trigger" data-modal="modal-usa" data-title="{{ link.title }}"
+             data-url="{{ link.url }}">
+            {% include 'icon_block.html' %}
+            <span class="link-title">{{ link.title }}</span>
+            <i class="fas fa-flag-usa"></i>
+        </div>
+        {% else %}
+        <a href="{{ link.url }}" class="link-item track-link" data-link-id="{{ link.id }}" target="_blank">
+            {% include 'icon_block.html' %}
+            <span class="link-title">{{ link.title }}</span>
+            <i class="fas fa-arrow-right"></i>
+        </a>
+        {% endif %}
+        {% endfor %}
+    </div>
+</section>
+{% endif %}

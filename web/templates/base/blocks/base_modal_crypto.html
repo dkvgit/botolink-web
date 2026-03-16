@@ -1,0 +1,225 @@
+{% for link in links if link.link_type in [
+'bybit', 'binance', 'okx', 'metamask', 'kucoin', 'gateio', 'text', 'ripple', 'ton', 'tron'
+] or link.category in ['stocks', 'exchanges', 'crypto', 'banks'] or link.url == '#modal' %}
+
+<div id="modal_{{ link.id }}" class="modal-overlay">
+    <div class="modal-content" style="border-radius: 0px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);">
+
+        <div class="modal-header" style="display: flex; align-items: center; gap: 12px; margin-bottom: 24px;">
+            {%- set icon_name = link.icon or link.link_type -%}
+            {%- if icon_name -%}
+            <img src="/static/icons/{{ icon_name }}.png"
+                 style="width: 32px; height: 32px; object-fit: contain;"
+                 onerror="this.style.display='none';" alt="logo">
+            {%- endif -%}
+
+            <h3 style="margin: 0; font-size: 1.2rem; flex-grow: 1; display: flex; align-items: center; font-weight: 700; color: #1e293b;">
+                <span class="link-title">
+                    {{ link.title }}
+                    <small style="opacity: 0.5; font-size: 0.75em; margin-left: 6px; font-weight: 400;">
+                        {# Расширенная логика определения типа #}
+                        {% if link.category == 'exchanges' or link.link_type in ['binance', 'bybit', 'okx', 'kucoin', 'gateio', 'coinbase'] %}
+                            (Биржа)
+                        {% elif link.category == 'crypto' or link.link_type in ['metamask', 'trustwallet', 'tonkeeper', 'phantom', 'ledger'] %}
+                            (Кошелек)
+                        {% elif link.category == 'banks' %}
+                            (Банк)
+                        {% endif %}
+                    </small>
+                </span>
+            </h3>
+
+            <button onclick="closeModal('modal_{{ link.id }}')" class="close-modal"
+                    style="font-size: 28px; background: none; border: none; cursor: pointer; color: #94a3b8; line-height: 1; transition: all 0.3s;">
+                &times;
+            </button>
+        </div>
+
+        <div class="modal-body">
+            {% if link.pay_details %}
+
+            {% if link.pay_details.tabs %}
+            {# --- ВАРИАНТ С ТАБАМИ --- #}
+
+
+            {# {# Jinja2 логика внутри шаблона #}
+            {% for tab in link.pay_details.tabs %}
+            <div id="currency-tab-{{ link.id }}-{{ loop.index0 }}{# {% for tab in link.pay_details.tabs %} #}
+            <div id=" currency-tab-{{ link.id }}-{{ loop.index0 }}
+                 class="currency-tab-content {% if loop.first %}active{% endif %}">
+
+                {# Расширенный список сетей, чтобы не путать их с валютой #}
+                {%- set net_list = ['BEP20', 'TRC20', 'ERC20', 'MAINNET', 'SOL', 'TON', 'ARBITRUM', 'ARBITRUM ONE',
+                'POLYGON', 'BASE', 'OPTIMISM', 'ZKSYNC', 'LIGHTNING'] -%}
+
+                {# Определяем валюту: если в link_type конкретика (не crypto/text), берем её, иначе проверяем таб #}
+                {%- set clean_type = link.link_type | upper -%}
+                {%- set is_generic = clean_type in ['CRYPTO', 'TEXT', 'DEFAULT'] -%}
+
+                {%- if not is_generic -%}
+                {%- set display_currency = clean_type -%}
+                {%- else -%}
+                {%- if tab.name.upper() in net_list -%}
+                {%- set display_currency = link.title -%}
+                {%- else -%}
+                {%- set display_currency = tab.name -%}
+                {%- endif -%}
+                {%- endif -%}
+
+                {# Для иконки берем либо link_type, либо определенную валюту #}
+                {%- set current_tab_icon = (clean_type | lower) if not is_generic else (display_currency | lower) -%}
+
+                <div class="info-block"
+                     style="background: #e8fffb; border-radius: 16px; padding: 16px; border: 1px solid #f1f5f9; text-align: left; margin-bottom: 24px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 12px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">
+                        <div style="display: flex; flex-direction: column;">
+                            <span style="font-size: 10px; color: #64748b; text-transform: uppercase; font-weight: 800; letter-spacing: 0.05em;">Криптовалюта</span>
+                            <span class="info-currency" style="font-weight: 700; color: #1e293b; font-size: 15px;">{{ display_currency }}</span>
+                        </div>
+
+                        <div style="display: flex; flex-direction: column; text-align: right;">
+                            <span style="font-size: 10px; color: #64748b; text-transform: uppercase; font-weight: 800; letter-spacing: 0.05em;">Сеть</span>
+                            <span style="color: #475569; font-size: 13px; font-weight: 600;">
+                                {# Если в названии таба была сеть - выводим её, если нет - ищем в поле network #}
+                                {{ tab.network_full or tab.network or (tab.name if tab.name.upper() in net_list else 'Mainnet') }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 6px;">
+                        <span style="font-size: 10px; color: #64748b; text-transform: uppercase; font-weight: 800; letter-spacing: 0.05em;">Адрес кошелька</span>
+                        <div class="info-address"
+                             style="display: flex; align-items: center; justify-content: space-between; background: #ffffff; padding: 10px 12px; border-radius: 10px; border: 1px solid #e2e8f0;">
+                            <code class="address-text"
+                                  style="font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #0f172a; word-break: break-all; line-height: 1.4;">{{
+                                tab.address }}</code>
+                            <button onclick="copyText('{{ tab.address }}')" class="copy-btn-press"
+                                    style="background: none; border: none; cursor: pointer; padding: 6px; flex-shrink: 0;">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                     xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M19 3H9C7.89543 3 7 3.89543 7 5V7H5C3.89543 7 3 7.89543 3 9V19C3 20.1046 3.89543 21 5 21H15C16.1046 21 17 20.1046 17 19V17H19C20.1046 17 21 16.1046 21 15V5C21 3.89543 20.1046 3 19 3ZM15 19H5V9H15V19ZM19 15H17V9C17 7.89543 16.1046 7 15 7H9V5H19V15Z"
+                                          fill="#3B71FE"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="qr-section" style="text-align: center; margin-bottom: 24px;">
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 16px;">
+
+                        <p style="margin: 0; font-size: 12px; color: #64748b; font-weight: 500;">
+                            Отсканируй, чтобы быстро скопировать адрес
+                        </p>
+
+                        <div class="qr-wrapper" style="position: relative; display: inline-block;">
+                            <div id="qrcode_{{ link.id }}_{{ loop.index0 }}"
+                                 class="auto-qr"
+                                 data-address="{{ tab.address }}"
+                                 style="padding: 12px; background: white; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; display: inline-block;">
+                            </div>
+                            <div class="qr-logo-overlay"
+                                 style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 38px; height: 38px; background: white; padding: 4px; border-radius: 8px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                <img src="/static/icons/{{ current_tab_icon }}.png"
+                                     style="width: 100%; height: 100%; object-fit: contain;"
+                                     onerror="this.src='/static/icons/{{ link.icon or link.link_type }}.png';">
+                            </div>
+                        </div>
+
+                        <div style="display: flex; gap: 12px; justify-content: center; width: 100%;">
+                            <button onclick="saveQRFromContainer('qrcode_{{ link.id }}_{{ loop.index0 }}')"
+                                    class="qr-action-btn"
+                                    style="padding: 10px 16px; border-radius: 10px; color: #3b82f6; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 8px; flex: 1; justify-content: center; font-weight: 600;">
+                                <i class="fas fa-download"></i> Сохранить
+                            </button>
+                            <button onclick="shareQRFromContainer('qrcode_{{ link.id }}_{{ loop.index0 }}', '{{ link.title }}')"
+                                    class="qr-action-btn"
+                                    style="padding: 10px 16px; border-radius: 10px; color: #3b82f6; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 8px; flex: 1; justify-content: center; font-weight: 600;">
+                                <i class="fas fa-share-nodes"></i> Поделиться
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+
+            {% else %}
+            {# --- ОДИНОЧНЫЙ ВАРИАНТ --- #}
+            {% set display_value = link.pay_details.card_number or link.pay_details.address or link.url %}
+
+            {# ИНФО-БЛОК ТЕПЕРЬ ВЫШЕ #}
+            <div class="info-block"
+                 style="background: #e8fffb; border-radius: 16px; padding: 16px; border: 1px solid #f1f5f9; text-align: left; margin-bottom: 24px;">
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                            <span style="font-size: 10px; color: #64748b; text-transform: uppercase; font-weight: 800; letter-spacing: 0.05em;">
+                                {% if link.category == 'banks' %}Данные карты{% else %}Адрес / Реквизиты{% endif %}
+                            </span>
+                    <div class="info-address"
+                         style="display: flex; align-items: center; justify-content: space-between; background: #ffffff; padding: 10px 12px; border-radius: 10px; border: 1px solid #e2e8f0;">
+                        <code class="address-text"
+                              style="font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #0f172a; word-break: break-all; line-height: 1.4;">{{
+                            display_value if display_value != '#modal' else 'Данные не указаны' }}</code>
+                        <button onclick="copyText('{{ display_value }}')" class="copy-btn-press"
+                                style="background: none; border: none; cursor: pointer; padding: 6px; flex-shrink: 0;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                 xmlns="http://www.w3.org/2000/svg">
+                                <path d="M19 3H9C7.89543 3 7 3.89543 7 5V7H5C3.89543 7 3 7.89543 3 9V19C3 20.1046 3.89543 21 5 21H15C16.1046 21 17 20.1046 17 19V17H19C20.1046 17 21 16.1046 21 15V5C21 3.89543 20.1046 3 19 3ZM15 19H5V9H15V19ZM19 15H17V9C17 7.89543 16.1046 7 15 7H9V5H19V15Z"
+                                      fill="#3B71FE"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {# QR-СЕКЦИЯ ТЕПЕРЬ НИЖЕ #}
+            <div class="qr-section" style="text-align: center; margin-bottom: 24px;">
+                {# {# Блок для одиночного кошелька с пояснением перед QR #} #}
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 16px;">
+
+                    {# Пояснение перед QR-кодом #}
+                    <p style="margin: 0; font-size: 12px; color: #64748b; font-weight: 500;">
+                        Отсканируй, чтобы быстро скопировать адрес
+                    </p>
+
+                    <div class="qr-wrapper" style="position: relative; display: inline-block;">
+                        <div id="qrcode_{{ link.id }}_single"
+                             class="auto-qr"
+                             data-address="{{ display_value if display_value != '#modal' else '' }}"
+                             style="padding: 12px; background: white; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; display: inline-block;">
+                        </div>
+                        <div class="qr-logo-overlay"
+                             style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 38px; height: 38px; background: white; padding: 4px; border-radius: 8px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                            <img src="/static/icons/{{ icon_name }}.png"
+                                 style="width: 100%; height: 100%; object-fit: contain;"
+                                 onerror="this.parentElement.style.display='none';">
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 12px; justify-content: center; width: 100%;">
+                        <button onclick="saveQRFromContainer('qrcode_{{ link.id }}_single')"
+                                class="qr-action-btn"
+                                style="padding: 10px 16px; border-radius: 10px; color: #3b82f6; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 8px; flex: 1; justify-content: center; font-weight: 600;">
+                            <i class="fas fa-download"></i> Сохранить
+                        </button>
+                        <button onclick="shareQRFromContainer('qrcode_{{ link.id }}_single', '{{ link.title }}')"
+                                class="qr-action-btn"
+                                style="padding: 10px 16px; border-radius: 10px; color: #3b82f6; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 8px; flex: 1; justify-content: center; font-weight: 600;">
+                            <i class="fas fa-share-nodes"></i> Поделиться
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% else %}
+            <p class="no-details" style="text-align: center; color: #94a3b8; padding: 20px;">Данные отсутствуют</p>
+            {% endif %}
+        </div>
+
+        <button onclick="closeModal('modal_{{ link.id }}')" class="close-btn-main"
+                style="margin-top: 24px; width: 100%; padding: 14px; border-radius: 12px; cursor: pointer; font-weight: 700; font-size: 15px;">
+            Закрыть
+        </button>
+    </div>
+</div>
+{% endfor %}

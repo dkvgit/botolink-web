@@ -1,0 +1,113 @@
+<!-- D:\aRabota\TelegaBoom\030_botolinkpro\web\templates\base\blocks\base_modal_usa.html-->
+
+{% for link in links if link.link_type == 'card_usa' %}
+<div id="modal_{{ link.id }}" class="modal-overlay">
+    <div class="modal-content"
+         style="max-width:340px; width:90%; max-height:80vh; overflow-y:auto; padding:16px; background:#ffffff; border-radius:0; box-shadow:0 10px 40px rgba(0,0,0,0.2);">
+
+        <!-- Шапка с логотипом и названием -->
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+            <img src="/static/icons/usa_card.png" class="link-icon custom-link-icon" alt="USA Card"
+                 style="width:32px; height:32px;">
+            <span style="font-size:1.2rem; font-weight:600; color:#1a1a1a;">{{ link.title }}</span>
+        </div>
+
+        <!-- QR-код для номера карты -->
+        <div style="text-align:center; margin:8px 0;">
+            {% if link.pay_details and link.pay_details.card_number %}
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data={{ link.pay_details.card_number|urlencode }}"
+                 alt="QR Code"
+                 style="width:120px; height:120px; border-radius:0; margin:0 auto; display:block; background:white; padding:8px; border:1px solid #e0e0e0;">
+            {% endif %}
+        </div>
+
+        <!-- Кнопки под QR-кодом -->
+        <div style="display:flex; gap:8px; justify-content:center; margin:8px 0;">
+            {% if link.pay_details and link.pay_details.card_number %}
+            <button onclick="saveQR('https://api.qrserver.com/v1/create-qr-code/?size=120x120&data={{ link.pay_details.card_number|urlencode }}')"
+                    style="background:#0070ba; border:none; color:white; padding:6px 12px; border-radius:0; font-size:0.75rem;">
+                💾 Сохранить QR
+            </button>
+            {% endif %}
+        </div>
+
+        США -->
+        <div style="background:#f8f9fa; border-radius:0; padding:12px; margin-bottom:12px; border:1px solid #e9ecef;">
+
+            <!-- Название банка -->
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <span style="color:#6c757d; font-size:0.7rem; width:90px;">Банк:</span>
+                <div style="display:flex; align-items:center; gap:6px; flex:1; justify-content:flex-end;">
+                    <span style="font-size:0.75rem; color:#003366;">{{ link.pay_details.bank_name or 'не указано' }}</span>
+                    {% if link.pay_details.bank_name %}
+                    <button onclick="copyText('{{ link.pay_details.bank_name }}')"
+                            style="background:none; border:none; color:#003366; cursor:pointer;">⧉
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Владелец карты (card_holder) -->
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <span style="color:#6c757d; font-size:0.7rem; width:90px;">Владелец:</span>
+                <div style="display:flex; align-items:center; gap:6px; flex:1; justify-content:flex-end;">
+                    <span style="font-size:0.75rem; color:#003366;">{{ link.pay_details.card_holder or 'не указано' }}</span>
+                    {% if link.pay_details.card_holder %}
+                    <button onclick="copyText('{{ link.pay_details.card_holder }}')"
+                            style="background:none; border:none; color:#003366; cursor:pointer;">⧉
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Номер карты -->
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <span style="color:#6c757d; font-size:0.7rem; width:90px;">Номер:</span>
+                <div style="display:flex; align-items:center; gap:6px; flex:1; justify-content:flex-end;">
+                    <span style="font-size:0.7rem; color:#003366; font-weight:500;">{{ link.pay_details.card_number }}</span>
+                    {% if link.pay_details.card_number %}
+                    <button onclick="copyText('{{ link.pay_details.card_number }}')"
+                            style="background:none; border:none; color:#003366; cursor:pointer;">⧉
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- ZIP код -->
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <span style="color:#6c757d; font-size:0.7rem; width:90px;">ZIP код:</span>
+                <div style="display:flex; align-items:center; gap:6px; flex:1; justify-content:flex-end;">
+                    <span style="font-size:0.7rem; color:#003366;">{{ link.pay_details.zip or 'не указано' }}</span>
+                    {% if link.pay_details.zip %}
+                    <button onclick="copyText('{{ link.pay_details.zip }}')"
+                            style="background:none; border:none; color:#003366; cursor:pointer;">⧉
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Страна -->
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0px;">
+                <span style="color:#6c757d; font-size:0.7rem; width:90px;">Страна:</span>
+                <div style="display:flex; align-items:center; gap:6px; flex:1; justify-content:flex-end;">
+                    <span style="font-size:0.7rem; color:#003366;">{{ COUNTRY_NAMES[link.pay_details.country] if link.pay_details.country else 'USA' }}</span>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Кнопка копировать всё -->
+        <button onclick="copyAllUSACardDetails('{{ link.id }}')"
+                style="width:100%; background:#0070ba; border:none; color:white; padding:10px; border-radius:0; font-size:0.85rem; margin-bottom:8px; cursor:pointer;">
+            ⧉ Копировать все реквизиты
+        </button>
+
+        <!-- Кнопка закрыть -->
+        <button onclick="closeModal('modal_{{ link.id }}')"
+                style="width:100%; background:transparent; border:1px solid #dee2e6; color:#495057; padding:8px; border-radius:0; font-size:0.8rem; cursor:pointer;">
+            Закрыть
+        </button>
+
+    </div>
+</div>
+{% endfor %}

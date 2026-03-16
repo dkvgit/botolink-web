@@ -1,0 +1,18 @@
+<div class="link-card" id="link-{{ link.id }}">
+    <a href="/click/{{ link.id }}" target="_blank" class="link-item">
+        <div class="link-icon">
+            <img src="/static/icons/{{ link.icon }}.png"
+                 onerror="this.src='/static/icons/default_link.png'"
+                 alt="{{ link.title }}">
+        </div>
+        <div class="link-info">
+            <div class="link-title">{{ link.title }}</div>
+            {% if link.description %}
+            <div class="link-description">{{ link.description }}</div>
+            {% endif %}
+        </div>
+        <div class="link-arrow">
+            <i class="fas fa-chevron-right"></i>
+        </div>
+    </a>
+</div>

@@ -1,0 +1,32 @@
+/* Уникальный стиль 12-го шаблона */
+.gradient-bg {
+    /* Космический темно-синий градиент */
+    background: radial-gradient(circle at top right, #1e3c72, #2a5298, #000000);
+}
+
+.category-title {
+    color: #00d2ff; /* Неоновый голубой для заголовков */
+    text-shadow: 0 0 10px rgba(0, 210, 255, 0.3);
+}
+
+.link-item {
+    /* Полупрозрачные карточки в стиле Glassmorphism */
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.link-item:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.link-title {
+    color: white;
+}
+
+.fa-chevron-right {
+    color: white !important;
+}

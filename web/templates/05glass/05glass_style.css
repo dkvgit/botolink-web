@@ -1,0 +1,158 @@
+/* web/templates/05glass/05glass_style.css */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+/* ГЛОБАЛЬНЫЙ СБРОС ДЛЯ ЭТОГО ШАБЛОНА */
+body {
+    font-family: 'Poppins', sans-serif !important;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* Фон и анимированные сферы */
+.background {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    z-index: -1;
+}
+.gradient-sphere {
+    position: absolute;
+    width: 600px; height: 600px;
+    border-radius: 50%;
+    filter: blur(100px);
+    animation: float 20s ease-in-out infinite;
+}
+.gradient-sphere:nth-child(1) { top: -200px; left: -200px; background: rgba(102, 126, 234, 0.5); }
+.gradient-sphere:nth-child(2) { bottom: -200px; right: -200px; background: rgba(118, 75, 162, 0.5); animation-delay: -5s; }
+.gradient-sphere:nth-child(3) {
+    top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 800px; height: 800px; background: rgba(255, 255, 255, 0.2);
+    animation: pulse 10s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    33% { transform: translate(100px, 50px) rotate(120deg); }
+    66% { transform: translate(-50px, 100px) rotate(240deg); }
+}
+@keyframes pulse {
+    0%, 100% { opacity: 0.2; transform: translate(-50%, -50%) scale(1); }
+    50% { opacity: 0.4; transform: translate(-50%, -50%) scale(1.1); }
+}
+
+/* КОНТЕЙНЕР (СБРОС БАЗЫ) */
+.container {
+    max-width: 600px !important;
+    width: 100% !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border-radius: 30px !important;
+    padding: 40px 25px !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+    margin: 0 auto !important;
+}
+
+/* ПРОФИЛЬ */
+.avatar {
+    width: 100px !important;
+    height: 100px !important;
+    margin: 0 auto 15px !important;
+    border-radius: 25px !important;
+    border: 2px solid rgba(255,255,255,0.4) !important;
+    overflow: hidden !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: rgba(255,255,255,0.1) !important;
+}
+.avatar-img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+}
+.username { color: #fff !important; text-align: center !important; margin-bottom: 5px !important; }
+.description { color: rgba(255,255,255,0.8) !important; text-align: center !important; }
+
+/* КАТЕГОРИИ */
+.category-title {
+    color: #fff !important;
+    margin: 25px 0 10px 0 !important;
+    font-size: 14px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+}
+
+/* ССЫЛКИ (ЖЕСТКИЙ ФИКС) */
+.link-card {
+    background: rgba(255, 255, 255, 0.12) !important;
+    backdrop-filter: blur(10px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 18px !important;
+    padding: 12px 15px !important;
+    margin-bottom: 12px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    text-decoration: none !important;
+    transition: all 0.3s ease !important;
+}
+.link-card:hover {
+    background: rgba(255, 255, 255, 0.22) !important;
+    transform: translateY(-2px) !important;
+    border-color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* ИКОНКИ (ЧТОБЫ НЕ БЫЛИ ОГРОМНЫМИ) */
+.link-icon {
+    width: 42px !important;
+    height: 42px !important;
+    min-width: 42px !important;
+    background: rgba(255, 255, 255, 0.15) !important;
+    border-radius: 12px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    overflow: hidden !important;
+    position: relative !important;
+}
+.link-icon img {
+    width: 24px !important;
+    height: 24px !important;
+    object-fit: contain !important;
+}
+.link-icon i {
+    font-size: 18px !important;
+    color: #fff !important;
+}
+
+.link-title {
+    flex: 1 !important;
+    color: #fff !important;
+    font-weight: 500 !important;
+    font-size: 15px !important;
+}
+
+/* СТРЕЛКА (ЗАМЕНА ШЕВРОНА) */
+.arrow-icon::before {
+    content: "\f061" !important; /* fa-arrow-right */
+    font-family: "Font Awesome 6 Free" !important;
+    font-weight: 900 !important;
+    color: rgba(255,255,255,0.5) !important;
+    font-size: 13px !important;
+}
+.link-card:hover .arrow-icon::before {
+    color: #fff !important;
+    transform: translateX(3px) !important;
+}
+
+/* ФУТЕР */
+.footer { border: none !important; margin-top: 30px !important; }
+.brand { color: rgba(255,255,255,0.6) !important; font-size: 12px !important; }
+.views { background: transparent !important; color: rgba(255,255,255,0.4) !important; font-size: 11px !important; }

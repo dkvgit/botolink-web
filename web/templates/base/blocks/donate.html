@@ -1,0 +1,14 @@
+{% if categories.donate %}
+<section class="category-section">
+    <h2 class="category-title">Поддержать автора</h2>
+    <div class="links-list">
+        {% for link in categories.donate %}
+        <a href="{{ link.url }}" class="link-item track-link" data-link-id="{{ link.id }}" target="_blank">
+            {% include 'icon_block.html' %}
+            <span class="link-title">{{ link.title }}</span>
+            <i class="fas fa-heart"></i>
+        </a>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
