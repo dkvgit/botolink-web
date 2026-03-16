@@ -1,5 +1,10 @@
+#D:\aRabota\TelegaBoom\030_mylinkspace\web\main.py
+
+
 import mimetypes  # ← ДОБАВЬ ЭТОТ ИМПОРТ
 import os
+# Добавляем корневую директорию в sys.path, чтобы папка 'bot' была видна
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from urllib.parse import urlparse
 import asyncio
 from contextlib import asynccontextmanager
