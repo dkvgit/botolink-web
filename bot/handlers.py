@@ -270,22 +270,25 @@ logger = logging.getLogger(__name__)
 
 # bot/main.py
 
+# // bot/main.py
+
 async def start_handler(update, context):
     # # Используем # для Python комментариев
-    from bot.utils import get_or_create_user, get_db_connection, check_subscription  # # ДОБАВИЛ ИМПОРТ check_subscription
+    from bot.utils import get_or_create_user, get_db_connection, check_subscription
     from bot.avatar_handler import setup_user_avatar
     from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-    from core import config
     import logging
     import os
+    import traceback
 
     logger = logging.getLogger("BotoLinkPro")
     user = update.effective_user
     if not user:
         return
+    
+    # # Лог для проверки в панели Railway
     print(f"\n--- [DEBUG] START HANDLER запущен для юзера: {user.id} ---")
 
-    # # Флаг: было ли удалено сообщение
     was_deleted = False
 
     # # 1. Очистка старых сообщений
@@ -327,7 +330,7 @@ async def start_handler(update, context):
             page_title, db_user['id']
         )
 
-        # # Оборачиваем аватар, чтобы из-за него не падал весь старт
+        # # Аватар
         try:
             await setup_user_avatar(user.id, context.bot, conn)
             print("--- [DEBUG] 2. Аватар обработан")
@@ -353,8 +356,8 @@ async def start_handler(update, context):
             page['id']
         ) or 0
 
-        # # БЕРЕМ URL ИЗ ENV (для Railway)
-        base_url = os.getenv("APP_URL", "https://botolink-web-production.up.railway.app").rstrip('/')
+        # # БЕРЕМ URL ИЗ ENV
+        base_url = os.getenv("APP_URL", "https://botolink-web-production-b49b.up.railway.app").rstrip('/')
 
         text_msg = (
             f"👋 Привет, <b>{db_user['first_name']}</b>!\n"
@@ -380,12 +383,15 @@ async def start_handler(update, context):
             [InlineKeyboardButton("⚙️ Профиль", callback_data="profile")]
         ]
 
-        if user.id in config.ADMIN_IDS:
+        # # Проверка админа через переменную окружения
+        raw_admins = os.getenv("ADMIN_IDS", "")
+        admin_list = [a.strip() for a in raw_admins.split(',') if a.strip()]
+        if str(user.id) in admin_list:
             keyboard.append([InlineKeyboardButton("👑 АДМИН-ПАНЕЛЬ", callback_data="admin_list_users")])
 
         reply_markup = InlineKeyboardMarkup(keyboard)
 
-        # # ЛОГИКА ОТПРАВКИ
+        # # Логика отправки
         if update.callback_query and not was_deleted:
             sent_msg = await update.callback_query.edit_message_text(
                 text=text_msg, reply_markup=reply_markup, parse_mode='HTML', disable_web_page_preview=True
@@ -402,15 +408,13 @@ async def start_handler(update, context):
         print("--- [DEBUG] !!! ВСЁ ОК, СООБЩЕНИЕ ОТПРАВЛЕНО ---")
 
     except Exception as e:
-        print(f"--- [DEBUG] !!! КРИТИЧЕСКАЯ ОШИБКА: {e}")
-        import traceback
+        print(f"--- [DEBUG] !!! КРИТИЧЕСКАЯ ОШИБКА В START_HANDLER: {e}")
         traceback.print_exc()
         logger.error(f"❌ Ошибка в start_handler: {e}", exc_info=True)
     finally:
         if conn:
             await conn.close()
             print("--- [DEBUG] 8. Соединение закрыто")
-		    
 		    
 		    
 		    
