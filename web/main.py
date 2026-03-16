@@ -532,20 +532,20 @@ async def set_webhook():
         return {"status": "error", "message": f"Ошибка установки: {str(e)}"}
 
 
-# web/main.py
 
 @app.post("/webhook")
 async def telegram_webhook(request: Request):
-    # // Получаем данные от Телеграма
+    # // Читаем входящий JSON от Telegram
     data = await request.json()
+    
+    # // Превращаем его в объект Update
     update = Update.de_json(data, bot_app.bot)
     
-    # // ВОТ ТУТ ДОЛЖЕН БЫТЬ await!
-    # // Без него бот не успеет сходить в базу и отправить тебе меню.
-    await bot_app.update(update)
+    # // ИСПРАВЛЕННЫЙ МЕТОД: .process_update(update) вместо .update(update)
+    # // Это скормит сообщение твоим хендлерам в bot/main.py
+    await bot_app.process_update(update)
     
     return {"status": "ok"}
-
 
 if __name__ == "__main__":
     import uvicorn
