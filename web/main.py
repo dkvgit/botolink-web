@@ -19,7 +19,12 @@ from starlette.responses import RedirectResponse
 from fastapi import Request
 from telegram import Update
 import httpx
-from bot.main import application as ptb_application
+try:
+    from bot.main import application as ptb_application
+except ImportError as e:
+    print(f"--- КРИТИЧЕСКАЯ ОШИБКА ИМПОРТА: {e} ---")
+    # // На случай если в будущем переименуешь обратно
+    from bot.main import ptb_application
 
 
 
