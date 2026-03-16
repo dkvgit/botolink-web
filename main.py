@@ -16,6 +16,10 @@ from web.main import app as web_application
 # Импортируем твою функцию main, в которой лежат все регистрации хендлеров
 from bot.main import main as start_bot_logic
 
+# # для Python
+print(f"DEBUG: FastAPI app has lifespan: {web_application.lifespan_context is not None}")
+
+
 load_dotenv()
 
 logging.basicConfig(
