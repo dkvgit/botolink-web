@@ -3,7 +3,7 @@
 
 import mimetypes  # ← ДОБАВЬ ЭТОТ ИМПОРТ
 import os
-
+from bot.main import application as bot_app
 from urllib.parse import urlparse
 import asyncio
 from contextlib import asynccontextmanager
@@ -519,7 +519,7 @@ async def user_page(request: Request, username: str):
 @app.get("/set_webhook")
 async def set_webhook():
     import os
-    from bot.main import application as bot_app
+   
     base_url = "https://botolink-web-production.up.railway.app"
     webhook_url = f"{base_url}/webhook"
     try:
@@ -535,7 +535,7 @@ async def set_webhook():
 
 @app.post("/webhook")
 async def telegram_webhook(request: Request):
-    from bot.main import application as bot_app
+
     from telegram import Update
     import json
     print("📥 [WEBHOOK] Запрос получен от Telegram")
