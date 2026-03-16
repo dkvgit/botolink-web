@@ -3,9 +3,7 @@ import sys
 import logging
 import asyncio
 import subprocess
-import signal
 from dotenv import load_dotenv
-
 
 # Загружаем переменные окружения
 load_dotenv()
@@ -17,61 +15,59 @@ logging.basicConfig(
 )
 logger = logging.getLogger("BotoLinkPro")
 
+# Экспортируем приложение для Railway, чтобы uvicorn нашел его в этом файле
+try:
+    from web.main import app as application
+except ImportError:
+    # Если запуск идет в режиме только бота и папка web не нужна
+    application = None
+
 def run_bot():
     """Запуск Telegram бота"""
     try:
-        # Импортируем внутри функции, чтобы не грузить лишнее при запуске только WEB
+        # Динамический импорт бота
         from bot.main import main as bot_main
         logger.info("🤖 Запуск Telegram бота...")
         asyncio.run(bot_main())
     except ImportError as e:
         logger.error(f"❌ Ошибка импорта бота: {e}")
-        print("Подсказка: pip install -r requirements.txt")
     except KeyboardInterrupt:
-        logger.info("🛑 Бот остановлен пользователем")
+        logger.info("🛑 Бот остановлен")
     except Exception as e:
         logger.exception(f"❌ Критическая ошибка бота: {e}")
 
 def run_web():
-    """Запуск веб-сервера"""
+    """Запуск веб-сервера (локально)"""
     try:
         import uvicorn
-        # reload=True лучше оставить только для разработки через переменную окружения
+        # Берем порт из переменных окружения (важно для Railway) или 8000
+        port = int(os.getenv("PORT", 8000))
         is_debug = os.getenv("DEBUG", "false").lower() == "true"
 
-        logger.info(f"🌐 Запуск веб-сервера на http://127.0.0.1:8000 (Debug: {is_debug})")
-        uvicorn.run("web.main:app", host="127.0.0.1", port=8000, reload=is_debug)
-    except ImportError:
-        logger.error("❌ Ошибка: uvicorn или fastapi не установлены.")
+        logger.info(f"🌐 Запуск веб-сервера на порту {port} (Debug: {is_debug})")
+        # Обращаемся к web.main:app
+        uvicorn.run("web.main:app", host="0.0.0.0", port=port, reload=is_debug)
     except Exception as e:
         logger.exception(f"❌ Ошибка запуска веб-сервера: {e}")
 
 def run_all():
-    """Запуск и бота, и веб-сервера параллельно"""
+    """Параллельный запуск бота и веб-сервера через subprocess"""
     logger.info("🚀 Запуск всех компонентов BotoLinkPro...")
-
-    # Используем sys.executable для уверенности, что запустится тот же интерпретатор
-    # Используем sys.argv[0], чтобы запустить этот же файл
+    
+    # Запускаем этот же файл с аргументом 'bot'
     bot_process = subprocess.Popen([sys.executable, sys.argv[0], "bot"])
 
     try:
-        # Веб-сервер запускаем в основном потоке
         run_web()
     except KeyboardInterrupt:
-        logger.info("🛑 Получен сигнал остановки...")
+        logger.info("🛑 Остановка...")
     finally:
-        logger.info("⏳ Завершение работы дочерних процессов...")
-        # Сначала пробуем вежливо попросить бота закрыться
         bot_process.terminate()
-        try:
-            bot_process.wait(timeout=5)
-        except subprocess.TimeoutExpired:
-            # Если не понял по-хорошему — закрываем принудительно
-            bot_process.kill()
+        bot_process.wait(timeout=5)
         logger.info("✅ Все процессы остановлены.")
 
 if __name__ == "__main__":
-    # Выбираем режим работы
+    # Если аргументов нет, по умолчанию запускаем 'all'
     command = sys.argv[1] if len(sys.argv) > 1 else "all"
 
     if command == "bot":
@@ -81,5 +77,4 @@ if __name__ == "__main__":
     elif command == "all":
         run_all()
     else:
-        print(f"Неизвестная команда: {command}")
-        print("Использование: python main.py [bot|web|all]")
+        print(f"Использование: python main.py [bot|web|all]")
