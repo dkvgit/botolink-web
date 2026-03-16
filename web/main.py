@@ -28,13 +28,21 @@ mimetypes.add_type('image/png', '.png')
 mimetypes.add_type('image/gif', '.gif')
 mimetypes.add_type('image/webp', '.webp')
 
-# web/main.py (в начале файла)
+# Подготавливаем URL для разных библиотек
 RAW_DB_URL = os.getenv("DATABASE_URL", "")
-if RAW_DB_URL and not RAW_DB_URL.startswith("postgresql+asyncpg://"):
-    DATABASE_URL = RAW_DB_URL.replace("postgresql://", "postgresql+asyncpg://")
-else:
-    DATABASE_URL = RAW_DB_URL or "postgresql+asyncpg://postgres@localhost/botolinkpro"
 
+# 1. Для SQLAlchemy (используется ботом)
+if RAW_DB_URL and "postgresql+asyncpg://" not in RAW_DB_URL:
+    BOT_DATABASE_URL = RAW_DB_URL.replace("postgresql://", "postgresql+asyncpg://")
+else:
+    BOT_DATABASE_URL = RAW_DB_URL
+
+# 2. Для asyncpg (используется в @app.get и кликах)
+# asyncpg НЕ ПРИНИМАЕТ +asyncpg в строке, ему нужно чистое postgresql://
+DIRECT_DATABASE_URL = RAW_DB_URL.replace("postgresql+asyncpg://", "postgresql://")
+
+# Если вдруг ты где-то используешь DATABASE_URL, давай оставим её для совместимости
+DATABASE_URL = DIRECT_DATABASE_URL
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # // Инициализация при старте
@@ -67,69 +75,60 @@ app = FastAPI(lifespan=lifespan)
 
 @app.get("/click/{link_id}")
 async def track_click(link_id: int, request: Request):
-	print(f"🔥 ПОЛУЧЕН КЛИК для link_id={link_id}")
-	conn = await asyncpg.connect(DATABASE_URL)
-	try:
-		# Получаем данные ссылки
-		row = await conn.fetchrow("SELECT url, page_id FROM links WHERE id = $1", link_id)
-		if not row:
-			print(f"❌ Ссылка {link_id} не найдена")
-			return {"error": "Link not found"}, 404
-		
-		# 👇 ИСПРАВЬТЕ ЭТУ СТРОКУ
-		# 1. Увеличиваем счетчик в таблице links (с обработкой NULL)
-		await conn.execute("""
-                           UPDATE links
-                           SET click_count = COALESCE(click_count, 0) + 1
-                           WHERE id = $1
-		                   """, link_id)
-		
-		# 2. Сохраняем детальную информацию в таблицу clicks (ЭТО НЕ ТРОГАЕМ)
-		await conn.execute("""
-                           INSERT INTO clicks
-                               (link_id, page_id, ip_address, user_agent, clicked_at)
-                           VALUES ($1, $2, $3, $4, NOW())
-		                   """,
-		                   link_id,
-		                   row['page_id'],
-		                   request.client.host,
-		                   request.headers.get('user-agent', '')
-		                   )
-		
-		print(f"✅ Клик для link_id={link_id} засчитан")
-		
-		# Перенаправляем
-		target_url = row['url']
-		if not target_url.startswith(('http://', 'https://')):
-			target_url = f'https://{target_url}'
-		
-		return RedirectResponse(url=target_url)
-	
-	except Exception as e:
-		print(f"🔥 Ошибка трекинга: {e}")
-		return {"error": str(e)}, 500
-	finally:
-		await conn.close()
+    print(f"🔥 ПОЛУЧЕН КЛИК для link_id={link_id}")
+    # Используем чистый URL без +asyncpg
+    conn = await asyncpg.connect(DATABASE_URL)
+    try:
+        row = await conn.fetchrow("SELECT url, page_id FROM links WHERE id = $1", link_id)
+        if not row:
+            print(f"❌ Ссылка {link_id} не найдена")
+            return HTMLResponse("Link not found", status_code=404)
+        
+        # 1. Увеличиваем счетчик
+        await conn.execute("""
+            UPDATE links
+            SET click_count = COALESCE(click_count, 0) + 1
+            WHERE id = $1
+        """, link_id)
+        
+        # 2. Сохраняем детали
+        await conn.execute("""
+            INSERT INTO clicks (link_id, page_id, ip_address, user_agent, clicked_at)
+            VALUES ($1, $2, $3, $4, NOW())
+        """,
+        link_id,
+        row['page_id'],
+        request.client.host,
+        request.headers.get('user-agent', ''))
+        
+        target_url = row['url']
+        if not target_url.startswith(('http://', 'https://')):
+            target_url = f'https://{target_url}'
+        
+        return RedirectResponse(url=target_url)
+    except Exception as e:
+        print(f"🔥 Ошибка трекинга: {e}")
+        return HTMLResponse(f"Error: {e}", status_code=500)
+    finally:
+        await conn.close()
 
 
 @app.post("/click/{link_id}")
 async def track_details_click(link_id: int, request: Request):
-	print(f"🔥 ПОЛУЧЕН КЛИК ПО РЕКВИЗИТАМ для link_id={link_id}")
-	data = await request.json()  # получаем данные из body
-	print(f"📦 Данные: {data}")
-	
-	conn = await asyncpg.connect(DATABASE_URL)
-	try:
-		# Обновляем счетчик
-		await conn.execute("""
-                           UPDATE links
-                           SET click_count = COALESCE(click_count, 0) + 1
-                           WHERE id = $1
-		                   """, link_id)
-		
-		return {"status": "ok"}
-	finally:
-		await conn.close()
+    # Метод для кнопок "Скопировать" или "Показать реквизиты"
+    print(f"🔥 ПОЛУЧЕН КЛИК ПО РЕКВИЗИТАМ для link_id={link_id}")
+    conn = await asyncpg.connect(DATABASE_URL)
+    try:
+        await conn.execute("""
+            UPDATE links
+            SET click_count = COALESCE(click_count, 0) + 1
+            WHERE id = $1
+        """, link_id)
+        return {"status": "ok"}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+    finally:
+        await conn.close()
 
 
 current_dir = os.path.dirname(os.path.realpath(__file__))
