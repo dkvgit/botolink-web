@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>botoLink.pro | Твоё пространство</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+    <style>
+        :root { --bg: #0f172a; --text: #f8fafc; --accent: #3b82f6; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); display: flex; flex-direction: column; align-items: center; padding: 40px 20px; }
+        .container { max-width: 400px; width: 100%; text-align: center; }
+        .link-card { display: block; background: #1e293b; padding: 16px; margin: 12px 0; border-radius: 12px; text-decoration: none; color: white; font-weight: 600; transition: transform 0.2s; border: 1px solid #334155; }
+        .link-card:hover { transform: translateY(-2px); border-color: var(--accent); }
+        h1 { margin-bottom: 30px; font-size: 24px; }
+    </style>
+</head>
+<body>
+    <div class="container" id="app">
+        <p>Загрузка профиля...</p>
+    </div>
+
+    <script>
+        // ЗАМЕНИ НА СВОИ ДАННЫЕ ИЗ SUPABASE
+        const SUPABASE_URL = "https://your-project.supabase.co";
+        const SUPABASE_KEY = "your-anon-key";
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        async function init() {
+            const path = window.location.pathname.split('/').filter(Boolean);
+            const username = path[0]; // Берем первый сегмент после /
+            const app = document.getElementById('app');
+
+            if (!username) {
+                app.innerHTML = "<h1>botoLink.pro</h1><p>Создай свою страницу в нашем боте!</p>";
+                return;
+            }
+
+            // Тянем данные из твоей таблицы
+            const { data, error } = await _supabase
+                .from('links') // Убедись, что таблица называется так
+                .select('*')
+                .eq('username', username);
+
+            if (error || !data || data.length === 0) {
+                app.innerHTML = "<h1>Упс!</h1><p>Пользователь @" + username + " еще не создал страницу.</p>";
+                return;
+            }
+
+            app.innerHTML = `<h1>@${username}</h1>`;
+            data.forEach(item => {
+                const a = document.createElement('a');
+                a.className = 'link-card';
+                a.href = item.url;
+                a.innerText = item.title;
+                app.appendChild(a);
+            });
+        }
+        init();
+    </script>
+</body>
+</html>

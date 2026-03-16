@@ -1,0 +1,2 @@
+# Правило для Cloudflare Pages: направлять всё на index.html
+/* /index.html   200
