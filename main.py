@@ -1,76 +1,71 @@
-# # для Python
+# # D:\aRabota\TelegaBoom\030_mylinkspace\main.py
 import os
 import sys
 import logging
-import asyncio
-import threading
+import uvicorn
 from dotenv import load_dotenv
 
-# Добавляем пути, чтобы Python видел папки web и bot
+# # Добавляем пути, чтобы Python видел папки web и bot
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 if BASE_DIR not in sys.path:
     sys.path.append(BASE_DIR)
 
-# Загружаем переменные окружения
+# # Загружаем переменные окружения
 load_dotenv()
 
-# Настройка логирования
+# # Настройка логирования
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     level=logging.INFO
 )
 logger = logging.getLogger("BotoLinkPro")
 
-# Экспортируем приложение для Railway
+# # Импортируем FastAPI приложение
 try:
     from web.main import app as application
-except ImportError:
-    logger.error("❌ Не удалось импортировать FastAPI app из web.main")
+except ImportError as e:
+    logger.error(f"❌ Не удалось импортировать FastAPI app из web.main: {e}")
     application = None
 
-def run_bot():
-    """Запуск Telegram бота"""
-    try:
-        from bot.main import main as bot_main
-        logger.info("🤖 Инициализация Telegram бота...")
-        # Создаем новый цикл событий для отдельного потока
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        loop.run_until_complete(bot_main())
-    except Exception as e:
-        logger.exception(f"❌ Критическая ошибка бота: {e}")
+def start_app():
+    # // для Python
+    # Запуск единого процесса (Web + Bot через lifespan в web/main.py)
+    if not application:
+        logger.critical("❌ Невозможно запустить сервер: приложение не импортировано.")
+        return
 
-def run_web():
-    """Запуск веб-сервера (Uvicorn)"""
     try:
-        import uvicorn
         port = int(os.getenv("PORT", 8000))
-        logger.info(f"🌐 Запуск веб-сервера на порту {port}")
-        # Передаем объект application напрямую, чтобы избежать проблем с ASGI lifespan
+        logger.info(f"🌐 Запуск единого сервиса на порту {port}")
+        
+        # Запускаем uvicorn. Бот включится сам через lifespan.
         uvicorn.run(application, host="0.0.0.0", port=port)
     except Exception as e:
-        logger.exception(f"❌ Ошибка запуска веб-сервера: {e}")
+        logger.exception(f"❌ Ошибка при старте сервиса: {e}")
 
-def run_all_railway():
-    """Запуск бота в потоке и сервера в основном процессе"""
-    logger.info("🚀 Запуск всех компонентов BotoLinkPro...")
-    
-    # Запускаем бота фоновым потоком (надежнее subprocess на Railway)
-    bot_thread = threading.Thread(target=run_bot, daemon=True)
-    bot_thread.start()
-
-    # Запускаем веб-сервер в основном потоке
-    run_web()
 
 if __name__ == "__main__":
+    # # На Railway всегда будет срабатывать запуск "all"
     command = sys.argv[1] if len(sys.argv) > 1 else "all"
 
     if command == "bot":
-        from bot.main import main as bot_main
-        asyncio.run(bot_main())
-    elif command == "web":
-        run_web()
-    elif command == "all":
-        run_all_railway()
+        # # Запуск бота отдельно (ЛОКАЛЬНО через polling)
+        try:
+            import asyncio
+            # Импортируем именно run_local, которую мы создали для цикличного запуска
+            from bot.main import run_local
+            logger.info("🤖 Запуск бота в режиме Polling...")
+            asyncio.run(run_local())
+        except ImportError:
+            # Если run_local нет, пробуем старый вариант
+            from bot.main import main as bot_main
+            asyncio.run(bot_main())
+        except Exception as e:
+            logger.error(f"❌ Ошибка запуска бота: {e}")
+    
+    elif command == "web" or command == "all":
+        # # Основной режим для Railway
+        start_app()
+    
     else:
         print(f"Использование: python main.py [bot|web|all]")

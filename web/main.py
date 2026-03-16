@@ -31,26 +31,26 @@ mimetypes.add_type('image/webp', '.webp')
 RAW_DB_URL = os.getenv("DATABASE_URL", "postgresql://postgres@localhost/botolinkpro")
 DATABASE_URL = RAW_DB_URL.replace("+asyncpg", "")
 
-# # для Python
-# Удали строку app = FastAPI() и вставь это вместо неё:
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Код запуска бота
-    print("🤖 Инициализация Telegram бота...")
+    # # Инициализируем компоненты бота, но НЕ запускаем polling,
+    # # так как мы будем использовать Webhook.
+    print("🤖 Инициализация Telegram бота для Webhook...")
     try:
+        # Инициализируем внутренние механизмы (хранилища, настройки)
         await application.initialize()
+        # Если используем Webhook, start() обычно не вызывает блокирующий polling
         await application.start()
-        print("✅ Бот успешно запущен")
+        print("✅ Бот готов к приему обновлений через /webhook")
     except Exception as e:
-        print(f"❌ Ошибка старта: {e}")
+        print(f"❌ Ошибка инициализации бота: {e}")
+    
     yield
-    # Код остановки
+    
+    # # Корректное завершение при выключении контейнера
+    print("Shutting down...")
     await application.stop()
     await application.shutdown()
-
-# ВАЖНО: Создаем app строго ПОСЛЕ определения функции lifespan
-app = FastAPI(lifespan=lifespan)
 
 
 
@@ -554,13 +554,13 @@ async def set_webhook():
     return {"status": "error", "message": "Failed to set webhook"}
 
 
-# # для Python
 if __name__ == "__main__":
+    # # Код для локального запуска или прямого вызова uvicorn
+    import uvicorn
+    import os
     
-    
-    # Пытаемся взять порт, который дал Railway. Если его нет — берем 8000
+    # Railway передает порт через переменную окружения
     port = int(os.getenv("PORT", 8000))
     
-    # ВАЖНО: host должен быть "0.0.0.0", а не "127.0.0.1"
-    # Иначе из интернета на сайт будет не зайти
+    # Запускаем сервер. lifespan сам подцепит бота.
     uvicorn.run(app, host="0.0.0.0", port=port)

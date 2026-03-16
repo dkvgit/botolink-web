@@ -795,37 +795,30 @@ async def main():
 	
 	# Универсальный обработчик (ВСЕГДА ПОСЛЕДНИЙ)
 	application.add_handler(CallbackQueryHandler(button_handler))
-	
-	# В самом конце main(), перед application.run_polling()
-	print("\n" + "=" * 50)
-	print("🔍 ДАМП ВСЕХ CONVERSATION HANDLER'ОВ:")
-	for handler in application.handlers.get(0, []):  # group 0
-		if isinstance(handler, ConversationHandler):
-			print(f"  📌 {handler.name}")
-			# Проверяем, есть ли внутри select_category
-			for state, callbacks in handler.states.items():
-				for cb in callbacks:
-					if hasattr(cb, 'callback') and cb.callback.__name__ == 'select_category':
-						print(f"     ⚠️  НАЙДЕН select_category в {handler.name}, состояние {state}")
-	print("=" * 50)
-	
 	logger.info("✅ Все хендлеры зарегистрированы.")
-	
-	async with application:
-	       await application.initialize()
-	       # post_init уже вызван через builder, но если нужно принудительно:
-	       # await post_init(application)
-	       await application.start()
-	       await application.updater.start_polling()
-	       logger.info("🚀 Поллинг запущен.")
-	       try:
-	          await asyncio.Event().wait()
-	       except (KeyboardInterrupt, asyncio.CancelledError):
-	          pass
-	
+	return application  # # Это ПОСЛЕДНЯЯ строка функции main
+
+
+
+async def run_local():
+    # # Сначала собираем бота, вызывая main
+    bot_app = await main()
+    
+    async with bot_app:
+        await bot_app.initialize()
+        await bot_app.start()
+        await bot_app.updater.start_polling()
+        logger.info("🚀 Бот запущен локально.")
+        try:
+            await asyncio.Event().wait()
+        except (KeyboardInterrupt, asyncio.CancelledError):
+            pass
+
+
+# # Блок запуска тоже БЕЗ отступов (0 пробелов)
 if __name__ == "__main__":
     import asyncio
     try:
-        asyncio.run(main())
+        asyncio.run(run_local())
     except (KeyboardInterrupt, SystemExit):
         logger.info("👋 Бот остановлен.")
