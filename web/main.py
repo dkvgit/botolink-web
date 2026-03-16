@@ -28,32 +28,36 @@ mimetypes.add_type('image/png', '.png')
 mimetypes.add_type('image/gif', '.gif')
 mimetypes.add_type('image/webp', '.webp')
 
-RAW_DB_URL = os.getenv("DATABASE_URL", "postgresql://postgres@localhost/botolinkpro")
-DATABASE_URL = RAW_DB_URL.replace("+asyncpg", "")
+# web/main.py (в начале файла)
+RAW_DB_URL = os.getenv("DATABASE_URL", "")
+if RAW_DB_URL and not RAW_DB_URL.startswith("postgresql+asyncpg://"):
+    DATABASE_URL = RAW_DB_URL.replace("postgresql://", "postgresql+asyncpg://")
+else:
+    DATABASE_URL = RAW_DB_URL or "postgresql+asyncpg://postgres@localhost/botolinkpro"
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # # Инициализируем компоненты бота, но НЕ запускаем polling,
-    # # так как мы будем использовать Webhook.
+    # // Инициализация при старте
     print("🤖 Инициализация Telegram бота для Webhook...")
     try:
-        # Инициализируем внутренние механизмы (хранилища, настройки)
-        await application.initialize()
-        # Если используем Webhook, start() обычно не вызывает блокирующий polling
-        await application.start()
+        # Инициализируем механизмы бота
+        await bot_app.initialize()
+        await bot_app.start()
         print("✅ Бот готов к приему обновлений через /webhook")
     except Exception as e:
         print(f"❌ Ошибка инициализации бота: {e}")
     
     yield
     
-    # # Корректное завершение при выключении контейнера
-    print("Shutting down...")
-    await application.stop()
-    await application.shutdown()
+    # // Чистое завершение при выключении
+    print("🚦 Завершение работы...")
+    try:
+        await bot_app.stop()
+        await bot_app.shutdown()
+    except Exception as e:
+        print(f"❌ Ошибка при выключении: {e}")
 
-
-# // ВАЖНО: app создается строго ПОСЛЕ функции lifespan
+# Создаем приложение FastAPI
 app = FastAPI(lifespan=lifespan)
 
 
