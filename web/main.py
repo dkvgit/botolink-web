@@ -62,20 +62,17 @@ app = FastAPI(lifespan=lifespan)
 
 @app.get("/set_webhook")
 async def set_webhook():
-    # Эта функция связывает твоего бота на Railway с серверами Telegram
     import os
-    from bot.main import bot_app # Убедись, что импорт правильный исходя из твоей структуры
+    # Замени 'bot_app' на то имя, которое у тебя в bot/main.py (например, application)
+    from bot.main import application as bot_app
     
-    # Берем адрес, по которому сейчас открывается твой сайт
     base_url = "https://botolink-web-production.up.railway.app"
-    webhook_path = f"{base_url}/webhook"
+    webhook_url = f"{base_url}/webhook"
     
     try:
-        # Отправляем команду Телеграму: "Шли все сообщения на этот адрес"
-        await bot_app.bot.set_webhook(url=webhook_path)
-        return {"status": "ok", "message": f"Webhook успешно установлен на {webhook_path}"}
+        await bot_app.bot.set_webhook(url=webhook_url)
+        return {"status": "ok", "message": f"Webhook set to {webhook_url}"}
     except Exception as e:
-        # Если что-то пошло не так (например, токен не подхватился)
         return {"status": "error", "message": str(e)}
 
 
@@ -530,26 +527,35 @@ async def user_page(request: Request, username: str):
 		await conn.close()
 
 
-# # для Python
+# web/main.py
+
 @app.get("/set_webhook")
 async def set_webhook():
-    # # Эта функция — одноразовая кнопка для связи с Telegram
+    # Эта функция принудительно связывает твой домен с серверами Telegram
     import os
-    from telegram import Bot
+    # Мы берем 'application' напрямую, как ты его импортировал в начале файла
+    from bot.main import application as bot_app
     
-    token = os.getenv("BOT_TOKEN")
-    # # Твой адрес на Railway (или botolink.pro, когда DNS обновятся)
-    webhook_url = "https://botolink.pro/webhook"
+    # Рекомендую использовать botolink.pro, раз он у тебя на Cloudflare
+    # Но если DNS еще не обновились, можно оставить up.railway.app
+    base_url = "https://botolink-web-production.up.railway.app"
+    webhook_url = f"{base_url}/webhook"
     
-    bot = Bot(token=token)
-    
-    # Сначала удаляем старый вебхук (или поллинг), потом ставим новый
-    await bot.delete_webhook()
-    success = await bot.set_webhook(url=webhook_url)
-    
-    if success:
-        return {"status": "success", "message": f"Webhook set to {webhook_url}"}
-    return {"status": "error", "message": "Failed to set webhook"}
+    try:
+        # Устанавливаем вебхук через объект бота в приложении
+        # drop_pending_updates=True поможет, если в очереди накопилось много старых сообщений
+        await bot_app.bot.set_webhook(url=webhook_url, drop_pending_updates=True)
+        return {
+            "status": "success",
+            "message": f"Бот успешно привязан к адресу: {webhook_url}",
+            "info": "Теперь сообщения из Telegram будут приходить в Railway"
+        }
+    except Exception as e:
+        # Если токен BOT_TOKEN не подтянулся или сеть глючит
+        return {
+            "status": "error",
+            "message": f"Ошибка при установке вебхука: {str(e)}"
+        }
 
 
 if __name__ == "__main__":
