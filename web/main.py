@@ -531,30 +531,40 @@ async def user_page(request: Request, username: str):
 
 @app.get("/set_webhook")
 async def set_webhook():
-    # Эта функция принудительно связывает твой домен с серверами Telegram
     import os
-    # Мы берем 'application' напрямую, как ты его импортировал в начале файла
-    from bot.main import application as bot_app
-    
-    # Рекомендую использовать botolink.pro, раз он у тебя на Cloudflare
-    # Но если DNS еще не обновились, можно оставить up.railway.app
-    base_url = "https://botolink-web-production.up.railway.app"
-    webhook_url = f"{base_url}/webhook"
+    import traceback
     
     try:
-        # Устанавливаем вебхук через объект бота в приложении
-        # drop_pending_updates=True поможет, если в очереди накопилось много старых сообщений
+        # 1. Проверяем наличие токена
+        token = os.getenv("BOT_TOKEN")
+        if not token:
+            return {"status": "error", "message": "BOT_TOKEN missing in environment variables"}
+
+        # 2. Пытаемся импортировать приложение
+        try:
+            from bot.main import application as bot_app
+        except ImportError as ie:
+            return {"status": "error", "message": f"Import error: {str(ie)}", "trace": traceback.format_exc()}
+
+        # 3. Устанавливаем адрес
+        base_url = "https://botolink-web-production.up.railway.app"
+        webhook_url = f"{base_url}/webhook"
+        
+        # 4. Выполняем запрос к Telegram
         await bot_app.bot.set_webhook(url=webhook_url, drop_pending_updates=True)
+        
         return {
             "status": "success",
-            "message": f"Бот успешно привязан к адресу: {webhook_url}",
-            "info": "Теперь сообщения из Telegram будут приходить в Railway"
+            "webhook_url": webhook_url,
+            "bot_info": "Webhook successfully registered"
         }
     except Exception as e:
-        # Если токен BOT_TOKEN не подтянулся или сеть глючит
+        # Если упало вообще всё — вернем детальное описание ошибки
         return {
-            "status": "error",
-            "message": f"Ошибка при установке вебхука: {str(e)}"
+            "status": "critical_error",
+            "error_type": str(type(e).__name__),
+            "message": str(e),
+            "stacktrace": traceback.format_exc()
         }
 
 
