@@ -3,8 +3,7 @@
 
 import mimetypes  # ← ДОБАВЬ ЭТОТ ИМПОРТ
 import os
-# Добавляем корневую директорию в sys.path, чтобы папка 'bot' была видна
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from urllib.parse import urlparse
 import asyncio
 from contextlib import asynccontextmanager
@@ -37,25 +36,23 @@ DATABASE_URL = RAW_DB_URL.replace("+asyncpg", "")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Этот блок запускается ПЕРЕД стартом сайта
     print("🤖 Инициализация Telegram бота...")
     try:
-        # Важно: это запускает внутренние механизмы бота
         await application.initialize()
         await application.start()
-        print("✅ Бот успешно запущен в фоновом режиме")
+        print("✅ Бот успешно запущен")
     except Exception as e:
-        print(f"❌ Ошибка при старте бота: {e}")
-    
-    yield  # В этой точке начинает работать сам сайт (FastAPI)
-    
-    # Этот блок запускается при выключении сервера
-    print("🛑 Остановка Telegram бота...")
+        print(f"❌ Ошибка: {e}")
+    yield
     await application.stop()
     await application.shutdown()
 
-# Теперь создаем приложение и передаем ему настройки запуска бота
+# ВАЖНО: lifespan должен быть передан при создании
 app = FastAPI(lifespan=lifespan)
+
+
+
+
 
 
 # ЭТОТ РОУТ НУЖЕН ДЛЯ РАБОТЫ БОТА В ОБЛАКЕ

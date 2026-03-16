@@ -4,6 +4,11 @@ import logging
 import asyncio
 import subprocess
 from dotenv import load_dotenv
+from web.main import app as application
+# Добавляем путь, чтобы Python видел папки web и bot
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+
 
 # Загружаем переменные окружения
 load_dotenv()
