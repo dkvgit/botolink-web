@@ -1,10 +1,8 @@
-#D:\aRabota\TelegaBoom\030_botolinkpro\core\config.py
-
 import os
 from dotenv import load_dotenv
 import urllib.parse
 
-load_dotenv()
+load_dotenv()  # Это загружает переменные из .env файла
 
 def get_env(key: str, default=None, required=False):
     value = os.getenv(key, default)
@@ -16,12 +14,7 @@ def get_env(key: str, default=None, required=False):
 DEBUG = get_env("DEBUG", "false").lower() == "true"
 
 # База данных
-# Мы принудительно используем настройки пулера Supabase (порт 6543),
-# так как прямой порт 5432 у тебя заблокирован провайдером.
-DATABASE_URL = get_env(
-    "DATABASE_URL",
-    "postgresql+asyncpg://postgres.jqvynmpkdjtalsrhvvov:baragoz07DEN05@aws-1-ap-southeast-2.pooler.supabase.com:6543/postgres"
-)
+DATABASE_URL = get_env("DATABASE_URL", required=True)  # Берем из .env!
 REDIS_URL = get_env("REDIS_URL", "redis://localhost:6379/0")
 
 # Telegram (Токен обязателен!)
