@@ -986,86 +986,93 @@ async def links_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 		await conn.close()
 
 
-async def stats_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-	"""Обработчик команды /stats - показать статистику"""
-	
-	# Удаляем предыдущее сообщение с подтверждением, если оно есть
-	if 'last_success_msg_id' in context.user_data:
-		try:
-			await context.bot.delete_message(
-				chat_id=update.effective_chat.id,
-				message_id=context.user_data['last_success_msg_id']
-			)
-		except:
-			pass
-		context.user_data.pop('last_success_msg_id', None)
-	
-	user = update.effective_user
-	
-	conn = await get_db_connection()
-	try:
-		db_user = await get_or_create_user(conn, user.id, user.username, user.first_name)
-		page = await get_user_page(conn, db_user['id'])
-		links = await get_user_links(conn, page['id'])
-		
-		# Считаем статистику
-		total_clicks = sum(link.get('click_count') or 0 for link in links)
-		view_count = page['view_count'] if page['view_count'] is not None else 0
-		
-		# Формируем текст
-		text = f"📊 **Статистика**\n\n"
-		text += f"👀 **Просмотры страницы:** {view_count}\n"
-		text += f"🔗 **Всего кликов:** {total_clicks}\n"
-		text += f"📌 **Всего ссылок:** {len(links)}\n\n"
-		
-		if links:
-			# Сортируем ссылки по кликам (заменяем None на 0)
-			sorted_links = sorted(links, key=lambda x: x.get('click_count') or 0, reverse=True)
-			
-			text += "🏆 **Топ ссылок:**\n"
-			for i, link in enumerate(sorted_links[:5], 1):
-				clicks = link.get('click_count') or 0
-				text += f"{i}. {link['title']} - {clicks} шт\n"  # ← убрал 👆, добавил "шт"
-			
-			# Средняя статистика
-			if len(links) > 0:
-				avg_clicks = total_clicks / len(links)
-				text += f"\n📈 **Среднее:** {avg_clicks:.1f} кликов на ссылку"
-		else:
-			text += "❌ У вас пока нет ссылок\n"
-			text += "➕ Добавьте ссылку чтобы начать собирать статистику"
-		
-		# Кнопки
-		keyboard = [
-			# [InlineKeyboardButton("🔄 Подробная статистика", callback_data="stats")],
-			[InlineKeyboardButton("◀️ Назад", callback_data="start")]
-		]
-		
-		# Отправляем или редактируем
-		if update.callback_query:
-			await update.callback_query.edit_message_text(
-				text=text,
-				parse_mode='Markdown',
-				reply_markup=InlineKeyboardMarkup(keyboard)
-			)
-		else:
-			await update.message.reply_text(
-				text=text,
-				parse_mode='Markdown',
-				reply_markup=InlineKeyboardMarkup(keyboard)
-			)
-	
-	except Exception as e:
-		logger.error(f"Ошибка в stats_handler: {e}")
-		error_text = "❌ Ошибка при загрузке статистики"
-		
-		if update.callback_query:
-			await update.callback_query.edit_message_text(error_text)
-		else:
-			await update.message.reply_text(error_text)
-	finally:
-		await conn.close()
+# # bot/handlers.py
 
+async def stats_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    # # Удаляем предыдущее сообщение с подтверждением, если оно есть
+    if 'last_success_msg_id' in context.user_data:
+        try:
+            await context.bot.delete_message(
+                chat_id=update.effective_chat.id,
+                message_id=context.user_data['last_success_msg_id']
+            )
+        except:
+            pass
+        context.user_data.pop('last_success_msg_id', None)
+    
+    user = update.effective_user
+    conn = await get_db_connection()
+    
+    try:
+        # # ПЕРЕДАЕМ 5 АРГУМЕНТОВ (исправлено под твою новую функцию)
+        db_user = await get_or_create_user(conn, user.id, user.username, user.first_name, user.last_name)
+        page = await get_user_page(conn, db_user['id'])
+        links = await get_user_links(conn, page['id'])
+        
+        # # Считаем статистику безопасно
+        total_clicks = sum((link.get('click_count') or 0) for link in links)
+        view_count = page['view_count'] if page['view_count'] is not None else 0
+        
+        # # Формируем текст
+        text = f"📊 **Статистика**\n\n"
+        text += f"👀 **Просмотры страницы:** {view_count}\n"
+        text += f"🔗 **Всего кликов:** {total_clicks}\n"
+        text += f"📌 **Всего ссылок:** {len(links)}\n\n"
+        
+        if links:
+            # # Сортируем ссылки по кликам (заменяем None на 0)
+            sorted_links = sorted(links, key=lambda x: x.get('click_count') or 0, reverse=True)
+            
+            text += "🏆 **Топ ссылок:**\n"
+            for i, link in enumerate(sorted_links[:5], 1):
+                clicks = link.get('click_count') or 0
+                text += f"{i}. {link['title']} - {clicks} шт\n"
+            
+            if len(links) > 0:
+                avg_clicks = total_clicks / len(links)
+                text += f"\n📈 **Среднее:** {avg_clicks:.1f} кликов на ссылку"
+        else:
+            text += "❌ У вас пока нет ссылок\n"
+            text += "➕ Добавьте ссылку, чтобы начать собирать статистику"
+        
+        keyboard = [[InlineKeyboardButton("◀️ Назад", callback_data="start")]]
+        
+        # # ИСПРАВЛЕНО: Если был клик по кнопке, пытаемся редактировать,
+        # # но если сообщение удалено — просто шлем новое.
+        if update.callback_query:
+            try:
+                await update.callback_query.edit_message_text(
+                    text=text,
+                    parse_mode='Markdown',
+                    reply_markup=InlineKeyboardMarkup(keyboard)
+                )
+            except Exception:
+                await context.bot.send_message(
+                    chat_id=update.effective_chat.id,
+                    text=text,
+                    parse_mode='Markdown',
+                    reply_markup=InlineKeyboardMarkup(keyboard)
+                )
+        else:
+            await update.message.reply_text(
+                text=text,
+                parse_mode='Markdown',
+                reply_markup=InlineKeyboardMarkup(keyboard)
+            )
+    
+    except Exception as e:
+        logger.error(f"Ошибка в stats_handler: {e}")
+        error_text = "❌ Ошибка при загрузке статистики. Попробуйте /start"
+        if update.callback_query:
+            try:
+                await update.callback_query.message.reply_text(error_text)
+            except:
+                pass
+        else:
+            await update.message.reply_text(error_text)
+    finally:
+        if conn:
+            await conn.close()
 
 # Файл: bot/handlers.py
 
