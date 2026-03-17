@@ -6,7 +6,6 @@ from telegram import Update
 import sys
 import os
 import mimetypes  # ← ДОБАВЬ ЭТОТ ИМПОРТ
-from bot.main import application
 from bot.main import application as bot_app
 from urllib.parse import urlparse
 import asyncio
@@ -24,12 +23,15 @@ from fastapi import Request
 # Добавляем путь к корневой папке проекта
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import httpx
+
+# Импортируем application из bot.main и сразу даем понятное имя
 try:
-    from bot.main import application as ptb_application
+    from bot.main import application as bot_app
+    print("✅ Успешно импортирован bot_app")
 except ImportError as e:
     print(f"--- КРИТИЧЕСКАЯ ОШИБКА ИМПОРТА: {e} ---")
-    # // На случай если в будущем переименуешь обратно
-    from bot.main import ptb_application
+    # Запасной вариант
+    from bot.main import ptb_application as bot_app
 
 
 
@@ -565,30 +567,29 @@ async def telegram_webhook(request: Request):
         logger.info(f"Получен webhook: {data.get('update_id')}")
         
         # Преобразуем в Update и передаем боту
-        update = Update.de_json(data, application.bot)
-        await application.process_update(update)
+        update = Update.de_json(data, bot_app.bot)
+        await bot_app.process_update(update)
         
         return Response(status_code=200)
         
     except Exception as e:
         logger.error(f"Ошибка в webhook: {e}", exc_info=True)
         return Response(status_code=500)
-
     
 
 @app.on_event("startup")
 async def startup():
     logger.info("🤖 Инициализация Telegram бота для Webhook...")
-    if not application.running:
-        await application.initialize()
-        await application.start()
+    if not bot_app.running:
+        await bot_app.initialize()
+        await bot_app.start()
     logger.info("✅ Бот готов к приему обновлений через /webhook")
 
 @app.on_event("shutdown")
 async def shutdown():
     logger.info("🚦 Завершение работы...")
-    if application.running:
-        await application.stop()
+    if bot_app.running:
+        await bot_app.stop()
     
     
 if __name__ == "__main__":
