@@ -357,7 +357,7 @@ async def start_handler(update, context):
         ) or 0
 
         # # БЕРЕМ URL ИЗ ENV
-        base_url = os.getenv("APP_URL", "https://botolink-web-production-b49b.up.railway.app").rstrip('/')
+        base_url = os.getenv("APP_URL", "https://botolink.pro").rstrip('/')
 
         text_msg = (
             f"👋 Привет, <b>{db_user['first_name']}</b>!\n"
