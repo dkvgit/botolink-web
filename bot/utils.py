@@ -19,7 +19,7 @@ async def get_db_connection():
     # # Используем данные для Supabase через Connection Pooler (порт 6543)
     config = {
         "user": "postgres.jqvynmpkdjtalsrhvvov",
-        "password": "UqyVWSwMA4yvwep6",
+        "password": "baragoz07DEN05",
         "host": "aws-1-ap-southeast-2.pooler.supabase.com",
         "port": 6543,
         "database": "postgres",

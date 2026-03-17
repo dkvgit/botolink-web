@@ -549,23 +549,21 @@ async def set_webhook():
 # // web/main.py
 
 @app.post("/webhook")
-async def webhook(request: Request):
-    # // Читаем данные, которые прислал Telegram
+async def telegram_webhook(request: Request):
+    """Точка входа для обновлений от Telegram"""
     try:
+        # Получаем данные от Telegram
         data = await request.json()
-        # // Печатаем в логи всё, что пришло, чтобы видеть активность
-        print(f"--- ВХОДЯЩИЙ ЗАПРОС: {data} ---")
         
-        update = Update.de_json(data, ptb_application.bot)
+        # Преобразуем в Update и передаем боту
+        update = Update.de_json(data, application.bot)
+        await application.process_update(update)
         
-        # // Обрабатываем сообщение через библиотеку
-        await ptb_application.process_update(update)
-        
-        return {"status": "ok"}
+        return Response(status_code=200)
     except Exception as e:
-        # // Если что-то пошло не так, увидим ошибку в логах Railway
-        print(f"--- ОШИБКА В WEBHOOK: {e} ---")
-        return {"status": "error", "message": str(e)}
+        logger.error(f"Ошибка в webhook: {e}")
+        return Response(status_code=500)
+
     
     
     
