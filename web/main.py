@@ -21,7 +21,7 @@ from fastapi.templating import Jinja2Templates
 from starlette.responses import RedirectResponse
 from fastapi import Request
 # Добавляем путь к корневой папке проекта
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import httpx
 
 # Импортируем application из bot.main и сразу даем понятное имя
@@ -34,6 +34,26 @@ except ImportError as e:
     from bot.main import ptb_application as bot_app
 
 
+# ========== НАСТРОЙКА ЛОГГЕРА ==========
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+
+
+
+# ========== ИМПОРТ БОТА ==========
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+try:
+    from bot.main import application as bot_app
+    logger.info("✅ Бот успешно импортирован как bot_app")
+except ImportError as e:
+    logger.error(f"❌ Ошибка импорта бота: {e}")
+    # Запасной вариант
+    from bot.main import ptb_application as bot_app
 
 load_dotenv()
 
@@ -54,44 +74,102 @@ mimetypes.add_type('image/webp', '.webp')
 # Подготавливаем URL для разных библиотек
 RAW_DB_URL = os.getenv("DATABASE_URL", "")
 
-# 1. Для SQLAlchemy (используется ботом)
+# ========== НАСТРОЙКА БАЗЫ ДАННЫХ ==========
+RAW_DB_URL = os.getenv("DATABASE_URL", "")
+
 if RAW_DB_URL and "postgresql+asyncpg://" not in RAW_DB_URL:
     BOT_DATABASE_URL = RAW_DB_URL.replace("postgresql://", "postgresql+asyncpg://")
 else:
     BOT_DATABASE_URL = RAW_DB_URL
 
-# 2. Для asyncpg (используется в @app.get и кликах)
-# asyncpg НЕ ПРИНИМАЕТ +asyncpg в строке, ему нужно чистое postgresql://
 DIRECT_DATABASE_URL = RAW_DB_URL.replace("postgresql+asyncpg://", "postgresql://")
-
-# Если вдруг ты где-то используешь DATABASE_URL, давай оставим её для совместимости
 DATABASE_URL = DIRECT_DATABASE_URL
+
+
+
+# ========== СОЗДАНИЕ FASTAPI ПРИЛОЖЕНИЯ ==========
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # // Инициализация при старте
-    print("🤖 Инициализация Telegram бота для Webhook...")
+    # Startup
+    logger.info("🤖 Инициализация Telegram бота для Webhook...")
     try:
-        # Инициализируем механизмы бота
-        await bot_app.initialize()
-        await bot_app.start()
-        print("✅ Бот готов к приему обновлений через /webhook")
+        if not bot_app.running:
+            await bot_app.initialize()
+            await bot_app.start()
+        logger.info("✅ Бот готов к приему обновлений через /webhook")
     except Exception as e:
-        print(f"❌ Ошибка инициализации бота: {e}")
+        logger.error(f"❌ Ошибка инициализации бота: {e}")
     
     yield
     
-    # // Чистое завершение при выключении
-    print("🚦 Завершение работы...")
+    # Shutdown
+    logger.info("🚦 Завершение работы...")
     try:
-        await bot_app.stop()
-        await bot_app.shutdown()
+        if bot_app.running:
+            await bot_app.stop()
     except Exception as e:
-        print(f"❌ Ошибка при выключении: {e}")
+        logger.error(f"❌ Ошибка при выключении: {e}")
 
-# Создаем приложение FastAPI
 app = FastAPI(lifespan=lifespan)
 
 
+# ========== СТАТИЧЕСКИЕ ФАЙЛЫ И ШАБЛОНЫ ==========
+current_dir = os.path.dirname(os.path.realpath(__file__))
+app.mount("/templates", StaticFiles(directory=os.path.join(current_dir, "templates")), name="templates_static")
+app.mount("/static", StaticFiles(directory=os.path.join(current_dir, "static")), name="static")
+templates = Jinja2Templates(directory=os.path.join(current_dir, "templates"))
+
+# ========== WEBHOOK - ЭТО САМОЕ ГЛАВНОЕ! ==========
+@app.post("/webhook")
+async def telegram_webhook(request: Request):
+    """Обработка входящих обновлений от Telegram"""
+    try:
+        # Получаем данные от Telegram
+        data = await request.json()
+        logger.info(f"🔥 Получен webhook: update_id={data.get('update_id')}")
+        
+        # Проверяем, что бот инициализирован
+        if not bot_app or not hasattr(bot_app, 'bot'):
+            logger.error("❌ Бот не инициализирован!")
+            return Response(status_code=500)
+        
+        # Преобразуем в Update и передаем боту
+        update = Update.de_json(data, bot_app.bot)
+        await bot_app.process_update(update)
+        
+        return Response(status_code=200)
+        
+    except Exception as e:
+        logger.error(f"❌ Ошибка в webhook: {e}", exc_info=True)
+        return Response(status_code=500)
+
+# ========== ОСТАЛЬНЫЕ ЭНДПОИНТЫ ==========
+@app.get("/")
+async def root():
+    return {"status": "ok", "message": "Bot is running"}
+
+@app.get("/set_webhook")
+async def set_webhook():
+    webhook_url = f"{os.getenv('APP_URL', '')}/webhook"
+    bot_token = os.getenv("BOT_TOKEN", "")
+    
+    if not webhook_url or not bot_token:
+        return {"error": "APP_URL or BOT_TOKEN not set"}
+    
+    tg_url = f"https://api.telegram.org/bot{bot_token}/setWebhook?url={webhook_url}"
+    
+    async with httpx.AsyncClient() as client:
+        try:
+            r = await client.get(tg_url)
+            return r.json()
+        except Exception as e:
+            return {"error": str(e)}
+	    
+	    
+	    
+	    
+	    
+	    
 
 
 
@@ -154,13 +232,7 @@ async def track_details_click(link_id: int, request: Request):
         await conn.close()
 
 
-current_dir = os.path.dirname(os.path.realpath(__file__))
 
-# Монтируем статические папки
-app.mount("/templates", StaticFiles(directory=os.path.join(current_dir, "templates")), name="templates_static")
-app.mount("/static", StaticFiles(directory=os.path.join(current_dir, "static")), name="static")
-
-templates = Jinja2Templates(directory=os.path.join(current_dir, "templates"))
 
 # Словари для иконок
 BRAND_ICONS = {
@@ -536,45 +608,9 @@ async def user_page(request: Request, username: str):
 	finally:
 		await conn.close()
 
-@app.get("/")
-async def root():
-    # // Просто заглушка, чтобы главная страница не выдавала ошибку 500
-    return {"status": "working", "message": "Bot is alive! Use /set_webhook to link Telegram"}
-
-# // web/main.py
-
-@app.get("/set_webhook")
-async def set_webhook():
-    # // Используем переменные, которые уже есть в системе
-    webhook_url = f"{APP_URL}/webhook"
-    tg_url = f"https://api.telegram.org/bot{BOT_TOKEN}/setWebhook?url={webhook_url}"
-    
-    async with httpx.AsyncClient() as client:
-        try:
-            r = await client.get(tg_url)
-            return r.json()
-        except Exception as e:
-            return {"error": str(e)}
 
 
 
-@app.post("/webhook")
-async def telegram_webhook(request: Request):
-    """Обработка входящих обновлений от Telegram"""
-    try:
-        # Получаем данные от Telegram
-        data = await request.json()
-        logger.info(f"Получен webhook: {data.get('update_id')}")
-        
-        # Преобразуем в Update и передаем боту
-        update = Update.de_json(data, bot_app.bot)
-        await bot_app.process_update(update)
-        
-        return Response(status_code=200)
-        
-    except Exception as e:
-        logger.error(f"Ошибка в webhook: {e}", exc_info=True)
-        return Response(status_code=500)
     
 
 @app.on_event("startup")
@@ -591,9 +627,8 @@ async def shutdown():
     if bot_app.running:
         await bot_app.stop()
     
-    
+
 if __name__ == "__main__":
     import uvicorn
-    import os
     port = int(os.getenv("PORT", 8000))
     uvicorn.run(app, host="0.0.0.0", port=port)
