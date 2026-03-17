@@ -202,6 +202,7 @@ change_nick_conv = ConversationHandler(
 		CommandHandler("cancel", cancel_handler),
 		CommandHandler("start", start_handler)
 	],
+	per_message=True,
 	per_chat=True,
 	allow_reentry=True,
 	name="change_nick_conversation"
@@ -222,7 +223,7 @@ edit_title_conv = ConversationHandler(
 		CommandHandler("cancel", cancel_handler),
 		CallbackQueryHandler(cancel_handler, pattern="^cancel$")
 	],
-	per_message=False,
+	per_message=True,
 	per_chat=True,
 	allow_reentry=True,
 	name="edit_title_conversation"
@@ -243,7 +244,7 @@ edit_url_conv = ConversationHandler(
 		CommandHandler("cancel", cancel_handler),
 		CallbackQueryHandler(cancel_handler, pattern="^cancel$")
 	],
-	per_message=False,
+	per_message=True,
 	per_chat=True,
 	allow_reentry=True,
 	name="edit_url_conversation"
@@ -263,7 +264,7 @@ edit_icon_conv = ConversationHandler(
 		CommandHandler("cancel", cancel_handler),
 		CallbackQueryHandler(cancel_handler, pattern="^cancel$")
 	],
-	per_message=False,
+	per_message=True,
 	per_chat=True,
 	allow_reentry=True,
 	name="edit_icon_conversation"
