@@ -13,8 +13,11 @@ def get_env(key: str, default=None, required=False):
 # Режим отладки
 DEBUG = get_env("DEBUG", "false").lower() == "true"
 
-# База данных
-DATABASE_URL = get_env("DATABASE_URL", required=True)  # Берем из .env!
+# База данных - ВРЕМЕННО ЖЕСТКО ПРОПИСАНО!
+DATABASE_URL = "postgresql+asyncpg://postgres.jqvynmpkdjtalsrhvvov:baragoz07DEN05@aws-1-ap-southeast-2.pooler.supabase.com:6543/postgres"
+# После деплоя раскомментировать:
+# DATABASE_URL = get_env("DATABASE_URL", required=True)
+
 REDIS_URL = get_env("REDIS_URL", "redis://localhost:6379/0")
 
 # Telegram (Токен обязателен!)
