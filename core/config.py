@@ -20,7 +20,7 @@ DEBUG = get_env("DEBUG", "false").lower() == "true"
 # так как прямой порт 5432 у тебя заблокирован провайдером.
 DATABASE_URL = get_env(
     "DATABASE_URL",
-    "postgresql+asyncpg://postgres.jqvynmpkdjtalsrhvvov:bragoz07DEN05@aws-0-eu-central-1.pooler.supabase.com:6543/postgres"
+    "postgresql+asyncpg://postgres.jqvynmpkdjtalsrhvvov:baragoz07DEN05@aws-1-ap-southeast-2.pooler.supabase.com:6543/postgres"
 )
 REDIS_URL = get_env("REDIS_URL", "redis://localhost:6379/0")
 
