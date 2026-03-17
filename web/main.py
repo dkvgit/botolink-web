@@ -25,7 +25,8 @@ except ImportError as e:
     print(f"--- КРИТИЧЕСКАЯ ОШИБКА ИМПОРТА: {e} ---")
     # // На случай если в будущем переименуешь обратно
     from bot.main import ptb_application
-
+import logging
+logger = logging.getLogger(__name__)
 
 
 load_dotenv()
@@ -544,23 +545,15 @@ async def set_webhook():
 
 
 
-# // web/main.py
-
-# // web/main.py
-
 @app.post("/webhook")
 async def telegram_webhook(request: Request):
-    """Точка входа для обновлений от Telegram"""
     try:
-        # Получаем данные от Telegram
         data = await request.json()
-        
-        # Преобразуем в Update и передаем боту
         update = Update.de_json(data, application.bot)
         await application.process_update(update)
-        
         return Response(status_code=200)
     except Exception as e:
+        # Здесь ошибка - logger не определен!
         logger.error(f"Ошибка в webhook: {e}")
         return Response(status_code=500)
 
