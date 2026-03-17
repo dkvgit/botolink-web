@@ -39,11 +39,19 @@ async def get_db_connection():
         raise e
 
 
-async def get_or_create_user(conn, tg_id, username, first_name, last_name):
-    # # 1. Пытаемся обновить юзера и получить данные (включая is_pro)
+# # bot/utils.py
+
+async def get_or_create_user(conn, tg_id, username, first_name, last_name=None):
+    # # last_name=None делает аргумент необязательным.
+    # # Теперь можно вызывать и с 4, и с 5 аргументами!
+
+    # # 1. Пытаемся обновить юзера (используем COALESCE для last_name, чтобы не затереть старое пустотой)
     user = await conn.fetchrow("""
         UPDATE users
-        SET username = $2, first_name = $3, last_name = $4, last_activity = CURRENT_TIMESTAMP
+        SET username = $2,
+            first_name = $3,
+            last_name = $4,
+            last_activity = CURRENT_TIMESTAMP
         WHERE telegram_id = $1
         RETURNING *
     """, tg_id, username, first_name, last_name)
@@ -56,14 +64,13 @@ async def get_or_create_user(conn, tg_id, username, first_name, last_name):
             RETURNING *
         """, tg_id, username, first_name, last_name)
         
-        # # 3. ВАЖНО: Создаем пустую страницу для новичка, чтобы бот не падал
+        # # 3. Создаем страницу для новичка
         await conn.execute("""
             INSERT INTO pages (user_id, username, title, template_id)
             VALUES ($1, $2, $3, 1) ON CONFLICT (user_id) DO NOTHING
         """, user['id'], username or f"user_{tg_id}", f"Страница {first_name}")
 
-    # # 4. Проверяем наличие страницы для старых юзеров (на всякий случай)
-    # # Это то, что было в версии "old" и защищало от ошибок
+    # # 4. Страховка: проверяем наличие страницы
     page_exists = await conn.fetchval("SELECT 1 FROM pages WHERE user_id = $1", user['id'])
     if not page_exists:
         await conn.execute("""
@@ -72,6 +79,9 @@ async def get_or_create_user(conn, tg_id, username, first_name, last_name):
         """, user['id'], username or f"user_{tg_id}", f"Страница {first_name}")
     
     return user
+
+
+
 
 async def check_subscription(conn, user_id: int):
     # # user_id здесь — это telegram_id пользователя
