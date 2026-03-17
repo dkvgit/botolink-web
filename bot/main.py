@@ -752,7 +752,7 @@ bank_world_conv = ConversationHandler(
 	name="bank_world_conv",
 	per_chat=True,
 	per_user=True,
-	per_message=False,
+	per_message=True,
 )
 application.add_handler(bank_world_conv)  # Сначала наш новый
 
