@@ -2163,41 +2163,69 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 			await conn.close()
 			return await execute_self_delete(update, context)
 		
-		# --- СТАТИСТИКА ---
+		
 		elif query.data == "stats":
-			await query.answer()
-			links = await get_user_links(conn, page['id'])
-			total_clicks = sum(link['click_count'] for link in links)
-			text = f"📊 **Статистика**\n\n👀 Просмотры: {page['view_count'] or 0}\n🔗 Клики: {total_clicks}\n\n"
-			if links:
-				text += "🔝 Топ ссылок:\n"
-				for link in sorted(links, key=lambda x: x['click_count'], reverse=True)[:3]:
-					text += f"• {link['title']}: {link['click_count']}\n"
-			keyboard = [[InlineKeyboardButton("◀️ Назад", callback_data="start")]]
-			await query.edit_message_text(
-				text,
-				reply_markup=InlineKeyboardMarkup(keyboard),
-				parse_mode='Markdown'
-			)
-	
+		    await query.answer()
+		
+		    # 1. Получаем ссылки
+		    links = await get_user_links(conn, page['id'])
+		
+		    # 2. Считаем клики безопасно
+		    total_clicks = sum((link['click_count'] or 0) for link in links)
+		
+		    # 3. Берем просмотры страницы
+		    views = page['view_count'] or 0
+		
+		    text = (
+		        f"📊 **Статистика**\n\n"
+		        f"👀 Просмотры страницы: **{views}**\n"
+		        f"🔗 Общее кол-во кликов: **{total_clicks}**\n\n"
+		    )
+		
+		    if links:
+		        text += "🔝 **Топ ссылок по кликам:**\n"
+		
+		        # 4. сортировка
+		        sorted_links = sorted(
+		            links,
+		            key=lambda x: (x['click_count'] or 0),
+		            reverse=True
+		        )[:3]
+		
+		        for i, link in enumerate(sorted_links, 1):
+		            clicks = link['click_count'] or 0
+		            title = (link['title'] or "Без названия").replace("*", "").replace("_", "")
+		            text += f"{i}. {title} — **{clicks}** кликов\n"
+		
+		    else:
+		        text += "ℹ️ У вас пока нет активных ссылок."
+		
+		    keyboard = [[InlineKeyboardButton("◀️ Назад", callback_data="start")]]
+		
+		    await query.edit_message_text(
+		        text,
+		        reply_markup=InlineKeyboardMarkup(keyboard),
+		        parse_mode='Markdown'
+		    )
+		    return
+		
 	except Exception as e:
-		logger.error(f"Ошибка в button_handler: {e}")
-		try:
-			# Пытаемся ответить пользователю об ошибке
-			await query.edit_message_text("❌ Произошла ошибка. Нажмите /start")
-		except:
-			pass
+	    logger.error(f"Ошибка в button_handler: {e}")
+	    try:
+	        await query.edit_message_text("❌ Произошла ошибка. Нажмите /start")
+	    except:
+	        pass
+	
 	finally:
-		# Проверяем, не закрыто ли соединение уже, чтобы не поймать ошибку в finally
-		if not conn.is_closed():
-			await conn.close()
+	    # корректное закрытие asyncpg соединения
+	    if 'conn' in locals() and conn:
+	        if not conn.is_closed():
+	            await conn.close()
+		
+		
+		
 
 
-# Название файла: bot/handlers.py
-
-# Название файла: bot/handlers.py
-
-# Название файла: bot/handlers.py
 
 async def profile_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # # Обработчик профиля: команда /profile или кнопка
