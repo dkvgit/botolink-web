@@ -251,7 +251,7 @@ edit_url_conv = ConversationHandler(
 )
 application.add_handler(edit_url_conv)
 
-# РЕДАКТИРОВАНИЕ ИКОНКИ
+# РЕДАКТИРОВАНИЕ ИКОНКИИ
 edit_icon_conv = ConversationHandler(
 	entry_points=[CallbackQueryHandler(edit_link_icon_start, pattern="^edit_icon_")],
 	states={
