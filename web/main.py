@@ -1,8 +1,12 @@
 #D:\aRabota\TelegaBoom\030_mylinkspace\web\main.py
 
-
-import mimetypes  # ← ДОБАВЬ ЭТОТ ИМПОРТ
+import logging
+from fastapi import FastAPI, Request, Response
+from telegram import Update
+import sys
 import os
+import mimetypes  # ← ДОБАВЬ ЭТОТ ИМПОРТ
+from bot.main import application
 from bot.main import application as bot_app
 from urllib.parse import urlparse
 import asyncio
@@ -11,13 +15,14 @@ import asyncpg
 import uvicorn
 from bot.bankworld import COUNTRY_NAMES
 from dotenv import load_dotenv
-from fastapi import FastAPI, Request
+
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.responses import RedirectResponse
 from fastapi import Request
-from telegram import Update
+# Добавляем путь к корневой папке проекта
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import httpx
 try:
     from bot.main import application as ptb_application
@@ -29,6 +34,13 @@ except ImportError as e:
 
 
 load_dotenv()
+
+
+
+# Создаем FastAPI приложение
+app = FastAPI()
+
+
 
 # Принудительно регистрируем MIME-типы - ДОБАВЬ ЭТО СРАЗУ ПОСЛЕ ИМПОРТОВ!
 mimetypes.add_type('image/jpeg', '.jpg')
@@ -546,18 +558,37 @@ async def set_webhook():
 
 @app.post("/webhook")
 async def telegram_webhook(request: Request):
+    """Обработка входящих обновлений от Telegram"""
     try:
+        # Получаем данные от Telegram
         data = await request.json()
+        logger.info(f"Получен webhook: {data.get('update_id')}")
+        
+        # Преобразуем в Update и передаем боту
         update = Update.de_json(data, application.bot)
         await application.process_update(update)
+        
         return Response(status_code=200)
+        
     except Exception as e:
-        print(f"!!! WEBHOOK ERROR: {e}")  # Так точно сработает
+        logger.error(f"Ошибка в webhook: {e}", exc_info=True)
         return Response(status_code=500)
 
     
-    
-    
+
+@app.on_event("startup")
+async def startup():
+    logger.info("🤖 Инициализация Telegram бота для Webhook...")
+    if not application.running:
+        await application.initialize()
+        await application.start()
+    logger.info("✅ Бот готов к приему обновлений через /webhook")
+
+@app.on_event("shutdown")
+async def shutdown():
+    logger.info("🚦 Завершение работы...")
+    if application.running:
+        await application.stop()
     
     
 if __name__ == "__main__":
