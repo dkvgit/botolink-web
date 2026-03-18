@@ -98,6 +98,8 @@ from telegram import BotCommand, BotCommandScopeChat, Update
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters, \
 	ConversationHandler, DictPersistence, ContextTypes
 
+import warnings
+
 warnings.filterwarnings(
     action="ignore",
     message=r".*CallbackQueryHandler.*",
