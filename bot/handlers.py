@@ -817,7 +817,7 @@ async def qr_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 		qr_img = qr.make_image(fill_color="black", back_color="white").convert('RGB')
 		
 		# Вставка логотипа
-		logo_path = r"D:\aRabota\TelegaBoom\030_botolinkpro\favicon_io\android-chrome-192x192.png"
+		logo_path = r"D:\aRabota\TelegaBoom\030_mylinkspace\favicon_io\android-chrome-192x192.png"
 		if os.path.exists(logo_path):
 			try:
 				logo = Image.open(logo_path).convert('RGBA')
