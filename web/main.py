@@ -146,7 +146,7 @@ async def telegram_webhook(request: Request):
 # ========== ОСТАЛЬНЫЕ ЭНДПОИНТЫ ==========
 @app.get("/")
 async def root():
-    return {"status": "ok", "message": "Bot is running"}
+    return RedirectResponse(url="https://t.me/botolinkprobot")
 
 @app.get("/set_webhook")
 async def set_webhook():
