@@ -97,7 +97,7 @@ from core.config import BOT_TOKEN, ADMIN_IDS
 from telegram import BotCommand, BotCommandScopeChat, Update
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters, \
 	ConversationHandler, DictPersistence, ContextTypes
-
+from telegram.warnings import PTBUserWarning
 import warnings
 
 warnings.filterwarnings(
