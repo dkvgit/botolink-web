@@ -2513,55 +2513,66 @@ async def method_other_country(update: Update, context: ContextTypes.DEFAULT_TYP
 # ============================================
 
 async def process_card_input(update: Update, context: ContextTypes.DEFAULT_TYPE):
-	"""Обработка ввода карты (универсальный)"""
-	text = update.message.text.strip()
-	
-	# Определяем тип по состоянию
-	state = context.user_data.get('current_state')
-	
-	# Парсим данные
-	if "," in text:
-		card, name = text.split(",", 1)
-		card = card.strip().replace(" ", "")
-		name = name.strip()
-	else:
-		card = text.strip().replace(" ", "")
-		name = None
-	
-	# Проверяем карту
-	card_clean = ''.join(filter(str.isdigit, card))
-	if len(card_clean) != 16:
-		await update.message.reply_text("❌ Номер карты должен содержать 16 цифр. Попробуйте еще:")
-		return state
-	
-	# Сохраняем
-	context.user_data['payment_data'] = {
-		'type': 'card',
-		'card': card_clean,
-		'name': name,
-		'country': context.user_data.get('current_country')
-	}
-	
-	# Показываем подтверждение
-	return await show_confirmation(update, context)
+    """Шаг 2: Универсальный приемщик (Текст банка или Номер карты)"""
+    text = update.message.text.strip()
+    state = context.user_data.get('current_state')
+    
+    # Если это ввод названия банка после телефона (СБП Россия)
+    if state == WAIT_RUSSIA_DETAILS:
+        data = context.user_data.get('payment_data', {})
+        data['bank_name'] = text  # Дописываем банк к телефону
+        context.user_data['payment_data'] = data
+        
+        # Теперь данные полные, вызываем подтверждение
+        from bot.bank import show_confirmation
+        return await show_confirmation(update, context)
 
+    # Логика для обычных КАРТ (проверка 16 цифр)
+    if "," in text:
+       card, name = text.split(",", 1)
+       card = card.strip().replace(" ", "")
+       name = name.strip()
+    else:
+       card = text.strip().replace(" ", "")
+       name = None
+    
+    card_clean = ''.join(filter(str.isdigit, card))
+    
+    if len(card_clean) != 16:
+       await update.message.reply_text("❌ Номер карты должен содержать 16 цифр. Попробуйте еще:")
+       return state
+    
+    context.user_data['payment_data'] = {
+       'type': 'card',
+       'card': card_clean,
+       'name': name,
+       'country': context.user_data.get('current_country')
+    }
+    
+    from bot.bank import show_confirmation
+    return await show_confirmation(update, context)
 
 async def process_phone_input(update: Update, context: ContextTypes.DEFAULT_TYPE):
-	"""Обработка ввода телефона"""
-	text = update.message.text.strip()
-	
-	# Очищаем номер
-	phone = ''.join(filter(lambda x: x.isdigit() or x == '+', text))
-	
-	# Сохраняем
-	context.user_data['payment_data'] = {
-		'type': 'phone',
-		'phone': phone,
-		'country': context.user_data.get('current_country')
-	}
-	
-	return await show_confirmation(update, context)
-
+    """Шаг 1: Получаем телефон и переходим к вводу банка (СБП)"""
+    text = update.message.text.strip()
+    
+    # Очистка номера
+    phone = ''.join(filter(lambda x: x.isdigit() or x == '+', text))
+    
+    # Сохраняем во временный словарь
+    context.user_data['payment_data'] = {
+       'type': 'phone',
+       'phone': phone,
+       'country': context.user_data.get('current_country')
+    }
+    
+    # Спрашиваем название банка
+    await update.message.reply_text(
+        "Введите название вашего банка (например: Сбербанк, Тинькофф, СБП):"
+    )
+    
+    # Переходим в стейт ожидания названия банка
+    return WAIT_RUSSIA_DETAILS
 
 async def process_iban_input(update: Update, context: ContextTypes.DEFAULT_TYPE):
 	"""Обработка ввода IBAN"""
