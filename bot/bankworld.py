@@ -399,30 +399,31 @@ def get_field_example(field: str) -> str:
 # ШАГ 3: НАЧАЛО ЗАПОЛНЕНИЯ ДАННЫХ
 # ============================================
 async def start_filling(update: Update, context: ContextTypes.DEFAULT_TYPE):
-	"""Начинает пошаговое заполнение выбранных методов"""
-	query = update.callback_query
-	
-	print(f"🌍 bankworld.py получил: {update.callback_query.data}")
-	
-	print(f"🔥 callback_data: {query.data}")  # или logger.info
-	
-	await query.answer()
-	
-	selected_methods = context.user_data.get('selected_methods', [])
-	
-	if not selected_methods:
-		await query.edit_message_text("❌ Вы не выбрали ни одного способа")
-		print(f"🔵 show_country_methods ВОЗВРАЩАЕТ: {WAIT_METHOD_SELECTION}")
-		
-		return WAIT_METHOD_SELECTION
-	
-	# Создаем очередь для заполнения
-	context.user_data['filling_queue'] = selected_methods.copy()
-	context.user_data['collected_methods'] = {}  # Сюда сохраним все данные
-	
-	# Начинаем с первого метода
-	await ask_next_method(query, context)
-	return WAIT_FILLING_DATA
+    """Начинает пошаговое заполнение выбранных методов"""
+    query = update.callback_query
+    
+    print(f"🌍 bankworld.py получил: {update.callback_query.data}")
+    print(f"🔥 callback_data: {query.data}")
+    
+    await query.answer()
+    
+    selected_methods = context.user_data.get('selected_methods', [])
+    
+    if not selected_methods:
+        await query.edit_message_text("❌ Вы не выбрали ни одного способа")
+        print(f"🔵 start_filling ВОЗВРАЩАЕТ: {WAIT_METHOD_SELECTION}")
+        return WAIT_METHOD_SELECTION
+    
+    # Создаем очередь для заполнения
+    context.user_data['filling_queue'] = selected_methods.copy()
+    context.user_data['collected_methods'] = {}  # Сюда сохраним все данные
+    context.user_data['current_field_index'] = 0  # Добавляем для безопасности
+    
+    # Начинаем с первого метода и возвращаем результат
+    result = await ask_next_method(query, context)
+    print(f"🔵 start_filling ВОЗВРАЩАЕТ: {result}")
+    return result  # Возвращаем WAIT_FIELD_INPUT
+
 
 
 async def ask_next_method(query_or_update, context):
