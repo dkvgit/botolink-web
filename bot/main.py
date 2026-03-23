@@ -778,7 +778,7 @@ application.add_handler(CallbackQueryHandler(choose_country_from_constructor, pa
 
 application.add_handler(CallbackQueryHandler(cancel_handler, pattern="cancel"))
 
-application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text_input))
+# application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text_input))
 
 application.add_handler(CallbackQueryHandler(show_categories, pattern="^show_categories$"))
 application.add_handler(CallbackQueryHandler(list_links_handler, pattern="^list_links$"))
