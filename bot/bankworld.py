@@ -496,94 +496,118 @@ async def ask_next_method(query_or_update, context):
 
 
 async def process_field_input(update: Update, context: ContextTypes.DEFAULT_TYPE):
-	"""Обрабатывает ввод очередного поля, проверяет лимиты и переключает на следующий шаг"""
-	
-	# ✅ ИСПРАВЛЕНО: проверяем, что пришло сообщение
-	if not update.message:
-		print("❌ Ошибка: нет сообщения")
-		return ConversationHandler.END
-	
-	user_input = update.message.text.strip()
-	print(f"🌍 bankworld.py получил сообщение: {user_input}")
-	
-	current_method = context.user_data.get('current_method')
-	if not current_method:
-		await update.message.reply_text("❌ Ошибка данных. Начните заново через /start")
-		return ConversationHandler.END
-	
-	field_index = context.user_data.get('current_field_index', 0)
-	fields = current_method['fields']
-	field_name = fields[field_index]
-	
-	# --- ВАЛИДАЦИЯ ДЛИНЫ ВВОДА ---
-	limits = {
-		"bank_name": 50,
-		"card_number": 25,
-		"phone": 20,
-		"iban": 34,
-		"beneficiary": 60,
-		"account_number": 30,
-		"bik": 12,
-		"swift": 15
-	}
-	max_len = limits.get(field_name, 100)
-	
-	if len(user_input) > max_len:
-		await update.message.reply_text(
-			f"❌ Слишком длинный текст (максимум {max_len} симв.).\n"
-			f"Вы ввели {len(user_input)}. Попробуйте еще раз:"
-		)
-		return WAIT_FIELD_INPUT
-	
-	if not user_input:
-		await update.message.reply_text("❌ Поле не может быть пустым. Введите данные:")
-		return WAIT_FIELD_INPUT
-	# -----------------------------
-	
-	# Сохраняем значение в текущий метод
-	if 'data' not in current_method:
-		current_method['data'] = {}
-	current_method['data'][field_name] = user_input
-	
-	# ПРОВЕРКА: Есть ли еще поля в ЭТОМ методе?
-	if field_index + 1 < len(fields):
-		context.user_data['current_field_index'] = field_index + 1
-		next_field = fields[field_index + 1]
-		
-		# Берем названия из FIELD_NAMES
-		curr_display = FIELD_NAMES.get(field_name, field_name.replace('_', ' '))
-		next_display = FIELD_NAMES.get(next_field, next_field.replace('_', ' '))
-		
-		text = f"✅ <b>{curr_display.upper()}</b> сохранен\n\n"
-		text += f"👉 Введите <b><code>{next_display.upper()}</code></b> в поле чата"
-		
-		await update.message.reply_text(text, parse_mode='HTML')
-		return WAIT_FIELD_INPUT
-	
-	# --- ЗАВЕРШЕНИЕ ТЕКУЩЕГО МЕТОДА ---
-	else:
-		method_id = current_method['id']
-		method_data = current_method['data']
-		
-		if 'collected_methods' not in context.user_data:
-			context.user_data['collected_methods'] = {}
-		
-		context.user_data['collected_methods'][method_id] = {
-			'name': current_method['name'],
-			'data': method_data
-		}
-		
-		queue = context.user_data.get('filling_queue', [])
-		if queue:
-			queue.pop(0)
-			context.user_data['filling_queue'] = queue
-		
-		await update.message.reply_text(
-			f"✅ Данные для <b>{current_method['name']}</b> сохранены!", parse_mode='HTML')
-		
-		# Переход к следующему методу или финалу
-		return await ask_next_method(update, context)
-
+    """Обрабатывает ввод очередного поля, проверяет лимиты и переключает на следующий шаг"""
+    
+    # ДИАГНОСТИКА
+    print("🔵🔵🔵🔵🔵 process_field_input ВЫЗВАНА! 🔵🔵🔵🔵🔵")
+    
+    # Проверяем, что пришло сообщение
+    if not update.message:
+        print("❌ Ошибка: нет сообщения")
+        return ConversationHandler.END
+    
+    user_input = update.message.text.strip()
+    print(f"🌍 bankworld.py получил сообщение: {user_input}")
+    
+    # Логируем текущее состояние
+    current_state = context.user_data.get('state')
+    print(f"📊 Текущее состояние в user_data: {current_state}")
+    print(f"📦 user_data keys: {list(context.user_data.keys())}")
+    
+    # Проверяем current_method
+    current_method = context.user_data.get('current_method')
+    if not current_method:
+        print("❌ current_method не найден в user_data!")
+        await update.message.reply_text("❌ Ошибка данных. Начните заново через /start")
+        return ConversationHandler.END
+    
+    print(f"✅ current_method найден: {current_method.get('name')}")
+    print(f"   fields: {current_method.get('fields')}")
+    
+    field_index = context.user_data.get('current_field_index', 0)
+    fields = current_method['fields']
+    
+    if field_index >= len(fields):
+        print(f"❌ Ошибка: field_index={field_index} >= len(fields)={len(fields)}")
+        await update.message.reply_text("❌ Ошибка данных. Начните заново через /start")
+        return ConversationHandler.END
+    
+    field_name = fields[field_index]
+    print(f"📝 Обрабатываем поле: {field_name} (индекс {field_index})")
+    
+    # --- ВАЛИДАЦИЯ ДЛИНЫ ВВОДА ---
+    limits = {
+        "bank_name": 50,
+        "card_number": 25,
+        "phone": 20,
+        "iban": 34,
+        "beneficiary": 60,
+        "account_number": 30,
+        "bik": 12,
+        "swift": 15
+    }
+    max_len = limits.get(field_name, 100)
+    
+    if len(user_input) > max_len:
+        await update.message.reply_text(
+            f"❌ Слишком длинный текст (максимум {max_len} симв.).\n"
+            f"Вы ввели {len(user_input)}. Попробуйте еще раз:"
+        )
+        return WAIT_FIELD_INPUT
+    
+    if not user_input:
+        await update.message.reply_text("❌ Поле не может быть пустым. Введите данные:")
+        return WAIT_FIELD_INPUT
+    # -----------------------------
+    
+    # Сохраняем значение в текущий метод
+    if 'data' not in current_method:
+        current_method['data'] = {}
+    current_method['data'][field_name] = user_input
+    print(f"💾 Сохранено: {field_name} = {user_input[:20]}...")
+    
+    # ПРОВЕРКА: Есть ли еще поля в ЭТОМ методе?
+    if field_index + 1 < len(fields):
+        context.user_data['current_field_index'] = field_index + 1
+        next_field = fields[field_index + 1]
+        
+        # Берем названия из FIELD_NAMES
+        curr_display = FIELD_NAMES.get(field_name, field_name.replace('_', ' '))
+        next_display = FIELD_NAMES.get(next_field, next_field.replace('_', ' '))
+        
+        text = f"✅ <b>{curr_display.upper()}</b> сохранен\n\n"
+        text += f"👉 Введите <b><code>{next_display.upper()}</code></b> в поле чата"
+        
+        await update.message.reply_text(text, parse_mode='HTML')
+        print(f"➡️ Запрашиваем следующее поле: {next_field}")
+        return WAIT_FIELD_INPUT
+    
+    # --- ЗАВЕРШЕНИЕ ТЕКУЩЕГО МЕТОДА ---
+    else:
+        print(f"🏁 Завершаем метод {current_method['name']}")
+        method_id = current_method['id']
+        method_data = current_method['data']
+        
+        if 'collected_methods' not in context.user_data:
+            context.user_data['collected_methods'] = {}
+        
+        context.user_data['collected_methods'][method_id] = {
+            'name': current_method['name'],
+            'data': method_data
+        }
+        
+        queue = context.user_data.get('filling_queue', [])
+        if queue:
+            queue.pop(0)
+            context.user_data['filling_queue'] = queue
+            print(f"📋 Очередь после удаления: {queue}")
+        
+        await update.message.reply_text(
+            f"✅ Данные для <b>{current_method['name']}</b> сохранены!", parse_mode='HTML')
+        
+        # Переход к следующему методу или финалу
+        print("🔄 Вызываем ask_next_method...")
+        return await ask_next_method(update, context)
 
 # ============================================
 # ЗАВЕРШЕНИЕ ЗАПОЛНЕНИЯ
