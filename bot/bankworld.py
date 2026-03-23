@@ -496,30 +496,23 @@ async def ask_next_method(query_or_update, context):
 
 
 async def process_field_input(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Обрабатывает ввод очередного поля, проверяет лимиты и переключает на следующий шаг"""
-    
-    # ДИАГНОСТИКА
     print("🔵🔵🔵🔵🔵 process_field_input ВЫЗВАНА! 🔵🔵🔵🔵🔵")
     
-    # Проверяем, что пришло сообщение
-    if not update.message:
-        print("❌ Ошибка: нет сообщения")
+    # Проверяем, есть ли активное состояние в ConversationHandler
+    conv_state = context.user_data.get('state')
+    print(f"📊 Conversation state: {conv_state}")
+    
+    if not conv_state:
+        print("⚠️ Нет активного состояния, очищаем данные")
+        # Очищаем старые данные
+        keys_to_clear = ['selected_country', 'selected_methods', 'filling_queue',
+                         'collected_methods', 'current_method', 'current_field_index']
+        for key in keys_to_clear:
+            context.user_data.pop(key, None)
+        await update.message.reply_text("❌ Сессия устарела. Начните заново через /start")
         return ConversationHandler.END
     
-    user_input = update.message.text.strip()
-    print(f"🌍 bankworld.py получил сообщение: {user_input}")
-    
-    # Логируем текущее состояние
-    current_state = context.user_data.get('state')
-    print(f"📊 Текущее состояние в user_data: {current_state}")
-    print(f"📦 user_data keys: {list(context.user_data.keys())}")
-    
-    # Проверяем current_method
-    current_method = context.user_data.get('current_method')
-    if not current_method:
-        print("❌ current_method не найден в user_data!")
-        await update.message.reply_text("❌ Ошибка данных. Начните заново через /start")
-        return ConversationHandler.END
+    # остальной код...
     
     print(f"✅ current_method найден: {current_method.get('name')}")
     print(f"   fields: {current_method.get('fields')}")
