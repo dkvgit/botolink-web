@@ -405,6 +405,11 @@ async def start_filling(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print(f"🌍 bankworld.py получил: {update.callback_query.data}")
     print(f"🔥 callback_data: {query.data}")
     
+    # Проверяем активный диалог
+    current_conv = context.user_data.get('conversation_key')
+    print(f"🔍 Активный диалог: {current_conv}")
+    print(f"🔍 Все user_data keys: {list(context.user_data.keys())}")
+    
     await query.answer()
     
     selected_methods = context.user_data.get('selected_methods', [])
@@ -423,6 +428,8 @@ async def start_filling(update: Update, context: ContextTypes.DEFAULT_TYPE):
     result = await ask_next_method(query, context)
     print(f"🔵 start_filling ВОЗВРАЩАЕТ: {result}")
     return result  # Возвращаем WAIT_FIELD_INPUT
+
+
 
 
 
