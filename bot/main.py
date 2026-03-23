@@ -764,8 +764,10 @@ bank_world_conv = ConversationHandler(
 	per_user=True,
 	per_message=True,
 )
+print(f"🔧 Регистрируем bank_world_conv с состоянием WAIT_FIELD_INPUT={WAIT_FIELD_INPUT}")
+print(f"   Обработчик WAIT_FIELD_INPUT: {bank_world_conv.states.get(WAIT_FIELD_INPUT)}")
 application.add_handler(bank_world_conv)  # Сначала наш новый
-
+print(f"✅ bank_world_conv добавлен, WAIT_FIELD_INPUT={WAIT_FIELD_INPUT}")
 
 
 # ===== 3. CALLBACK HANDLERS =====
