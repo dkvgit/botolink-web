@@ -859,301 +859,135 @@ async def continue_after_edit(update: Update, context: ContextTypes.DEFAULT_TYPE
 # ============================================
 # СОХРАНЕНИЕ ВСЕХ МЕТОДОВ В БАЗУ (ИСПРАВЛЕННАЯ)
 # ============================================
+import json # Добавь в начало файла или оставь здесь
+
 async def save_all_methods(update: Update, context: ContextTypes.DEFAULT_TYPE):
-	"""Сохраняет все выбранные методы в базу данных"""
-	query = update.callback_query
-	await query.answer()
-	
-	print(f"🌍 bankworld.py получил: {update.callback_query.data}")
-	
-	collected = context.user_data.get('collected_methods', {})
-	page_id = context.user_data.get('page_id')
-	country = context.user_data.get('selected_country', '')
-	
-	# Базовый URL из конфига
-	from core.config import APP_URL
-	base_url = APP_URL.rstrip('/')
-	page_username = None
-	page_url = None
-	
-	# Если нет page_id - пробуем получить из базы
-	if not page_id:
-		try:
-			from bot.utils import get_db_connection
-			
-			conn = await get_db_connection()
-			
-			# Получаем страницу пользователя
-			user_id = update.effective_user.id
-			page = await conn.fetchrow(
-				"""
-                SELECT p.id, p.username
-                FROM pages p
-                         JOIN users u ON u.id = p.user_id
-                WHERE u.telegram_id = $1
-				""",
-				user_id
-			)
-			
-			if not page:
-				await query.edit_message_text(
-					"❌ Ошибка: страница не найдена.\n"
-					"Пожалуйста, сначала создайте страницу через /start"
-				)
-				await conn.close()
-				return ConversationHandler.END
-			
-			page_id = page['id']
-			page_username = page['username']
-			context.user_data['page_id'] = page_id
-			context.user_data['page_username'] = page_username
-			await conn.close()
-			page_url = f"{base_url}/{page_username}"
-		
-		except Exception as e:
-			logger.error(f"Ошибка получения page_id: {e}")
-			await query.edit_message_text(
-				"❌ Ошибка: не удалось получить ID страницы.\n"
-				"Пожалуйста, сначала создайте страницу через /start"
-			)
-			return ConversationHandler.END
-	else:
-		# Если page_id уже есть, получаем username
-		try:
-			from bot.utils import get_db_connection
-			conn = await get_db_connection()
-			page = await conn.fetchrow(
-				"SELECT username FROM pages WHERE id = $1",
-				page_id
-			)
-			if page:
-				page_username = page['username']
-				page_url = f"{base_url}/{page_username}"
-			await conn.close()
-		except Exception as e:
-			logger.error(f"Ошибка получения username: {e}")
-			page_username = None
-	
-	# Проверяем, есть ли данные для сохранения
-	if not collected:
-		await query.edit_message_text("❌ Нет данных для сохранения")
-		return ConversationHandler.END
-	
-	saved_count = 0
-	errors = []
-	saved_methods_info = []
-	
-	await query.edit_message_text("⏳ Сохраняем данные в базу...")
-	
-	try:
-		from bot.utils import get_db_connection
-		
-		conn = await get_db_connection()
-		
-		# Получаем максимальный sort_order
-		max_sort = await conn.fetchval(
-			"SELECT COALESCE(MAX(sort_order), 0) FROM links WHERE page_id = $1",
-			page_id
-		)
-		
-		for method_id, method_info in collected.items():
-			try:
-				# Добавляем страну в JSON данные
-				method_info['data']['country'] = country
-				
-				# Формируем название для title
-				title = f"{method_info['name']}"
-				
-				# ОБРЕЗАЕМ TITLE (обычно VARCHAR(255))
-				if title and len(title) > 255:
-					title = title[:255]
-					print(f"⚠️ Title обрезан до 255 символов")
-				
-				# Определяем иконку в зависимости от типа метода
-				if method_id.startswith('card_'):
-					icon = 'card'
-				elif method_id.startswith('iban_'):
-					icon = 'iban'
-				elif method_id.startswith('phone_'):
-					icon = 'phone'
-				elif method_id.startswith('account_') or method_id.startswith(
-						'non_res_') or method_id == 'non_res_vietnam':
-					icon = 'account'  # для всех счетов одна иконка
-				elif method_id.startswith('account_'):
-					icon = 'account'
-				elif method_id.startswith('ach_'):
-					icon = 'ach'
-				elif method_id.startswith('wire_'):
-					icon = 'wire'
-				else:
-					icon = method_id  # для старых типов (card, iban, phone)
-				
-				# ОБРЕЗАЕМ ICON (обычно VARCHAR(100))
-				if icon and len(icon) > 100:
-					icon = icon[:100]
-					print(f"⚠️ Icon обрезана до 100 символов")
-				
-				# Проверяем, сколько уже таких методов (для создания уникального link_type)
-				similar_count = await conn.fetchval(
-					"""
-                    SELECT COUNT(*)
-                    FROM links
-                    WHERE page_id = $1
-                      AND link_type LIKE $2
-					""",
-					page_id, f"{method_id}%"
-				)
-				
-				# Если уже есть такие методы - добавляем суффикс
-				if similar_count > 0:
-					unique_method_id = f"{method_id}_{similar_count + 1}"
-				else:
-					unique_method_id = method_id
-				
-				# ОБРЕЗАЕМ UNIQUE_METHOD_ID (обычно VARCHAR(50))
-				if unique_method_id and len(unique_method_id) > 50:
-					unique_method_id = unique_method_id[:50]
-					print(f"⚠️ unique_method_id обрезан до 50 символов")
-				
-				# ПОДГОТАВЛИВАЕМ JSON ДАННЫЕ
-				pay_details_json = json.dumps(method_info['data'])
-				# ОБРЕЗАЕМ JSON если нужно (для TEXT поля обычно 5000-10000)
-				if len(pay_details_json) > 10000:
-					pay_details_json = pay_details_json[:10000]
-					print(f"⚠️ pay_details JSON обрезан до 10000 символов")
-				
-				# Вставляем новую запись ВСЕГДА (без проверки на существование!)
-				await conn.execute(
-					"""
+    """Сохраняет все выбранные методы в базу данных и завершает диалог"""
+    query = update.callback_query
+    await query.answer()
+    
+    print(f"💾 Начинаем сохранение. Методов к записи: {len(context.user_data.get('collected_methods', {}))}")
+    
+    collected = context.user_data.get('collected_methods', {})
+    page_id = context.user_data.get('page_id')
+    country = context.user_data.get('selected_country', '')
+    
+    # Импортируем конфиг
+    from core.config import APP_URL
+    base_url = APP_URL.rstrip('/')
+    page_username = None
+    
+    # 1. ПОЛУЧЕНИЕ PAGE_ID И USERNAME (если их нет в context)
+    from bot.utils import get_db_connection
+    try:
+        conn = await get_db_connection()
+        if not page_id:
+            user_id = update.effective_user.id
+            page = await conn.fetchrow(
+                "SELECT p.id, p.username FROM pages p JOIN users u ON u.id = p.user_id WHERE u.telegram_id = $1",
+                user_id
+            )
+            if not page:
+                await query.edit_message_text("❌ Ошибка: страница не найдена. Создайте её через /start")
+                await conn.close()
+                return ConversationHandler.END
+            page_id = page['id']
+            page_username = page['username']
+        else:
+            page = await conn.fetchrow("SELECT username FROM pages WHERE id = $1", page_id)
+            page_username = page['username'] if page else None
+    except Exception as e:
+        print(f"❌ Ошибка БД при поиске страницы: {e}")
+        await query.edit_message_text("❌ Ошибка базы данных.")
+        return ConversationHandler.END
+
+    # 2. ПРОЦЕСС СОХРАНЕНИЯ
+    saved_count = 0
+    errors = []
+    saved_methods_info = []
+    
+    await query.edit_message_text("⏳ Сохраняем данные в базу...")
+    
+    try:
+        # Получаем текущий макс. порядок сортировки
+        max_sort = await conn.fetchval("SELECT COALESCE(MAX(sort_order), 0) FROM links WHERE page_id = $1", page_id)
+        
+        for method_id, method_info in collected.items():
+            try:
+                # Подготовка данных
+                method_info['data']['country'] = country
+                title = f"{method_info['name']}"[:255]
+                
+                # Логика иконки
+                icon = 'card' if 'card' in method_id else 'iban' if 'iban' in method_id else 'account'
+                
+                # Уникальный ID для записи
+                similar_count = await conn.fetchval(
+                    "SELECT COUNT(*) FROM links WHERE page_id = $1 AND link_type LIKE $2",
+                    page_id, f"{method_id}%"
+                )
+                unique_id = f"{method_id}_{similar_count + 1}" if similar_count > 0 else method_id
+                
+                # JSON реквизитов
+                pay_details_json = json.dumps(method_info['data'])
+
+                # INSERT
+                await conn.execute(
+                    """
                     INSERT INTO links (page_id, title, url, icon, link_type, category,
                                        pay_details, sort_order, is_active, click_count, created_at)
                     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, true, 0, NOW())
-					""",
-					page_id,
-					title,  # обрезанный
-					"",  # url пустой, ок
-					icon,  # обрезанный
-					unique_method_id,  # обрезанный
-					'transfers',  # категория фиксированная
-					pay_details_json,  # обрезанный JSON
-					max_sort + saved_count + 1
-				)
-				logger.info(f"✅ Сохранен метод: {title} (тип: {unique_method_id})")
-				action = "добавлен"
-				
-				# Сохраняем информацию для отчета
-				saved_methods_info.append({
-					'name': method_info['name'],
-					'action': action,
-					'details': method_info['data']
-				})
-				
-				saved_count += 1
-			
-			except Exception as e:
-				errors.append(f"{method_info['name']}: {str(e)}")
-				logger.error(f"Error saving method {method_id}: {e}")
-		
-		await conn.close()
-	except Exception as e:
-		logger.error(f"Database error: {e}")
-		errors.append(f"Ошибка базы данных: {str(e)}")
-	
-	# Очищаем временные данные
-	keys_to_clear = ['selected_methods', 'filling_queue', 'collected_methods', 'current_method', 'selected_country']
-	for key in keys_to_clear:
-		context.user_data.pop(key, None)
-	
-	# ФОРМИРУЕМ КРАСИВЫЙ ОТЧЕТ
-	if errors:
-		result_text = f"⚠️ <b>Сохранено с ошибками:</b>\n✅ Успешно: {saved_count}\n❌ Ошибки:\n" + "\n".join(errors[:3])
-		if len(errors) > 3:
-			result_text += f"\n...и еще {len(errors) - 3} ошибок"
-	else:
-		# Заголовок
-		result_text = f"✅ <b>ГОТОВО! Сохранено {saved_count} способ(а) получения</b>\n"
-		result_text += "───────────────────\n\n"
-		
-		# Детальный отчет по каждому методу
-		result_text += "📋 <b>Добавленные реквизиты:</b>\n\n"
-		
-		for idx, item in enumerate(saved_methods_info, 1):
-			# Название метода с действием
-			result_text += f"{idx}. <b>{item['name']}</b> <i>({item['action']})</i>\n"
-			
-			# Детали в зависимости от типа
-			details = item['details']
-			
-			# Банк
-			if details.get('bank_name'):
-				result_text += f"   🏦 <b>Банк:</b> {details['bank_name']}\n"
-			
-			# Карта
-			if details.get('card_number'):
-				card = details['card_number'].replace(' ', '')
-				if len(card) == 16:
-					card_formatted = f"{card[:4]} {card[4:8]} {card[8:12]} {card[12:]}"
-				else:
-					card_formatted = card
-				result_text += f"   💳 <b>Карта:</b> <code>{card_formatted}</code>\n"
-			
-			# IBAN
-			if details.get('iban'):
-				iban = details['iban']
-				if len(iban) > 8:
-					iban_short = f"{iban[:8]}...{iban[-4:]}"
-				else:
-					iban_short = iban
-				result_text += f"   🏛 <b>IBAN:</b> <code>{iban_short}</code>\n"
-			
-			# BIC
-			if details.get('bic'):
-				result_text += f"   🔑 <b>BIC:</b> <code>{details['bic']}</code>\n"
-			
-			# Beneficiary
-			if details.get('beneficiary'):
-				result_text += f"   👤 <b>Получатель:</b> {details['beneficiary']}\n"
-			
-			# Телефон
-			if details.get('phone'):
-				result_text += f"   📱 <b>Телефон:</b> <code>{details['phone']}</code>\n"
-			
-			# Страна
-			if details.get('country'):
-				country_display = COUNTRY_NAMES.get(details['country'], details['country'])
-				result_text += f"   🌍 <b>Страна:</b> {country_display}\n"
-			
-			result_text += "\n"
-		
-		result_text += "───────────────────\n"
-		
-		# ССЫЛКА НА СТРАНИЦУ - только текст
-		if page_username:
-			page_url = f"{base_url}/{page_username}"
-			result_text += f"🔗 <b>Твоя страница:</b>\n"
-			result_text += f"<code>{page_url}</code>\n\n"
-			result_text += "👉 Скопируй ссылку и открой в браузере!\n\n"
-		else:
-			result_text += "⚠️ <b>Страница не найдена</b>\n"
-			result_text += "Сначала создай страницу через /start\n\n"
-		
-		result_text += "👇 <b>Выбери действие:</b>"
-	
-	# КНОПКИ - ТОЛЬКО CALLBACK
-	keyboard = [
-		[InlineKeyboardButton("➕ Добавить еще ссылку", callback_data="add_link")],
-		[InlineKeyboardButton("📋 Список всех ссылок", callback_data="list_links")],
-		[InlineKeyboardButton("🏠 Главное меню", callback_data="start")]
-	]
-	
-	await query.edit_message_text(
-		result_text,
-		reply_markup=InlineKeyboardMarkup(keyboard),
-		parse_mode='HTML'
-	)
-	
-	return ConversationHandler.END
+                    """,
+                    page_id, title, "", icon[:100], unique_id[:50], 'transfers', pay_details_json, max_sort + saved_count + 1
+                )
+                
+                saved_methods_info.append({'name': method_info['name'], 'details': method_info['data']})
+                saved_count += 1
+                
+            except Exception as e:
+                errors.append(f"{method_info.get('name', method_id)}: {str(e)}")
 
+        await conn.close()
+    except Exception as e:
+        print(f"❌ Ошибка при записи ссылок: {e}")
+        errors.append("Ошибка доступа к таблице ссылок")
+
+    # 3. ФОРМИРОВАНИЕ ОТЧЕТА
+    # Используем COUNTRY_NAMES для красивого вывода страны
+    try:
+        from bot.utils import COUNTRY_NAMES
+    except:
+        COUNTRY_NAMES = {}
+
+    result_text = f"✅ <b>ГОТОВО! Сохранено: {saved_count}</b>\n"
+    result_text += "───────────────────\n\n"
+    
+    for idx, item in enumerate(saved_methods_info, 1):
+        det = item['details']
+        result_text += f"{idx}. <b>{item['name']}</b>\n"
+        if det.get('bank_name'): result_text += f"   🏦 {det['bank_name']}\n"
+        if det.get('card_number'): result_text += f"   💳 <code>{det['card_number']}</code>\n"
+        if det.get('iban'): result_text += f"   🌍 <code>{det['iban'][:8]}...</code>\n"
+        result_text += "\n"
+
+    if page_username:
+        result_text += f"🔗 <b>Твоя страница:</b>\n<code>{base_url}/{page_username}</code>\n\n"
+
+    # 4. ОЧИСТКА И ЗАВЕРШЕНИЕ
+    keys_to_clear = ['selected_methods', 'filling_queue', 'collected_methods', 'current_method', 'selected_country']
+    for key in keys_to_clear:
+        context.user_data.pop(key, None)
+
+    keyboard = [
+        [InlineKeyboardButton("➕ Добавить еще", callback_data="add_link")],
+        [InlineKeyboardButton("📋 Мои ссылки", callback_data="list_links")],
+        [InlineKeyboardButton("🏠 Меню", callback_data="start")]
+    ]
+
+    await query.edit_message_text(result_text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode='HTML')
+    
+    print("🏁 Сохранение завершено, диалог закрыт.")
+    return ConversationHandler.END
 
 async def restart_filling(update: Update, context: ContextTypes.DEFAULT_TYPE):
 	"""Полностью перезапускает процесс заполнения для текущей страны"""
