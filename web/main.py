@@ -424,190 +424,147 @@ def get_icon_class(icon_name, link_type, url, pay_details):
 
 @app.get("/{username}", response_class=HTMLResponse)
 async def user_page(request: Request, username: str):
-	conn = await asyncpg.connect(DATABASE_URL)
-	try:
-		# Сначала увеличиваем счетчик просмотров
-		await conn.execute("UPDATE pages SET view_count = view_count + 1 WHERE username = $1", username)
-		
-		# Потом получаем данные страницы
-		row = await conn.fetchrow("""
-                                  SELECT p.*, t.folder_name, t.name as t_name
-                                  FROM pages p
-                                           LEFT JOIN templates t ON p.template_id = t.id
-                                  WHERE p.username = $1
-		                          """, username)
-		
-		if not row:
-			return HTMLResponse("<h1>Пользователь не найден</h1>", status_code=404)
-		
-		page_data = dict(row)
-		folder = page_data.get('folder_name')
-		template_file = f"{folder}/{folder}_page.html" if folder else "page.html"
-		
-		# Получаем ссылки
-		links_records = await conn.fetch("""
-                                         SELECT *
-                                         FROM links
-                                         WHERE page_id = $1
-                                           AND is_active = true
-                                         ORDER BY sort_order
-		                                 """, page_data['id'])
-		
-		# ПОЛУЧАЕМ ВСЕ ИКОНКИ ИЗ БАЗЫ ОДНИМ ЗАПРОСОМ
-		icon_names = list(set([r['icon'] for r in links_records if r['icon']]))
-		icon_map = {}
-		
-		if icon_names:
-			icon_rows = await conn.fetch("""
-                                         SELECT icon_code, font_awesome_class
-                                         FROM icons
-                                         WHERE icon_code = ANY ($1::text[])
-			                             """, icon_names)
-			icon_map = {row['icon_code']: row['font_awesome_class'] for row in icon_rows}
-			
-			print(f"📌 icon_names: {icon_names}")
-			print(f"📌 icon_map: {icon_map}")
-			print(f"📌 bnb in icon_map: {'bnb' in icon_map}")
-		
-		# Обрабатываем ссылки
-		import json  # Добавь импорт в начало функции или файла
-		processed_links = []
-		for r in links_records:
-			l_dict = dict(r)
-			
-			# --- НОВОЕ: ОБРАБОТКА JSON В pay_details ---
-			pay_details = l_dict.get('pay_details')
-			if pay_details and isinstance(pay_details, str):
-				try:
-					# Превращаем строку '{"tabs": ...}' в настоящий словарь Python
-					l_dict['pay_details'] = json.loads(pay_details)
-				except Exception as e:
-					print(f"⚠️ Ошибка парсинга JSON для ссылки {l_dict.get('id')}: {e}")
-					l_dict['pay_details'] = {}
-			elif not pay_details:
-				l_dict['pay_details'] = {}
-			
-			# --- ИСПРАВЛЕННАЯ ОБРАБОТКА URL (в функции user_page) ---
-			original_url = l_dict.get('url')
-			link_type = l_dict.get('link_type', 'standard')
-			
-			if original_url is not None and original_url != "#":
-				if isinstance(original_url, str):
-					original_url = original_url.strip()
-				
-				# ПРОВЕРКА: Если это крипта, НЕ добавляем https://, оставляем как есть
-				if link_type == 'crypto' or link_type in ['binance', 'bybit', 'okx', 'metamask', 'kucoin']:
-					l_dict['url'] = original_url
-				
-				# Для всего остального (соцсети и т.д.) добавляем протокол, если его нет
-				elif not (original_url.startswith('http://') or original_url.startswith('https://')):
-					l_dict['url'] = f"https://{original_url}"
-				else:
-					l_dict['url'] = original_url
-			else:
-				l_dict['url'] = "#"
-			
-			# --- ИСПРАВЛЕННАЯ ОБРАБОТКА ИКОНОК (main.py) ---
-			icon_name = l_dict.get('icon')
-			
-			# Если в БД напрямую указан код иконки
-			if icon_name and icon_name in icon_map:
-				l_dict['icon_class'] = icon_map[icon_name]
-			else:
-				# Проверяем по link_type
-				if link_type in ['binance', 'bybit', 'okx', 'metamask', 'kucoin', 'crypto']:
-					# Если это кастомная крипта через бота
-					if link_type == 'crypto':
-						l_dict['icon_class'] = 'fas fa-coins'
-					else:
-						# Для бирж ставим иконку, но помни:
-						# в HTML шаблоне у тебя приоритет на <img src="/static/icons/{{link_type}}.png">
-						l_dict['icon_class'] = BRAND_ICONS.get(link_type, 'fas fa-wallet')
-				elif link_type == 'finance':
-					l_dict['icon_class'] = 'fas fa-credit-card'
-				else:
-					l_dict['icon_class'] = 'fas fa-link'
-			
-			l_dict['is_external'] = l_dict.get('url', '').startswith(('http://', 'https://'))
-			processed_links.append(l_dict)
-		
-		# Получаем данные пользователя
-		user_row = await conn.fetchrow("SELECT * FROM users WHERE id = $1", page_data['user_id'])
-		user_data = dict(user_row) if user_row else {}
-		
-		# ЯВНОЕ ПРЕОБРАЗОВАНИЕ ВСЕХ ПОЛЕЙ В СТРОКИ
-		if user_data:
-			# first_name может быть методом, преобразуем в строку
-			if user_data.get('first_name'):
-				user_data['first_name'] = str(user_data['first_name'])
-			
-			# username тоже преобразуем для надежности
-			if user_data.get('username'):
-				user_data['username'] = str(user_data['username'])
-		
-		# Если нет first_name, используем username из page
-		if not user_data.get('first_name'):
-			user_data['first_name'] = str(page_data.get('username', 'Пользователь'))
-		
-		print(f"🔥🔥🔥 ОБРАБОТКА СТРАНИЦЫ {username}")
-		print(f"🔥 Всего ссылок: {len(processed_links)}")
-		
-		for link in processed_links:
-			print(
-				f"🔥 Ссылка: {link['title']}, link_type: {link['link_type']}, категория по словарю: {LINK_TYPE_CATEGORY.get(link['link_type'], 'other')}")
-		
-		# СОЗДАЕМ categories
-		categories = {
-			'social': [],
-			'messengers': [],
-			'transfers': [],
-			'donate': [],
-			'crypto': [],
-			'shops': [],
-			'partner': [],
-			'other': []
-		}
-		
-		for link in processed_links:
-			link_type = link['link_type']
-			
-			# Автоматически определяем категорию для всех новых типов
-			if (link_type.startswith('card_') or
-					link_type.startswith('iban_') or
-					link_type.startswith('phone_') or
-					link_type.startswith('account_') or
-					link_type.startswith('ach_') or
-					link_type.startswith('wire_')):
-				cat = 'transfers'
-			else:
-				# Для остальных используем словарь
-				cat = LINK_TYPE_CATEGORY.get(link_type, 'other')
-			
-			if cat in categories:
-				categories[cat].append(link)
-			else:
-				categories['other'].append(link)
-		
-		print(f"🔥 transfers: {len(categories['transfers'])} ссылок")
-		
-		# Теперь return с categories и COUNTRY_NAMES
-		return templates.TemplateResponse(template_file, {
-			"request": request,
-			"user": user_data,
-			"page": page_data,
-			"links": processed_links,
-			"categories": categories,
-			"COUNTRY_NAMES": COUNTRY_NAMES
-		})
-	
-	except Exception as e:
-		print(f"🔥 ОШИБКА: {e}")
-		import traceback
-		traceback.print_exc()
-		return HTMLResponse(f"Ошибка сервера: {e}", status_code=500)
-	finally:
-		await conn.close()
+    conn = await asyncpg.connect(DATABASE_URL)
+    try:
+        # 1. Увеличиваем счетчик просмотров
+        await conn.execute("UPDATE pages SET view_count = view_count + 1 WHERE username = $1", username)
+        
+        # 2. Получаем данные страницы
+        row = await conn.fetchrow("""
+            SELECT p.*, t.folder_name, t.name as t_name
+            FROM pages p
+            LEFT JOIN templates t ON p.template_id = t.id
+            WHERE p.username = $1
+        """, username)
+        
+        if not row:
+            return HTMLResponse("<h1>Пользователь не найден</h1>", status_code=404)
+        
+        page_data = dict(row)
+        folder = page_data.get('folder_name')
+        
+        # Строго проверяем путь к шаблону
+        if folder and isinstance(folder, str):
+            template_file = f"{folder}/{folder}_page.html"
+        else:
+            template_file = "page.html"
+            
+        # 3. Получаем ссылки
+        links_records = await conn.fetch("""
+            SELECT *
+            FROM links
+            WHERE page_id = $1
+              AND is_active = true
+            ORDER BY sort_order
+        """, page_data['id'])
+        
+        # 4. Собираем иконки
+        icon_names = list(set([r['icon'] for r in links_records if r['icon']]))
+        icon_map = {}
+        
+        if icon_names:
+            icon_rows = await conn.fetch("""
+                SELECT icon_code, font_awesome_class
+                FROM icons
+                WHERE icon_code = ANY ($1::text[])
+            """, icon_names)
+            icon_map = {r['icon_code']: r['font_awesome_class'] for r in icon_rows}
 
+        # 5. Обрабатываем ссылки
+        processed_links = []
+        import json # Убедись, что json импортирован в начале файла
+        
+        for r in links_records:
+            l_dict = dict(r)
+            
+            # Обработка JSON
+            pay_details = l_dict.get('pay_details')
+            if pay_details and isinstance(pay_details, str):
+                try:
+                    l_dict['pay_details'] = json.loads(pay_details)
+                except Exception:
+                    l_dict['pay_details'] = {}
+            elif not isinstance(pay_details, (dict, list)):
+                l_dict['pay_details'] = {}
+            
+            # Обработка URL
+            original_url = l_dict.get('url')
+            link_type = l_dict.get('link_type', 'standard')
+            
+            if original_url and original_url != "#":
+                original_url = str(original_url).strip()
+                # Для крипты оставляем как есть, для остального добавляем https
+                crypto_types = ['crypto', 'binance', 'bybit', 'okx', 'metamask', 'kucoin']
+                if link_type in crypto_types:
+                    l_dict['url'] = original_url
+                elif not original_url.startswith(('http://', 'https://')):
+                    l_dict['url'] = f"https://{original_url}"
+                else:
+                    l_dict['url'] = original_url
+            else:
+                l_dict['url'] = "#"
+            
+            # Обработка иконок
+            icon_name = l_dict.get('icon')
+            if icon_name and icon_name in icon_map:
+                l_dict['icon_class'] = icon_map[icon_name]
+            else:
+                if link_type in ['binance', 'bybit', 'okx', 'metamask', 'kucoin', 'crypto']:
+                    l_dict['icon_class'] = 'fas fa-coins' if link_type == 'crypto' else BRAND_ICONS.get(link_type, 'fas fa-wallet')
+                elif link_type == 'finance':
+                    l_dict['icon_class'] = 'fas fa-credit-card'
+                else:
+                    l_dict['icon_class'] = 'fas fa-link'
+            
+            l_dict['is_external'] = l_dict['url'].startswith(('http://', 'https://'))
+            processed_links.append(l_dict)
+        
+        # 6. Данные пользователя
+        user_row = await conn.fetchrow("SELECT * FROM users WHERE id = $1", page_data['user_id'])
+        user_data = dict(user_row) if user_row else {}
+        
+        # Преобразование полей в строки для стабильности Jinja2
+        user_data['first_name'] = str(user_data.get('first_name') or page_data.get('username') or 'Пользователь')
+        user_data['username'] = str(user_data.get('username') or '')
+
+        # 7. Распределение по категориям
+        categories = {k: [] for k in ['social', 'messengers', 'transfers', 'donate', 'crypto', 'shops', 'partner', 'other']}
+        
+        for link in processed_links:
+            l_type = link['link_type']
+            if any(l_type.startswith(p) for p in ['card_', 'iban_', 'phone_', 'account_', 'ach_', 'wire_']):
+                cat = 'transfers'
+            else:
+                cat = LINK_TYPE_CATEGORY.get(l_type, 'other')
+            
+            if cat in categories:
+                categories[cat].append(link)
+            else:
+                categories['other'].append(link)
+
+        # ФИНАЛЬНЫЙ ОТЛАДОЧНЫЙ ПРИНТ
+        print(f"✅ Rendering template: {template_file} for user: {username}")
+
+        # 8. Возврат ответа (С ИСПРАВЛЕННОЙ ПЕРЕДАЧЕЙ REQUEST)
+        return templates.TemplateResponse(
+            request=request,
+            name=template_file,
+            context={
+                "user": user_data,
+                "page": page_data,
+                "links": processed_links,
+                "categories": categories,
+                "COUNTRY_NAMES": COUNTRY_NAMES
+            }
+        )
+    
+    except Exception as e:
+        print(f"🔥 КРИТИЧЕСКАЯ ОШИБКА В user_page: {e}")
+        import traceback
+        traceback.print_exc()
+        return HTMLResponse(f"Ошибка сервера: {e}", status_code=500)
+    finally:
+        await conn.close()
 
 
 
