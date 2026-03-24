@@ -534,6 +534,9 @@ async def ask_next_method(query_or_update, context):
 
 
 async def process_field_input(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    print("\n" + "🔵" * 5 + " process_field_input ВЫЗВАНА! " + "🔵" * 5)
+    print(f"📩 Текст: {update.message.text if update.message else 'НЕТ ТЕКСТА'}")
+
     # Перед тем как что-то делать, берем текст от юзера
     user_input = update.message.text.strip() if update.message.text else ""
     

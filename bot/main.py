@@ -860,7 +860,13 @@ application.add_handler(CallbackQueryHandler(delete_link_confirm, pattern=r"^del
 application.add_handler(CallbackQueryHandler(button_handler))
 logger.info("✅ Все хендлеры зарегистрированы.")
 
+async def debug_all_messages(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    print(f"🕵️ ГЛОБАЛЬНЫЙ ПЕРЕХВАТ: Юзер {update.effective_user.id} прислал: {update.message.text}")
+    # Проверим, какой стейт сейчас у юзера в конструкторе
+    # Это покажет, "видит" ли система активный диалог
+    return
 
+application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, debug_all_messages), group=10)
 
 async def run_local():
     # # Сначала собираем бота, вызывая main
