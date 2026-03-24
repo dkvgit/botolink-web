@@ -6,6 +6,11 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes, ConversationHandler
 from bot.states import WAIT_METHOD_SELECTION, WAIT_FIELD_INPUT, SELECT_CATEGORY
 
+# В самом начале файла bot/bankworld.py
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import ContextTypes, ConversationHandler
+# Убедись, что здесь НЕТ строки: from bot.bank import choose_country
+
 from bot.states import (
 	WAIT_METHOD_SELECTION,
 	WAIT_FILLING_DATA,

@@ -71,100 +71,100 @@ async def get_user_page(conn, user_id: int):
 # ГЛАВНОЕ МЕНЮ ВЫБОРА СТРАНЫ
 # ============================================
 
+# // bot/bank.py
+
 async def choose_country(update: Update, context: ContextTypes.DEFAULT_TYPE):
-	"""Главное меню выбора страны и сервисов (универсальный вызов)"""
-	
-	print(f"💳 bank.py получил: {update.callback_query.data}")
-	
-	# ===== ОТЛАДКА =====
-	current_state = context.user_data.get('_state')
-	conversation_name = context.user_data.get('_conversation')
-	print(f"\n🔍 choose_country ВЫЗВАНА")
-	print(f"🔍 ДИАЛОГ: {conversation_name}")
-	print(f"🔍 СОСТОЯНИЕ: {current_state}")
-	if update.callback_query:
-		print(f"🔍 callback_data: {update.callback_query.data}")
-	print("=" * 40)
-	# ===================
-	
-	# Определяем, как отвечать пользователю
-	if update.callback_query:
-		query = update.callback_query
-		await query.answer()
-		send_func = query.edit_message_text
-	else:
-		send_func = update.message.reply_text
-	
-	# Очистка данных
-	keys_to_clear = [
-		'selected_methods', 'filling_queue', 'collected_methods',
-		'current_method', 'selected_country'
-	]
-	for key in keys_to_clear:
-		context.user_data.pop(key, None)
-	
-	text = (
-		"🌍 *Как хотите получать переводы?*\n\n"
-		"👇 *Выберите платежную систему или страну банка:*"
-	)
-	
-	# Клавиатура (как у вас)
-	payment_wallet_buttons = [
-		InlineKeyboardButton("🌐 PayPal", callback_data="method_paypal"),
-		InlineKeyboardButton("🇪🇺 Wise", callback_data="method_wise"),
-		InlineKeyboardButton("🇪🇺 Revolut", callback_data="method_revolut"),
-		InlineKeyboardButton("🌐 SWIFT/IBAN", callback_data="method_swift"),
-		InlineKeyboardButton("🇷🇺 ЮMoney", callback_data="method_yoomoney"),
-		InlineKeyboardButton("🇷🇺 VK Pay", callback_data="method_vkpay"),
-		InlineKeyboardButton("🇺🇦 Монобанк", callback_data="method_monobank"),
-		InlineKeyboardButton("🇰🇿 Kaspi.kz", callback_data="method_kaspi"),
-		InlineKeyboardButton("🇺🇿 Payme", callback_data="method_payme"),
-		InlineKeyboardButton("🇺🇿 Click", callback_data="method_click"),
-		InlineKeyboardButton("🇬🇪 TBC Pay", callback_data="method_tbcpay"),
-		InlineKeyboardButton("🇦🇲 Idram", callback_data="method_idram"),
-	]
-	
-	bank_buttons = [
-		InlineKeyboardButton("🇱🇹 Литва", callback_data="country_lithuania"),
-		InlineKeyboardButton("🇱🇻 Латвия", callback_data="country_latvia"),
-		InlineKeyboardButton("🇪🇪 Эстония", callback_data="country_estonia"),
-		InlineKeyboardButton("🇺🇸 США", callback_data="country_usa"),
-		InlineKeyboardButton("🇷🇺 Россия", callback_data="country_russia"),
-		InlineKeyboardButton("🇺🇦 Украина", callback_data="country_ukraine"),
-		InlineKeyboardButton("🇧🇾 Беларусь", callback_data="country_belarus"),
-		InlineKeyboardButton("🇰🇿 Казахстан", callback_data="country_kazakhstan"),
-		InlineKeyboardButton("🇦🇲 Армения", callback_data="country_armenia"),
-		InlineKeyboardButton("🇦🇿 Азербайджан", callback_data="country_azerbaijan"),
-		InlineKeyboardButton("🇬🇪 Грузия", callback_data="country_georgia"),
-		InlineKeyboardButton("🇲🇩 Молдова", callback_data="country_moldova"),
-		InlineKeyboardButton("🇺🇿 Узбекистан", callback_data="country_uzbekistan"),
-		InlineKeyboardButton("🇹🇯 Таджикистан", callback_data="country_tajikistan"),
-		InlineKeyboardButton("🇰🇬 Кыргызстан", callback_data="country_kyrgyzstan"),
-		InlineKeyboardButton("🇹🇲 Туркменистан", callback_data="country_turkmenistan"),
-		InlineKeyboardButton("🇻🇳 Вьетнам", callback_data="country_vietnam"),
-	]
-	
-	keyboard = []
-	keyboard.append([InlineKeyboardButton("─── 👛 КОШЕЛЬКИ И СЕРВИСЫ ───", callback_data="ignore")])
-	for i in range(0, len(payment_wallet_buttons), 3):
-		keyboard.append(payment_wallet_buttons[i:i + 3])
-	
-	keyboard.append([InlineKeyboardButton("─── 🏦 БАНКИ ПО СТРАНАМ ───", callback_data="ignore")])
-	for i in range(0, len(bank_buttons), 3):
-		keyboard.append(bank_buttons[i:i + 3])
-	
-	keyboard.append([InlineKeyboardButton("◀️ Назад", callback_data="back_to_categories")])
-	
-	await send_func(
-		text=text,
-		reply_markup=InlineKeyboardMarkup(keyboard),
-		parse_mode='Markdown'
-	)
-	
-	# ===== ВАЖНО: ЗАВЕРШАЕМ constructor_conv И ПЕРЕХОДИМ В bank_world_conv =====
-	# Возвращаем ConversationHandler.END, чтобы выйти из constructor_conv
-	# Дальше bank_world_conv подхватит по entry_points (method_* или country_*)
-	return
+    """Главное меню выбора страны и сервисов (универсальный вызов)"""
+    from telegram.ext import ConversationHandler
+    
+    # Логирование для отладки
+    cb_data = update.callback_query.data if update.callback_query else "no_callback"
+    print(f"\n" + "🌍" * 5 + " ВХОД В choose_country " + "🌍" * 5)
+    print(f"🔹 Callback: {cb_data}")
+    
+    # Определяем способ ответа (редактирование или новое сообщение)
+    if update.callback_query:
+        query = update.callback_query
+        await query.answer()
+        send_func = query.edit_message_text
+    else:
+        send_func = update.message.reply_text
+    
+    # Полная очистка временных данных перед новым выбором
+    keys_to_clear = [
+        'selected_methods', 'selected_methods_full', 'filling_queue',
+        'collected_methods', 'current_method', 'selected_country',
+        'current_field_index'
+    ]
+    for key in keys_to_clear:
+        context.user_data.pop(key, None)
+    
+    text = (
+        "🌍 *Как хотите получать переводы?*\n\n"
+        "👇 *Выберите платежную систему или страну банка:*"
+    )
+    
+    # Кнопки сервисов (по 3 в ряд)
+    payment_wallet_buttons = [
+        InlineKeyboardButton("🌐 PayPal", callback_data="method_paypal"),
+        InlineKeyboardButton("🇪🇺 Wise", callback_data="method_wise"),
+        InlineKeyboardButton("🇪🇺 Revolut", callback_data="method_revolut"),
+        InlineKeyboardButton("🌐 SWIFT/IBAN", callback_data="method_swift"),
+        InlineKeyboardButton("🇷🇺 ЮMoney", callback_data="method_yoomoney"),
+        InlineKeyboardButton("🇷🇺 VK Pay", callback_data="method_vkpay"),
+        InlineKeyboardButton("🇺🇦 Монобанк", callback_data="method_monobank"),
+        InlineKeyboardButton("🇰🇿 Kaspi.kz", callback_data="method_kaspi"),
+        InlineKeyboardButton("🇺🇿 Payme", callback_data="method_payme"),
+        InlineKeyboardButton("🇺🇿 Click", callback_data="method_click"),
+        InlineKeyboardButton("🇬🇪 TBC Pay", callback_data="method_tbcpay"),
+        InlineKeyboardButton("🇦🇲 Idram", callback_data="method_idram"),
+    ]
+    
+    # Кнопки стран (по 3 в ряд)
+    bank_buttons = [
+        InlineKeyboardButton("🇱🇹 Литва", callback_data="country_lithuania"),
+        InlineKeyboardButton("🇱🇻 Латвия", callback_data="country_latvia"),
+        InlineKeyboardButton("🇪🇪 Эстония", callback_data="country_estonia"),
+        InlineKeyboardButton("🇺🇸 США", callback_data="country_usa"),
+        InlineKeyboardButton("🇷🇺 Россия", callback_data="country_russia"),
+        InlineKeyboardButton("🇺🇦 Украина", callback_data="country_ukraine"),
+        InlineKeyboardButton("🇧🇾 Беларусь", callback_data="country_belarus"),
+        InlineKeyboardButton("🇰🇿 Казахстан", callback_data="country_kazakhstan"),
+        InlineKeyboardButton("🇦🇲 Армения", callback_data="country_armenia"),
+        InlineKeyboardButton("🇦🇿 Азербайджан", callback_data="country_azerbaijan"),
+        InlineKeyboardButton("🇬🇪 Грузия", callback_data="country_georgia"),
+        InlineKeyboardButton("🇲🇩 Молдова", callback_data="country_moldova"),
+        InlineKeyboardButton("🇺🇿 Узбекистан", callback_data="country_uzbekistan"),
+        InlineKeyboardButton("🇹🇯 Таджикистан", callback_data="country_tajikistan"),
+        InlineKeyboardButton("🇰🇬 Кыргызстан", callback_data="country_kyrgyzstan"),
+        InlineKeyboardButton("🇹🇲 Туркменистан", callback_data="country_turkmenistan"),
+        InlineKeyboardButton("🇻🇳 Вьетнам", callback_data="country_vietnam"),
+    ]
+    
+    keyboard = []
+    
+    # Секция кошельков
+    keyboard.append([InlineKeyboardButton("─── 👛 КОШЕЛЬКИ И СЕРВИСЫ ───", callback_data="ignore")])
+    for i in range(0, len(payment_wallet_buttons), 3):
+        keyboard.append(payment_wallet_buttons[i:i + 3])
+    
+    # Секция банков
+    keyboard.append([InlineKeyboardButton("─── 🏦 БАНКИ ПО СТРАНАМ ───", callback_data="ignore")])
+    for i in range(0, len(bank_buttons), 3):
+        keyboard.append(bank_buttons[i:i + 3])
+    
+    # Кнопка возврата в общее меню категорий
+    keyboard.append([InlineKeyboardButton("◀️ Назад", callback_data="back_to_categories")])
+    
+    await send_func(
+        text=text,
+        reply_markup=InlineKeyboardMarkup(keyboard),
+        parse_mode='Markdown'
+    )
+    
+    # Завершаем текущий ConversationHandler, чтобы передать управление
+    # следующему хендлеру, который ловит country_ или method_
+    return ConversationHandler.END
 
 
 async def back_to_add_link(update: Update, context: ContextTypes.DEFAULT_TYPE):
