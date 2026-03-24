@@ -34,29 +34,22 @@ logger = logging.getLogger(__name__)
 # Находим функцию choose_country_from_constructor
 # // bot/bank.py
 
+# // bot/bank.py
+
 async def choose_country_from_constructor(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """
-    Переход из конструктора в банковский модуль.
-    Мы НЕ заканчиваем диалог, а переводим его в стейт выбора стран/методов.
-    """
     query = update.callback_query
     if query:
         await query.answer()
-        print(f"💳 Переход в банки из конструктора: {query.data}")
     
-    # 1. Импортируем ПРАВИЛЬНУЮ функцию из bankworld.py
-    from bot.bankworld import show_country_methods
+    # Импортируем функцию, которая рисует СПИСОК СТРАН (флаги)
+    from bot.bankworld import choose_country
     
-    # 2. Вызываем именно её (вместо choose_country)
-    await show_country_methods(update, context)
+    # Вызываем именно её
+    await choose_country(update, context)
     
-    # 3. Получаем нужный стейт
     from bot.states import SELECT_CATEGORY
-    
-    print(f"🔄 Стейт изменен на: SELECT_CATEGORY ({SELECT_CATEGORY})")
-    
-    # 4. Возвращаем стейт для ConversationHandler
     return SELECT_CATEGORY
+
 
 # Удали импорт и добавь функцию прямо в bank.py
 async def get_user_page(conn, user_id: int):
