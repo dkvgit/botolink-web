@@ -620,70 +620,96 @@ async def process_field_input(update: Update, context: ContextTypes.DEFAULT_TYPE
 # ЗАВЕРШЕНИЕ ЗАПОЛНЕНИЯ
 # ============================================
 async def show_filling_complete(update_or_query, context):
-	# show_filling_complete
-	"""Показывает итог с Названием банка и реквизитами"""
-	collected = context.user_data.get('collected_methods', {})
-	
-	if not collected:
-		text = "❌ <b>Данные не найдены.</b>"
-		keyboard = [[InlineKeyboardButton("◀️ В начало", callback_data="transfers")]]
-		if hasattr(update_or_query, 'message') and update_or_query.message:
-			await update_or_query.message.reply_text(text, reply_markup=InlineKeyboardMarkup(keyboard),
-			                                         parse_mode='HTML')
-		else:
-			await update_or_query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard),
-			                                        parse_mode='HTML')
-		return ConversationHandler.END
-	
-	text = "✅ <b>Все данные собраны!</b>\n"
-	text += "───────────────────\n"
-	text += "📋 <b>Проверьте введенные данные:</b>\n\n"
-	
-	field_names = {
-		"bank_name": "🏦 Название банка",
-		"card_number": "Номер карты",
-		"phone": "Телефон",
-		"account_number": "Номер счета",
-		"bik": "БИК",
-		"iban": "IBAN",
-		"bic": "BIC",
-		"beneficiary": "Получатель",
-		"bank_name": "Банк",
-		"routing": "Routing Number",
-		"account": "Account Number",
-		"swift": "SWIFT",
-		"zip": "ZIP код",
-		"mfo": "МФО"
-	}
-	
-	for method_id, method_info in collected.items():
-		text += f"🔹 <b>{method_info['name']}</b>\n"
-		# Сначала выводим банк, если он есть
-		if "bank_name" in method_info['data']:
-			val = method_info['data']['bank_name']
-			text += f"  • 🏦 Название банка: <code>{val}</code>\n"
-		
-		for field, value in method_info['data'].items():
-			if field == "bank_name": continue
-			field_display = field_names.get(field, field.replace('_', ' ').capitalize())
-			text += f"  • {field_display}: <code>{value}</code>\n"
-		text += "\n"
-	
-	text += "───────────────────\n"
-	text += "👇 <b>Все данные верны?</b>"
-	
-	keyboard = [[
-		InlineKeyboardButton("✅ Да, сохранить", callback_data="save_all_methods"),
-		InlineKeyboardButton("❌ Нет, заново", callback_data="restart_filling")
-	]]
-	
-	if hasattr(update_or_query, 'message') and update_or_query.message:
-		await update_or_query.message.reply_text(text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode='HTML')
-	else:
-		await update_or_query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode='HTML')
-	
-	return WAIT_FINAL_CONFIRM
+    """Показывает итог с реквизитами и запрашивает подтверждение"""
+    collected = context.user_data.get('collected_methods', {})
+    
+    # 1. Если вдруг данных нет (защита от багов)
+    if not collected:
+        print("⚠️ show_filling_complete: данные 'collected_methods' пусты")
+        text = "❌ <b>Данные не найдены или сессия истекла.</b>"
+        keyboard = [[InlineKeyboardButton("◀️ В начало", callback_data="back_to_categories")]]
+        
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        if hasattr(update_or_query, 'message') and update_or_query.message:
+            await update_or_query.message.reply_text(text, reply_markup=reply_markup, parse_mode='HTML')
+        else:
+            await update_or_query.edit_message_text(text, reply_markup=reply_markup, parse_mode='HTML')
+        return ConversationHandler.END
 
+    # 2. Формируем красивый отчет
+    text = "✅ <b>Все данные собраны!</b>\n"
+    text += "───────────────────\n"
+    text += "📋 <b>Проверьте введенные данные:</b>\n\n"
+    
+    # Расширенный словарь имен полей (можно вынести в utils.py)
+    friendly_names = {
+        "bank_name": "🏦 Банк",
+        "card_number": "💳 Карта",
+        "phone": "📱 Телефон",
+        "account_number": "📄 Счет",
+        "bik": "🆔 БИК",
+        "iban": "🌍 IBAN",
+        "bic": "🔑 BIC/SWIFT",
+        "beneficiary": "👤 Получатель",
+        "routing": "🔄 Routing",
+        "swift": "⚡ SWIFT",
+        "zip": "📮 ZIP код",
+        "mfo": "🏦 МФО"
+    }
+    
+    for method_id, method_info in collected.items():
+        text += f"🔹 <b>{method_info['name'].upper()}</b>\n"
+        
+        # Данные из метода
+        data = method_info.get('data', {})
+        
+        # Сначала выводим название банка, если оно есть
+        if "bank_name" in data:
+            text += f"  • {friendly_names['bank_name']}: <code>{data['bank_name']}</code>\n"
+        
+        # Выводим остальные поля
+        for field, value in data.items():
+            if field == "bank_name": continue
+            display = friendly_names.get(field, field.replace('_', ' ').capitalize())
+            text += f"  • {display}: <code>{value}</code>\n"
+        text += "\n"
+    
+    text += "───────────────────\n"
+    text += "👇 <b>Все данные верны?</b>"
+    
+    # Кнопки финализации
+    keyboard = [[
+        InlineKeyboardButton("✅ Да, сохранить", callback_data="save_all_methods"),
+        InlineKeyboardButton("❌ Нет, заново", callback_data="restart_filling")
+    ]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    # 3. Отправка пользователю
+    try:
+        if hasattr(update_or_query, 'callback_query') and update_or_query.callback_query:
+            await update_or_query.callback_query.edit_message_text(text, reply_markup=reply_markup, parse_mode='HTML')
+        elif hasattr(update_or_query, 'message') and update_or_query.message:
+            await update_or_query.message.reply_text(text, reply_markup=reply_markup, parse_mode='HTML')
+        else:
+            # Если вызвано из MessageHandler после последнего поля
+            await context.bot.send_message(
+                chat_id=context._chat_id or update_or_query.effective_chat.id,
+                text=text,
+                reply_markup=reply_markup,
+                parse_mode='HTML'
+            )
+    except Exception as e:
+        print(f"⚠️ Ошибка вывода финала: {e}")
+        # Запасной вариант - новое сообщение
+        await context.bot.send_message(
+            chat_id=context._chat_id or update_or_query.effective_chat.id,
+            text=text,
+            reply_markup=reply_markup,
+            parse_mode='HTML'
+        )
+    
+    print("🔵 Финальный экран показан. Ждем стейт 503 (WAIT_FINAL_CONFIRM)")
+    return WAIT_FINAL_CONFIRM
 
 # ============================================
 # ВСПОМОГАТЕЛЬНАЯ: ГЕНЕРАЦИЯ ССЫЛКИ
