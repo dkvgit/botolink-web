@@ -402,16 +402,13 @@ async def start_filling(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Начинает пошаговое заполнение выбранных методов"""
     query = update.callback_query
     
-    # --- МЕГА ЛОГИ ---
     print("\n" + "🚀" * 10 + " ВХОД В start_filling " + "🚀" * 10)
     print(f"🔹 Update ID: {update.update_id}")
     print(f"🔹 User ID: {update.effective_user.id}")
-    print(f"🔹 Callback Data: {query.data if query else 'НЕТ QUERY'}")
     
-    # Проверяем, что в памяти
+    # 1. Проверяем выбранные методы
     selected = context.user_data.get('selected_methods', [])
-    print(f"🔹 Выбрано методов в памяти: {selected}")
-    print(f"🔹 Ключи user_data: {list(context.user_data.keys())}")
+    print(f"🔹 Выбрано ID методов: {selected}")
     
     if query:
         await query.answer()
@@ -420,25 +417,53 @@ async def start_filling(update: Update, context: ContextTypes.DEFAULT_TYPE):
         print("❌ ОШИБКА: selected_methods пуст!")
         await query.edit_message_text("❌ Вы не выбрали ни одного способа.")
         return WAIT_METHOD_SELECTION
-    
-    # Инициализация процесса
+
+    # 2. ФОРМИРУЕМ СТРУКТУРУ ДЛЯ ВВОДА (selected_methods_full)
+    # Это "карта" для process_field_input, чтобы он знал, что спрашивать
+    methods_config = {
+        'phone_russia': {
+            'name': 'По номеру телефона (СБП)',
+            'fields': ['phone', 'bank_name']
+        },
+        'card_russia': {
+            'name': 'По номеру карты',
+            'fields': ['card_number', 'bank_name']
+        },
+        'iban_europe': {
+            'name': 'IBAN (Европа)',
+            'fields': ['iban', 'beneficiary', 'swift']
+        }
+    }
+
+    full_data = {}
+    for m_id in selected:
+        if m_id in methods_config:
+            full_data[m_id] = methods_config[m_id].copy()
+            full_data[m_id]['data'] = {} # Сюда будем записывать ввод
+        else:
+            # Дефолтная структура, если метода нет в конфиге
+            full_data[m_id] = {'name': m_id, 'fields': ['value'], 'data': {}}
+
+    # 3. Сохраняем всё в context.user_data
+    context.user_data['selected_methods_full'] = full_data
     context.user_data['filling_queue'] = list(selected)
     context.user_data['collected_methods'] = {}
     context.user_data['current_field_index'] = 0
     
     print(f"📝 Очередь создана: {context.user_data['filling_queue']}")
-    
-    # Вызов следующего шага
+    print(f"📦 Структура подготовлена: {list(full_data.keys())}")
+
+    # 4. Вызов первого вопроса
     try:
         print("🔄 Вызываем ask_next_method...")
+        from bot.bankworld import ask_next_method
         result = await ask_next_method(query, context)
         
-        # САМАЯ ВАЖНАЯ ПРОВЕРКА
         print(f"✅ ask_next_method вернула стейт: {result}")
         
         if result is None:
-            print("🚨 КРИТИЧЕСКАЯ ОШИБКА: ask_next_method вернула None! Стейт потерян.")
-            # Принудительно возвращаем 502, если функция почему-то отдала пустоту
+            print("🚨 КРИТИЧЕСКАЯ ОШИБКА: ask_next_method вернула None!")
+            from bot.states import WAIT_FIELD_INPUT
             return WAIT_FIELD_INPUT
             
         return result
@@ -448,7 +473,6 @@ async def start_filling(update: Update, context: ContextTypes.DEFAULT_TYPE):
         import traceback
         traceback.print_exc()
         return ConversationHandler.END
-
 
 
 
@@ -534,47 +558,57 @@ async def ask_next_method(query_or_update, context):
 
 
 async def process_field_input(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    print("\n" + "🔵" * 5 + " process_field_input ВЫЗВАНА! " + "🔵" * 5)
-    print(f"📩 Текст: {update.message.text if update.message else 'НЕТ ТЕКСТА'}")
+    """
+    Принимает текст от юзера, валидирует и сохраняет в структуру метода.
+    """
+    print("\n" + "🔵" * 15)
+    print("🚀 ВХОД В process_field_input")
+    
+    # 1. Базовая проверка сообщения
+    if not update.message or not update.message.text:
+        print("⚠️ Сообщение пустое или не содержит текст")
+        return WAIT_FIELD_INPUT
 
-    # Перед тем как что-то делать, берем текст от юзера
-    user_input = update.message.text.strip() if update.message.text else ""
-    
-    print("\n" + "🔵" * 10)
-    print(f"📥 ВВОД ПОЛЯ: '{user_input[:20]}...'")
-    
-    # ПРОВЕРКА ДАННЫХ В ОЧЕРЕДИ
-    # Вместо мифического 'state' проверяем наличие очереди заполнения
+    user_input = update.message.text.strip()
+    print(f"📩 Юзер прислал текст: '{user_input}'")
+
+    # 2. Проверка очереди
     queue = context.user_data.get('filling_queue')
-    if not queue:
-        print("⚠️ Очередь заполнения пуста или отсутствует")
-        await update.message.reply_text("❌ Данные сессии потеряны. Начните заново через /addlink")
+    print(f"📋 Текущая очередь (filling_queue): {queue}")
+    
+    if not queue or len(queue) == 0:
+        print("🚨 ОШИБКА: Очередь заполнения пуста!")
+        await update.message.reply_text("❌ Сессия истекла. Начните заново: /addlink")
         return ConversationHandler.END
 
-    # Берем текущий метод из очереди (не удаляя его пока)
+    # 3. Достаем данные текущего метода
     current_method_id = queue[0]
-    
-    # Получаем данные текущего метода (они должны быть в context.user_data)
-    # Предполагаем, что ты хранишь структуру методов в 'methods_data'
     methods_dict = context.user_data.get('selected_methods_full', {})
     current_method = methods_dict.get(current_method_id)
+    
+    print(f"🛠 Обработка метода: {current_method_id}")
+    print(f"📦 Данные метода из selected_methods_full: {current_method}")
 
     if not current_method:
-        print(f"❌ Метод {current_method_id} не найден в selected_methods_full")
-        await update.message.reply_text("❌ Ошибка структуры данных. Начните заново.")
+        print(f"🚨 ОШИБКА: Метод {current_method_id} не найден в словаре!")
+        await update.message.reply_text("❌ Техническая ошибка. Начните заново.")
         return ConversationHandler.END
 
+    # 4. Работа с полями (phone, bank_name и т.д.)
     fields = current_method.get('fields', [])
     field_index = context.user_data.get('current_field_index', 0)
     
+    print(f"📑 Поля метода: {fields}")
+    print(f"📍 Текущий индекс поля: {field_index}")
+
     if field_index >= len(fields):
-        print(f"❌ Индекс {field_index} вышел за пределы полей {len(fields)}")
+        print("⚠️ Индекс превысил количество полей. Сбрасываем и идем дальше.")
         return await ask_next_method(update, context)
 
     field_name = fields[field_index]
-    print(f"📝 Обрабатываем: {field_name} (индекс {field_index})")
+    print(f"📝 Имя текущего поля: {field_name}")
 
-    # --- ВАЛИДАЦИЯ ДЛИНЫ ВВОДА ---
+    # 5. Валидация (лимиты)
     limits = {
         "bank_name": 50, "card_number": 25, "phone": 20,
         "iban": 34, "beneficiary": 60, "account_number": 30,
@@ -582,60 +616,52 @@ async def process_field_input(update: Update, context: ContextTypes.DEFAULT_TYPE
     }
     max_len = limits.get(field_name, 100)
     
-    if not user_input:
-        await update.message.reply_text("❌ Поле не может быть пустым. Введите данные:")
-        return WAIT_FIELD_INPUT
-
     if len(user_input) > max_len:
-        await update.message.reply_text(
-            f"❌ Слишком длинный текст (макс. {max_len} симв.).\nПопробуйте еще раз:"
-        )
+        print(f"❌ Валидация провалена: {len(user_input)} > {max_len}")
+        await update.message.reply_text(f"❌ Слишком длинно (макс {max_len} симв.). Повторите:")
         return WAIT_FIELD_INPUT
 
-    # --- СОХРАНЕНИЕ ---
+    # 6. Сохранение данных внутрь объекта метода
     if 'data' not in current_method:
         current_method['data'] = {}
     
     current_method['data'][field_name] = user_input
-    print(f"💾 Сохранено в {current_method_id}: {field_name} = {user_input[:20]}")
+    print(f"💾 СОХРАНЕНО: {current_method_id} -> {field_name} = {user_input}")
 
-    # --- ПРОВЕРКА: ЕСТЬ ЛИ ЕЩЕ ПОЛЯ В ЭТОМ МЕТОДЕ? ---
+    # 7. Проверка: есть ли еще поля в ЭТОМ методе?
     if field_index + 1 < len(fields):
         context.user_data['current_field_index'] = field_index + 1
         next_field = fields[field_index + 1]
         
-        # Используем твой FIELD_NAMES (убедись, что он импортирован)
-        from bot.utils import FIELD_NAMES # Пример импорта, проверь у себя
-        next_display = FIELD_NAMES.get(next_field, next_field.replace('_', ' '))
+        # Пытаемся красиво назвать поле для юзера
+        display_names = {"phone": "НОМЕР ТЕЛЕФОНА", "bank_name": "НАЗВАНИЕ БАНКА"}
+        next_display = display_names.get(next_field, next_field.upper())
         
-        await update.message.reply_text(
-            f"✅ Сохранено. Теперь введите <b>{next_display.upper()}</b>:",
-            parse_mode='HTML'
-        )
+        print(f"➡️ Переходим к следующему полю: {next_field}")
+        await update.message.reply_text(f"✅ Принято. Теперь введите <b>{next_display}</b>:", parse_mode='HTML')
         return WAIT_FIELD_INPUT
 
-    # --- ЗАВЕРШЕНИЕ ТЕКУЩЕГО МЕТОДА ---
-    print(f"🏁 Метод {current_method_id} полностью заполнен")
+    # 8. Завершение метода (переход к следующему в очереди)
+    print(f"🏁 Метод {current_method_id} полностью заполнен.")
     
-    # Перекладываем в "готовое"
+    # Сохраняем готовый метод в итоговый список
     if 'collected_methods' not in context.user_data:
         context.user_data['collected_methods'] = {}
     
     context.user_data['collected_methods'][current_method_id] = current_method
     
-    # Убираем метод из очереди
+    # Удаляем метод из очереди и сбрасываем индекс полей
     queue.pop(0)
     context.user_data['filling_queue'] = queue
-    context.user_data['current_field_index'] = 0 # Сбрасываем индекс для следующего метода
+    context.user_data['current_field_index'] = 0
     
-    await update.message.reply_text(
-        f"✅ Данные для <b>{current_method.get('name', current_method_id)}</b> приняты!",
-        parse_mode='HTML'
-    )
+    print(f"📉 Осталось методов в очереди: {len(queue)}")
     
-    # Переход к следующему методу в очереди или к финалу
-    return await ask_next_method(update, context)
+    await update.message.reply_text(f"✅ Метод <b>{current_method.get('name')}</b> готов!", parse_mode='HTML')
 
+    # Идем к следующему методу (или финишу)
+    print("🔄 Вызываем ask_next_method...")
+    return await ask_next_method(update, context)
 
 
 # ============================================

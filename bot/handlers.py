@@ -266,11 +266,6 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-# Название файла: web/bot/handlers.py
-
-# bot/main.py
-
-# // bot/main.py
 
 async def start_handler(update, context):
     # # Используем # для Python комментариев
