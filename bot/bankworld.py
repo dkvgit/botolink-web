@@ -2,6 +2,9 @@
 
 import json
 import logging
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import ContextTypes, ConversationHandler
+from bot.states import WAIT_METHOD_SELECTION, WAIT_FIELD_INPUT, SELECT_CATEGORY
 
 from bot.states import (
 	WAIT_METHOD_SELECTION,
@@ -398,15 +401,17 @@ def get_field_example(field: str) -> str:
 # ============================================
 # ШАГ 3: НАЧАЛО ЗАПОЛНЕНИЯ ДАННЫХ
 # ============================================
+# // bot/bankworld.py
+
+# // bot/bankworld.py
+
 async def start_filling(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Начинает пошаговое заполнение выбранных методов"""
     query = update.callback_query
     
     print("\n" + "🚀" * 10 + " ВХОД В start_filling " + "🚀" * 10)
-    print(f"🔹 Update ID: {update.update_id}")
-    print(f"🔹 User ID: {update.effective_user.id}")
     
-    # 1. Проверяем выбранные методы
+    # 1. Проверка выбранных методов
     selected = context.user_data.get('selected_methods', [])
     print(f"🔹 Выбрано ID методов: {selected}")
     
@@ -415,144 +420,167 @@ async def start_filling(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     if not selected:
         print("❌ ОШИБКА: selected_methods пуст!")
-        await query.edit_message_text("❌ Вы не выбрали ни одного способа.")
+        if query:
+            await query.edit_message_text("❌ Вы не выбрали ни одного способа.")
         return WAIT_METHOD_SELECTION
 
-    # 2. ФОРМИРУЕМ СТРУКТУРУ ДЛЯ ВВОДА (selected_methods_full)
-    # Это "карта" для process_field_input, чтобы он знал, что спрашивать
-    methods_config = {
-        'phone_russia': {
-            'name': 'По номеру телефона (СБП)',
-            'fields': ['phone', 'bank_name']
-        },
-        'card_russia': {
-            'name': 'По номеру карты',
-            'fields': ['card_number', 'bank_name']
-        },
-        'iban_europe': {
-            'name': 'IBAN (Европа)',
-            'fields': ['iban', 'beneficiary', 'swift']
-        }
-    }
-
+    # 2. ФОРМИРУЕМ СТРУКТУРУ ИЗ ГЛОБАЛЬНОГО СЛОВАРЯ
     full_data = {}
+    
+    # Собираем все методы из COUNTRY_METHODS (он в этом же файле, импорт не нужен)
+    all_known_methods = []
+    for methods_list in COUNTRY_METHODS.values():
+        all_known_methods.extend(methods_list)
+
     for m_id in selected:
-        if m_id in methods_config:
-            full_data[m_id] = methods_config[m_id].copy()
-            full_data[m_id]['data'] = {} # Сюда будем записывать ввод
+        method_info = next((m for m in all_known_methods if m['id'] == m_id), None)
+        
+        if method_info:
+            full_data[m_id] = {
+                'name': method_info['name'],
+                'fields': list(method_info['fields']), # Копируем список полей
+                'data': {}
+            }
         else:
-            # Дефолтная структура, если метода нет в конфиге
             full_data[m_id] = {'name': m_id, 'fields': ['value'], 'data': {}}
 
-    # 3. Сохраняем всё в context.user_data
+    # 3. Инициализация состояния процесса
     context.user_data['selected_methods_full'] = full_data
     context.user_data['filling_queue'] = list(selected)
     context.user_data['collected_methods'] = {}
-    context.user_data['current_field_index'] = 0
+    context.user_data['current_field_index'] = 0 # Сбрасываем в 0 только ТУТ
     
     print(f"📝 Очередь создана: {context.user_data['filling_queue']}")
-    print(f"📦 Структура подготовлена: {list(full_data.keys())}")
 
-    # 4. Вызов первого вопроса
+    # 4. Переходим к задаванию вопросов
+    # Вызываем ask_next_method напрямую (она в этом же файле)
     try:
-        print("🔄 Вызываем ask_next_method...")
-        from bot.bankworld import ask_next_method
-        result = await ask_next_method(query, context)
-        
-        print(f"✅ ask_next_method вернула стейт: {result}")
-        
-        if result is None:
-            print("🚨 КРИТИЧЕСКАЯ ОШИБКА: ask_next_method вернула None!")
-            from bot.states import WAIT_FIELD_INPUT
-            return WAIT_FIELD_INPUT
-            
-        return result
-        
+        # Передаем update (или query), ask_next_method разберется
+        return await ask_next_method(update, context)
     except Exception as e:
-        print(f"💥 ВЗРЫВ В start_filling: {e}")
+        print(f"💥 ОШИБКА ПРИ ВЫЗОВЕ ask_next_method: {e}")
         import traceback
         traceback.print_exc()
         return ConversationHandler.END
 
 
+async def process_field_input(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Принимает текст от юзера, валидирует и сохраняет в структуру метода."""
+    print("\n" + "🔵" * 10 + " process_field_input " + "🔵" * 10)
+    
+    if not update.message or not update.message.text:
+        return WAIT_FIELD_INPUT
 
-async def ask_next_method(query_or_update, context):
-    """Запрашивает данные для следующего метода или показывает итог"""
+    user_input = update.message.text.strip()
+    
+    # 1. Достаем текущее состояние из памяти
+    queue = context.user_data.get('filling_queue')
+    methods_dict = context.user_data.get('selected_methods_full', {})
+    field_index = context.user_data.get('current_field_index', 0)
+    
+    if not queue or not methods_dict:
+        print("🚨 ОШИБКА: Данные сессии потеряны!")
+        await update.message.reply_text("❌ Сессия истекла. Начните заново.")
+        return ConversationHandler.END
+
+    current_method_id = queue[0]
+    current_method = methods_dict.get(current_method_id)
+    fields = current_method.get('fields', [])
+    field_name = fields[field_index]
+
+    # 2. ВАЛИДАЦИЯ (длина текста)
+    limits = {"bank_name": 50, "card_number": 25, "phone": 20, "iban": 34}
+    if len(user_input) > limits.get(field_name, 100):
+        await update.message.reply_text(f"❌ Слишком длинно. Повторите ввод:")
+        return WAIT_FIELD_INPUT
+
+    # 3. СОХРАНЕНИЕ
+    current_method['data'][field_name] = user_input
+    print(f"💾 СОХРАНЕНО: {current_method_id} -> {field_name} = {user_input}")
+
+    # 4. ЛОГИКА ПЕРЕКЛЮЧЕНИЯ
+    # Если в текущем методе ЕЩЕ есть поля — просто увеличиваем индекс
+    if field_index + 1 < len(fields):
+        context.user_data['current_field_index'] = field_index + 1
+        print(f"➡️ Переходим к следующему полю этого же метода (индекс {field_index + 1})")
+    else:
+        # Если поля кончились — выкидываем метод из очереди и сбрасываем индекс
+        print(f"🏁 Метод {current_method_id} заполнен.")
+        
+        if 'collected_methods' not in context.user_data:
+            context.user_data['collected_methods'] = {}
+        
+        # Копируем результат в итоговое хранилище
+        context.user_data['collected_methods'][current_method_id] = current_method
+        
+        queue.pop(0) # Удаляем завершенный метод
+        context.user_data['filling_queue'] = queue
+        context.user_data['current_field_index'] = 0
+        
+        await update.message.reply_text(f"✅ Данные для <b>{current_method.get('name')}</b> приняты.", parse_mode='HTML')
+
+    # 5. ВСЕГДА В КОНЦЕ вызываем ask_next_method (она сама решит, спросить новое поле или закончить)
+    from bot.bankworld import ask_next_method
+    return await ask_next_method(update, context)
+
+
+# // bot/bankworld.py
+
+async def ask_next_method(update_or_query, context):
+    """Запрашивает данные для следующего поля или показывает итог"""
     queue = context.user_data.get('filling_queue', [])
     
-    # 1. ЕСЛИ ОЧЕРЕДЬ ПУСТА — ПОКАЗЫВАЕМ ФИНАЛЬНЫЙ ЭКРАН
+    # 1. ФИНАЛ
     if not queue:
-        print("🏁 Очередь пуста, переходим к финалу")
-        # Убедись, что show_filling_complete возвращает WAIT_FINAL_CONFIRM (503)
-        return await show_filling_complete(query_or_update, context)
+        from bot.bankworld import show_filling_complete
+        return await show_filling_complete(update_or_query, context)
     
-    # 2. БЕРЕМ ТЕКУЩИЙ МЕТОД
     current_method_id = queue[0]
-    country = context.user_data.get('selected_country')
-    
-    # Ищем инфо о методе в COUNTRY_METHODS
-    method_info = None
-    for m in COUNTRY_METHODS.get(country, []):
-        if m['id'] == current_method_id:
-            method_info = m
-            break
-    
-    if not method_info:
-        print(f"⚠️ Метод {current_method_id} не найден для страны {country}")
-        if queue: queue.pop(0)
-        return await ask_next_method(query_or_update, context)
-    
-    # 3. ПОДГОТОВКА ПОЛЕЙ
-    # Создаем копию списка полей, чтобы не мутировать исходный COUNTRY_METHODS
-    all_fields = list(method_info.get('fields', []))
-    
-    # Если это банковский перевод и нет поля bank_name — добавляем
-    if "bank_name" not in all_fields and method_info.get('type') == 'bank':
-        all_fields.insert(0, "bank_name")
-    
-    # Сохраняем структуру текущего процесса
-    context.user_data['current_method'] = {
-        'id': current_method_id,
-        'name': method_info['name'],
-        'fields': all_fields,
-        'data': {}
-    }
-    context.user_data['current_field_index'] = 0  # СТРОГО СБРАСЫВАЕМ НА 0
-    
-    # 4. ФОРМИРУЕМ ТЕКСТ
-    total_methods = len(context.user_data.get('selected_methods', []))
-    # Сколько методов уже НЕ в очереди + текущий
-    current_step = total_methods - len(queue) + 1
-    
-    first_field = all_fields[0]
-    # Используем FIELD_NAMES из твоего файла
-    display_name = FIELD_NAMES.get(first_field, first_field.replace('_', ' '))
+    methods_full = context.user_data.get('selected_methods_full', {})
+    method = methods_full.get(current_method_id)
+
+    # 2. ОПРЕДЕЛЯЕМ ТЕКУЩЕЕ ПОЛЕ
+    # МЫ БОЛЬШЕ НЕ СБРАСЫВАЕМ индекс в 0 здесь!
+    # Индекс контролируется в process_field_input
+    idx = context.user_data.get('current_field_index', 0)
+    fields = method.get('fields', [])
+
+    # Проверка на случай ошибки индексов
+    if idx >= len(fields):
+        print("⚠️ Индекс за границей, закрываем метод вручную")
+        queue.pop(0)
+        context.user_data['filling_queue'] = queue
+        context.user_data['current_field_index'] = 0
+        return await ask_next_method(update_or_query, context)
+
+    current_field = fields[idx]
+    display_name = FIELD_NAMES.get(current_field, current_field.upper())
+
+    # 3. ТЕКСТ (Шаги)
+    total = len(context.user_data.get('selected_methods', []))
+    done = total - len(queue)
     
     text = (
-        f"📝 <b>Заполнение данных: Шаг {current_step} из {total_methods}</b>\n"
+        f"📝 <b>Заполнение: Метод {done + 1} из {total}</b>\n"
         f"───────────────────\n"
-        f"Метод: <b>{method_info['name']}</b>\n"
-        f"Полей к заполнению: {len(all_fields)}\n\n"
-        f"👉 Введите <b><code>{display_name.upper()}</code></b> в чат:"
+        f"Способ: <b>{method['name']}</b>\n"
+        f"Поле {idx + 1} из {len(fields)}\n\n"
+        f"👉 Введите <b>{display_name}</b>:"
     )
-    
-    # 5. ОТПРАВКА (Обработка и callback_query, и обычного сообщения)
-    try:
-        if hasattr(query_or_update, 'callback_query') and query_or_update.callback_query:
-            await query_or_update.callback_query.edit_message_text(text, parse_mode='HTML')
-        elif hasattr(query_or_update, 'message') and query_or_update.message:
-            await query_or_update.message.reply_text(text, parse_mode='HTML')
-        else:
-            # Универсальный вариант для context или update
-            await context.bot.send_message(chat_id=update.effective_chat.id, text=text, parse_mode='HTML')
-    except Exception as e:
-        print(f"⚠️ Ошибка вывода в ask_next_method: {e}")
-        # Если edit не сработал (например, текст тот же), пробуем ответить новым сообщением
-        await context.bot.send_message(chat_id=context._chat_id, text=text, parse_mode='HTML')
-    
-    print(f"🔵 ask_next_method: ждем поле {first_field} (стейт 502)")
-    return WAIT_FIELD_INPUT
 
+    # 4. ВЫВОД (Твой блок try-except хороший, оставляем)
+    # Используем эффективный метод получения сообщения
+    message = update_or_query.callback_query.message if hasattr(update_or_query, 'callback_query') and update_or_query.callback_query else update_or_query.message
+
+    try:
+        if hasattr(update_or_query, 'callback_query') and update_or_query.callback_query:
+            await update_or_query.callback_query.edit_message_text(text, parse_mode='HTML')
+        else:
+            await message.reply_text(text, parse_mode='HTML')
+    except Exception:
+        await context.bot.send_message(chat_id=update_or_query.effective_chat.id, text=text, parse_mode='HTML')
+
+    return WAIT_FIELD_INPUT
 
 	# ============================================
 
@@ -663,6 +691,43 @@ async def process_field_input(update: Update, context: ContextTypes.DEFAULT_TYPE
     print("🔄 Вызываем ask_next_method...")
     return await ask_next_method(update, context)
 
+
+# // bot/bankworld.py
+
+async def db_save_methods(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Сохраняет собранные данные в базу данных (JSON)"""
+    query = update.callback_query
+    await query.answer()
+    
+    collected = context.user_data.get('collected_methods', {})
+    user_id = update.effective_user.id
+    
+    if not collected:
+        await query.edit_message_text("❌ Ошибка: данные не найдены.")
+        return ConversationHandler.END
+
+    try:
+        # Здесь должна быть твоя логика сохранения в БД (SQLAlchemy/и т.д.)
+        # Например, преобразуем в JSON строку для хранения в одной колонке:
+        import json
+        methods_json = json.dumps(collected, ensure_ascii=False)
+        
+        print(f"💾 БАЗА ДАННЫХ: Сохраняем для юзера {user_id}: {methods_json}")
+        
+        # ТУТ ТВОЙ КОД ЗАПИСИ:
+        # await db.update_user_bank_methods(user_id, methods_json)
+        
+        await query.edit_message_text(
+            "✅ <b>Данные успешно сохранены!</b>\n\n"
+            "Теперь они будут отображаться в твоем профиле и на странице оплаты.",
+            parse_mode='HTML'
+        )
+        
+    except Exception as e:
+        print(f"💥 ОШИБКА СОХРАНЕНИЯ: {e}")
+        await query.edit_message_text("❌ Произошла ошибка при сохранении в базу.")
+
+    return ConversationHandler.END
 
 # ============================================
 # ЗАВЕРШЕНИЕ ЗАПОЛНЕНИЯ
