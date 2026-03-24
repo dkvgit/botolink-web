@@ -36,20 +36,28 @@ logger = logging.getLogger(__name__)
 
 # // bot/bank.py
 
+# // bot/bank.py
+
 async def choose_country_from_constructor(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    Переход из конструктора в банковский модуль.
+    """
     query = update.callback_query
     if query:
         await query.answer()
+        print(f"💳 Переход в банки из конструктора: {query.data}")
     
-    # Импортируем функцию, которая рисует СПИСОК СТРАН (флаги)
-    from bot.bankworld import choose_country
-    
-    # Вызываем именно её
+    # 1. Просто вызываем функцию, которая находится в ЭТОМ ЖЕ файле (выше или ниже)
+    # Нам НЕ нужно импортировать её из bankworld, так как она здесь, в bank.py
     await choose_country(update, context)
     
+    # 2. Получаем стейт
     from bot.states import SELECT_CATEGORY
+    
+    print(f"🔄 Стейт изменен на: SELECT_CATEGORY ({SELECT_CATEGORY})")
+    
+    # 3. Возвращаем стейт для ConversationHandler
     return SELECT_CATEGORY
-
 
 # Удали импорт и добавь функцию прямо в bank.py
 async def get_user_page(conn, user_id: int):
@@ -158,7 +166,7 @@ async def choose_country(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     # Завершаем текущий ConversationHandler, чтобы передать управление
     # следующему хендлеру, который ловит country_ или method_
-    return ConversationHandler.END
+    return SELECT_CATEGORY
 
 
 async def back_to_add_link(update: Update, context: ContextTypes.DEFAULT_TYPE):
