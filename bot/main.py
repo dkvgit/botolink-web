@@ -196,93 +196,6 @@ logger.info("🤖 Запуск бота...")
 
 # ===== 1. CONVERSATION HANDLERS =====
 
-# СМЕНА НИКА
-change_nick_conv = ConversationHandler(
-	entry_points=[
-		CallbackQueryHandler(change_username_start, pattern="^change_nick$")
-	],
-	states={
-		"WAITING_FOR_NICKNAME": [
-			MessageHandler(filters.TEXT & ~filters.COMMAND, save_new_nickname),
-			CallbackQueryHandler(cancel_handler, pattern="^cancel$")
-		],
-	},
-	fallbacks=[
-		CommandHandler("cancel", cancel_handler),
-		CommandHandler("start", start_handler)
-	],
-	
-	per_chat=True,
-	allow_reentry=True,
-	name="change_nick_conversation"
-)
-application.add_handler(change_nick_conv)
-
-# РЕДАКТИРОВАНИЕ НАЗВАНИЯ
-edit_title_conv = ConversationHandler(
-	entry_points=[CallbackQueryHandler(edit_link_title_start, pattern="^edit_title_")],
-	states={
-		EDIT_LINK_TITLE: [
-			MessageHandler(filters.TEXT & ~filters.COMMAND, edit_link_title_save),
-			MessageHandler(filters.ALL, edit_link_title_invalid),
-			CallbackQueryHandler(cancel_handler, pattern="^cancel$")
-		],
-	},
-	fallbacks=[
-		CommandHandler("cancel", cancel_handler),
-		CallbackQueryHandler(cancel_handler, pattern="^cancel$")
-	],
-	
-	per_chat=True,
-	allow_reentry=True,
-	name="edit_title_conversation"
-)
-application.add_handler(edit_title_conv)
-
-# Редактирование URL
-edit_url_conv = ConversationHandler(
-	entry_points=[CallbackQueryHandler(edit_link_url_start, pattern="^edit_url_")],
-	states={
-		EDIT_LINK_URL: [
-			MessageHandler(filters.TEXT & ~filters.COMMAND, edit_link_url_save),
-			MessageHandler(filters.ALL, edit_link_url_invalid),
-			CallbackQueryHandler(cancel_handler, pattern="^cancel$")
-		],
-	},
-	fallbacks=[
-		CommandHandler("cancel", cancel_handler),
-		CallbackQueryHandler(cancel_handler, pattern="^cancel$")
-	],
-	
-	per_chat=True,
-	allow_reentry=True,
-	name="edit_url_conversation"
-)
-application.add_handler(edit_url_conv)
-
-# РЕДАКТИРОВАНИЕ ИКОНКИИ
-edit_icon_conv = ConversationHandler(
-	entry_points=[CallbackQueryHandler(edit_link_icon_start, pattern="^edit_icon_")],
-	states={
-		EDIT_LINK_ICON: [
-			CallbackQueryHandler(edit_link_icon_save, pattern="^change_icon_"),
-			CallbackQueryHandler(cancel_handler, pattern="^cancel$")
-		],
-	},
-	fallbacks=[
-		CommandHandler("cancel", cancel_handler),
-		CallbackQueryHandler(cancel_handler, pattern="^cancel$")
-	],
-	per_message=True,
-	per_chat=True,
-	allow_reentry=True,
-	name="edit_icon_conversation"
-)
-application.add_handler(edit_icon_conv)
-
-# # для Python
-
-# # для Python
 
 # ============================================
 #         НОВЫЙ КОНСТРУКТОР ССЫЛОК (ПОЛНЫЙ НАБОР СТЕЙТОВ)
@@ -394,6 +307,8 @@ constructor_conv = ConversationHandler(
     allow_reentry=True
 )
 
+print(f"DEBUG: WAIT_FIELD_INPUT is {WAIT_FIELD_INPUT}")
+print(f"DEBUG: process_field_input is {process_field_input}")
 
 # Добавляем конструктор
 application.add_handler(constructor_conv)
@@ -401,6 +316,93 @@ application.add_handler(constructor_conv)
 print(f"✅ Конструктор создан: constructor_conversation")
 print(f"  • states: {[WAIT_CONSTRUCTOR_CATEGORY, WAIT_CONSTRUCTOR_TYPE, STEP_CHOICE, STEP_INPUT]}")
 print("🔧" * 30 + "\n")
+
+# СМЕНА НИКА
+change_nick_conv = ConversationHandler(
+	entry_points=[
+		CallbackQueryHandler(change_username_start, pattern="^change_nick$")
+	],
+	states={
+		"WAITING_FOR_NICKNAME": [
+			MessageHandler(filters.TEXT & ~filters.COMMAND, save_new_nickname),
+			CallbackQueryHandler(cancel_handler, pattern="^cancel$")
+		],
+	},
+	fallbacks=[
+		CommandHandler("cancel", cancel_handler),
+		CommandHandler("start", start_handler)
+	],
+	
+	per_chat=True,
+	allow_reentry=True,
+	name="change_nick_conversation"
+)
+application.add_handler(change_nick_conv)
+
+# РЕДАКТИРОВАНИЕ НАЗВАНИЯ
+edit_title_conv = ConversationHandler(
+	entry_points=[CallbackQueryHandler(edit_link_title_start, pattern="^edit_title_")],
+	states={
+		EDIT_LINK_TITLE: [
+			MessageHandler(filters.TEXT & ~filters.COMMAND, edit_link_title_save),
+			MessageHandler(filters.ALL, edit_link_title_invalid),
+			CallbackQueryHandler(cancel_handler, pattern="^cancel$")
+		],
+	},
+	fallbacks=[
+		CommandHandler("cancel", cancel_handler),
+		CallbackQueryHandler(cancel_handler, pattern="^cancel$")
+	],
+	
+	per_chat=True,
+	allow_reentry=True,
+	name="edit_title_conversation"
+)
+application.add_handler(edit_title_conv)
+
+# Редактирование URL
+edit_url_conv = ConversationHandler(
+	entry_points=[CallbackQueryHandler(edit_link_url_start, pattern="^edit_url_")],
+	states={
+		EDIT_LINK_URL: [
+			MessageHandler(filters.TEXT & ~filters.COMMAND, edit_link_url_save),
+			MessageHandler(filters.ALL, edit_link_url_invalid),
+			CallbackQueryHandler(cancel_handler, pattern="^cancel$")
+		],
+	},
+	fallbacks=[
+		CommandHandler("cancel", cancel_handler),
+		CallbackQueryHandler(cancel_handler, pattern="^cancel$")
+	],
+	
+	per_chat=True,
+	allow_reentry=True,
+	name="edit_url_conversation"
+)
+application.add_handler(edit_url_conv)
+
+# РЕДАКТИРОВАНИЕ ИКОНКИИ
+edit_icon_conv = ConversationHandler(
+	entry_points=[CallbackQueryHandler(edit_link_icon_start, pattern="^edit_icon_")],
+	states={
+		EDIT_LINK_ICON: [
+			CallbackQueryHandler(edit_link_icon_save, pattern="^change_icon_"),
+			CallbackQueryHandler(cancel_handler, pattern="^cancel$")
+		],
+	},
+	fallbacks=[
+		CommandHandler("cancel", cancel_handler),
+		CallbackQueryHandler(cancel_handler, pattern="^cancel$")
+	],
+	per_message=True,
+	per_chat=True,
+	allow_reentry=True,
+	name="edit_icon_conversation"
+)
+application.add_handler(edit_icon_conv)
+
+
+
 
 # БАНКОВСКИЙ ДИАЛОГ
 bank_world_conv = ConversationHandler(

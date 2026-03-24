@@ -402,33 +402,52 @@ async def start_filling(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Начинает пошаговое заполнение выбранных методов"""
     query = update.callback_query
     
-    print(f"🌍 bankworld.py получил: {update.callback_query.data}")
-    print(f"🔥 callback_data: {query.data}")
+    # --- МЕГА ЛОГИ ---
+    print("\n" + "🚀" * 10 + " ВХОД В start_filling " + "🚀" * 10)
+    print(f"🔹 Update ID: {update.update_id}")
+    print(f"🔹 User ID: {update.effective_user.id}")
+    print(f"🔹 Callback Data: {query.data if query else 'НЕТ QUERY'}")
     
-    # Проверяем активный диалог
-    current_conv = context.user_data.get('conversation_key')
-    print(f"🔍 Активный диалог: {current_conv}")
-    print(f"🔍 Все user_data keys: {list(context.user_data.keys())}")
+    # Проверяем, что в памяти
+    selected = context.user_data.get('selected_methods', [])
+    print(f"🔹 Выбрано методов в памяти: {selected}")
+    print(f"🔹 Ключи user_data: {list(context.user_data.keys())}")
     
-    await query.answer()
+    if query:
+        await query.answer()
     
-    selected_methods = context.user_data.get('selected_methods', [])
-    
-    if not selected_methods:
-        await query.edit_message_text("❌ Вы не выбрали ни одного способа")
-        print(f"🔵 start_filling ВОЗВРАЩАЕТ: {WAIT_METHOD_SELECTION}")
+    if not selected:
+        print("❌ ОШИБКА: selected_methods пуст!")
+        await query.edit_message_text("❌ Вы не выбрали ни одного способа.")
         return WAIT_METHOD_SELECTION
     
-    # Создаем очередь для заполнения
-    context.user_data['filling_queue'] = selected_methods.copy()
-    context.user_data['collected_methods'] = {}  # Сюда сохраним все данные
-    context.user_data['current_field_index'] = 0  # Добавляем для безопасности
+    # Инициализация процесса
+    context.user_data['filling_queue'] = list(selected)
+    context.user_data['collected_methods'] = {}
+    context.user_data['current_field_index'] = 0
     
-    # Начинаем с первого метода и возвращаем результат
-    result = await ask_next_method(query, context)
-    print(f"🔵 start_filling ВОЗВРАЩАЕТ: {result}")
-    return result  # Возвращаем WAIT_FIELD_INPUT
-
+    print(f"📝 Очередь создана: {context.user_data['filling_queue']}")
+    
+    # Вызов следующего шага
+    try:
+        print("🔄 Вызываем ask_next_method...")
+        result = await ask_next_method(query, context)
+        
+        # САМАЯ ВАЖНАЯ ПРОВЕРКА
+        print(f"✅ ask_next_method вернула стейт: {result}")
+        
+        if result is None:
+            print("🚨 КРИТИЧЕСКАЯ ОШИБКА: ask_next_method вернула None! Стейт потерян.")
+            # Принудительно возвращаем 502, если функция почему-то отдала пустоту
+            return WAIT_FIELD_INPUT
+            
+        return result
+        
+    except Exception as e:
+        print(f"💥 ВЗРЫВ В start_filling: {e}")
+        import traceback
+        traceback.print_exc()
+        return ConversationHandler.END
 
 
 
