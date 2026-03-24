@@ -289,71 +289,112 @@ application.add_handler(edit_icon_conv)
 # ============================================
 
 constructor_conv = ConversationHandler(
-	entry_points=[
-		CallbackQueryHandler(start_constructor, pattern="^add_link$"),
-		CommandHandler("addlink", start_constructor)
-	],
-	states={
-		WAIT_CONSTRUCTOR_CATEGORY: [
-			CallbackQueryHandler(handle_category, pattern="^cat_"),
-			CallbackQueryHandler(back_to_categories, pattern="^back_to_categories$"),
-			CallbackQueryHandler(cancel_constructor, pattern="^back_to_main$")
-		],
-		WAIT_CONSTRUCTOR_TYPE: [
-			CallbackQueryHandler(handle_type, pattern="^type_"),
-			CallbackQueryHandler(back_to_categories, pattern="^back_to_categories$")
-		],
-		STEP_CHOICE: [
-			CallbackQueryHandler(handle_choice, pattern="^choice_"),
-			CallbackQueryHandler(back_to_types, pattern="^back_to_types$")
-		],
-		STEP_INPUT: [
-			MessageHandler(filters.TEXT & ~filters.COMMAND, handle_input),
-			CallbackQueryHandler(back_to_types, pattern="^back_to_types$"),
-			CallbackQueryHandler(back_to_previous, pattern="^back_to_previous$"),
-			CallbackQueryHandler(handle_skip, pattern="^skip_step$")
-		],
-		
-		# 🟢 ДОБАВЛЯЕМ ВСЕ ФИНАНСОВЫЕ СОСТОЯНИЯ В ЭТОТ ЖЕ ДИАЛОГ
-		SELECT_CATEGORY: [
-			CallbackQueryHandler(wallets_and_crypto_menu, pattern="^cat_crypto$"),
-			CallbackQueryHandler(select_category, pattern="^cat_wallets$"),
-			CallbackQueryHandler(select_category, pattern="^cat_stocks$"),
-			CallbackQueryHandler(select_category, pattern="^cat_transfers$"),
-			CallbackQueryHandler(back_to_categories, pattern="^back_to_categories$"),
-		],
-		SELECT_LINK_TYPE: [  # Состояние 10
-			CallbackQueryHandler(select_link_type, pattern="^type_"),
-			CallbackQueryHandler(back_to_categories, pattern="^back_to_categories$"),
-		],
-		SELECT_CRYPTO_NETWORK: [  # Состояние 6
-			CallbackQueryHandler(select_crypto_network, pattern="^net_"),
-			CallbackQueryHandler(back_to_categories, pattern="^back_to_categories$"),
-		],
-		ADD_LINK_URL: [  # Состояние 5 (Ввод адреса кошелька)
-			MessageHandler(filters.TEXT & ~filters.COMMAND, add_link_url),
-			CallbackQueryHandler(back_to_categories, pattern="^back_to_categories$"),
-		],
-		SELECT_FINANCE_SUBTYPE: [  # Состояние 11
-			CallbackQueryHandler(select_finance_subtype, pattern="^fin_sub_"),
-			CallbackQueryHandler(back_to_categories, pattern="^back_to_categories$"),
-		],
-		
-		ADD_MULTI_FINANCE_DATA: [  # Состояние 28
-			CallbackQueryHandler(ask_for_multi_finance_details, pattern="^net_"),
-			MessageHandler(filters.TEXT & ~filters.COMMAND, process_multi_finance_data),
-			CallbackQueryHandler(back_to_categories, pattern="^back_to_categories$"),
-		]
-	},
-	fallbacks=[
-		CommandHandler("cancel", cancel_constructor),
-		CallbackQueryHandler(cancel_constructor, pattern="^cancel$")
-	],
-	name="constructor_conversation",
-	per_user=True,
-	per_chat=True,
-	allow_reentry=True
+    entry_points=[
+        CallbackQueryHandler(start_constructor, pattern="^add_link$"),
+        CommandHandler("addlink", start_constructor)
+    ],
+    states={
+        # === 1. БАЗОВЫЙ КОНСТРУКТОР (ОБЩИЕ ШАГИ) ===
+        WAIT_CONSTRUCTOR_CATEGORY: [
+            CallbackQueryHandler(handle_category, pattern="^cat_"),
+            CallbackQueryHandler(back_to_categories, pattern="^back_to_categories$"),
+            CallbackQueryHandler(cancel_constructor, pattern="^back_to_main$")
+        ],
+        WAIT_CONSTRUCTOR_TYPE: [
+            CallbackQueryHandler(handle_type, pattern="^type_"),
+            CallbackQueryHandler(back_to_categories, pattern="^back_to_categories$")
+        ],
+        STEP_CHOICE: [
+            CallbackQueryHandler(handle_choice, pattern="^choice_"),
+            CallbackQueryHandler(back_to_types, pattern="^back_to_types$")
+        ],
+        STEP_INPUT: [
+            MessageHandler(filters.TEXT & ~filters.COMMAND, handle_input),
+            CallbackQueryHandler(back_to_types, pattern="^back_to_types$"),
+            CallbackQueryHandler(back_to_previous, pattern="^back_to_previous$"),
+            CallbackQueryHandler(handle_skip, pattern="^skip_step$")
+        ],
+
+        # === 2. ФИНАНСЫ, КРИПТО И ВЫБОР КАТЕГОРИЙ ===
+        SELECT_CATEGORY: [
+            CallbackQueryHandler(wallets_and_crypto_menu, pattern="^cat_crypto$"),
+            CallbackQueryHandler(select_category, pattern="^cat_wallets$"),
+            CallbackQueryHandler(select_category, pattern="^cat_stocks$"),
+            CallbackQueryHandler(select_category, pattern="^cat_transfers$"),
+            CallbackQueryHandler(show_country_methods, pattern="^country_.*$"), # Важно для банков
+            CallbackQueryHandler(back_to_categories, pattern="^back_to_categories$"),
+        ],
+        SELECT_CRYPTO_NETWORK: [
+            CallbackQueryHandler(select_crypto_network, pattern="^net_"),
+            CallbackQueryHandler(back_to_categories, pattern="^back_to_categories$"),
+        ],
+        ADD_MULTI_FINANCE_DATA: [
+            CallbackQueryHandler(ask_for_multi_finance_details, pattern="^net_"),
+            MessageHandler(filters.TEXT & ~filters.COMMAND, process_multi_finance_data),
+            CallbackQueryHandler(back_to_categories, pattern="^back_to_categories$"),
+        ],
+
+        # === 3. УНИВЕРСАЛЬНЫЕ БАНКОВСКИЕ СТЕЙТЫ (ТОТ САМЫЙ 502) ===
+        WAIT_METHOD_SELECTION: [
+            CallbackQueryHandler(toggle_method, pattern="^method_[a-z]+_[a-z_]+$"),
+            CallbackQueryHandler(start_filling, pattern="^start_filling$")
+        ],
+        WAIT_FIELD_INPUT: [  # 502 - Самый важный для тебя сейчас
+            MessageHandler(filters.TEXT & ~filters.COMMAND, process_field_input),
+            CallbackQueryHandler(back_to_countries, pattern="^back_to_countries$")
+        ],
+        WAIT_FILLING_DATA: [  # 501
+            MessageHandler(filters.TEXT & ~filters.COMMAND, process_field_input),
+            CallbackQueryHandler(back_to_countries, pattern="^back_to_countries$")
+        ],
+        WAIT_FINAL_CONFIRM: [  # 503
+            CallbackQueryHandler(save_all_methods, pattern="^save_all_methods$"),
+            CallbackQueryHandler(back_to_countries, pattern="^back_to_countries$")
+        ],
+
+        # === 4. СНГ И МЕЖДУНАРОДНЫЕ БАНКИ (ВВОД ДАННЫХ) ===
+        # Россия, Беларусь, Казахстан и др.
+        WAIT_RUSSIA_CARD: [MessageHandler(filters.TEXT & ~filters.COMMAND, process_card_input)],
+        WAIT_RUSSIA_PHONE: [MessageHandler(filters.TEXT & ~filters.COMMAND, process_phone_input)],
+        WAIT_KAZAKHSTAN_CARD: [MessageHandler(filters.TEXT & ~filters.COMMAND, process_card_input)],
+        WAIT_KAZAKHSTAN_PHONE: [MessageHandler(filters.TEXT & ~filters.COMMAND, process_phone_input)],
+        WAIT_UKRAINE_CARD: [MessageHandler(filters.TEXT & ~filters.COMMAND, process_card_input)],
+        WAIT_UZBEKISTAN_CARD: [MessageHandler(filters.TEXT & ~filters.COMMAND, process_card_input)],
+        WAIT_EUROPE_IBAN: [MessageHandler(filters.TEXT & ~filters.COMMAND, process_iban_input)],
+        WAIT_USA_ACH: [MessageHandler(filters.TEXT & ~filters.COMMAND, process_card_input)],
+        
+        # Специальные кошельки
+        WAIT_YOOMONEY: [MessageHandler(filters.TEXT & ~filters.COMMAND, process_yoomoney_input)],
+        WAIT_VKPAY: [MessageHandler(filters.TEXT & ~filters.COMMAND, process_vkpay_input)],
+        WAIT_KASPI: [MessageHandler(filters.TEXT & ~filters.COMMAND, process_kaspi_input)],
+        WAIT_PAYME: [MessageHandler(filters.TEXT & ~filters.COMMAND, process_payme_input)],
+
+        # === 5. REVOLUT & WISE (СЛОЖНЫЕ ЦЕПОЧКИ) ===
+        WAIT_REVOLUT_CHOICE: [
+            CallbackQueryHandler(revolut_choice_handler, pattern="^revolut_(quick|full)$"),
+            CallbackQueryHandler(back_to_countries, pattern="^back_to_countries$")
+        ],
+        WAIT_REVOLUT_LOGIN: [MessageHandler(filters.TEXT & ~filters.COMMAND, process_revolut_login)],
+        WAIT_REVOLUT_IBAN: [MessageHandler(filters.TEXT & ~filters.COMMAND, process_revolut_iban)],
+        
+        WAIT_WISE_CHOICE: [
+            CallbackQueryHandler(wise_choice_handler, pattern="^wise_(quick|full)$"),
+            CallbackQueryHandler(back_to_countries, pattern="^back_to_countries$")
+        ],
+        WAIT_WISE_LOGIN: [MessageHandler(filters.TEXT & ~filters.COMMAND, process_wise_login)],
+        WAIT_WISE_IBAN: [MessageHandler(filters.TEXT & ~filters.COMMAND, process_wise_iban)],
+    },
+    fallbacks=[
+        CommandHandler("cancel", cancel_constructor),
+        CallbackQueryHandler(cancel_constructor, pattern="^cancel$")
+    ],
+    name="constructor_conversation",
+    per_user=True,
+    per_chat=True,
+    allow_reentry=True
 )
+
+
 # Добавляем конструктор
 application.add_handler(constructor_conv)
 

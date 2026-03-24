@@ -31,19 +31,22 @@ from telegram.ext import ConversationHandler, CallbackQueryHandler, MessageHandl
 logger = logging.getLogger(__name__)
 
 
+# Находим функцию choose_country_from_constructor
 async def choose_country_from_constructor(update: Update, context: ContextTypes.DEFAULT_TYPE):
-	"""Переход из конструктора в банковский модуль"""
-	query = update.callback_query
-	await query.answer()
-	
-	print(f"💳 bank.py получил: {update.callback_query.data}")
-	
-	# Показываем меню банков
-	await choose_country(update, context)
-	
-	# ВАЖНО: Завершаем текущий диалог конструктора!
-	return ConversationHandler.END  # ← НЕ SELECT_COUNTRY, А END!
-
+    """Переход из конструктора в банковский модуль"""
+    query = update.callback_query
+    await query.answer()
+    
+    # Вместо простого вызова, логируем переход
+    print(f"💳 Переход в банки из конструктора: {query.data}")
+    
+    # Показываем меню стран
+    await choose_country(update, context)
+    
+    # ВАЖНО: Мы возвращаем стейт, который теперь будет в конструкторе!
+    # Обычно это SELECT_CATEGORY (где выбираются страны/методы)
+    from states import SELECT_CATEGORY
+    return SELECT_CATEGORY
 
 # Удали импорт и добавь функцию прямо в bank.py
 async def get_user_page(conn, user_id: int):
