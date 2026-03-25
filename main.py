@@ -48,24 +48,19 @@ if __name__ == "__main__":
     # # На Railway всегда будет срабатывать запуск "all"
     command = sys.argv[1] if len(sys.argv) > 1 else "all"
 
-    if command == "bot":
-        # # Запуск бота отдельно (ЛОКАЛЬНО через polling)
-        try:
-            import asyncio
-            # Импортируем именно run_local, которую мы создали для цикличного запуска
-            from bot.main import run_local
-            logger.info("🤖 Запуск бота в режиме Polling...")
-            asyncio.run(run_local())
-        except ImportError:
-            # Если run_local нет, пробуем старый вариант
-            from bot.main import main as bot_main
-            asyncio.run(bot_main())
-        except Exception as e:
-            logger.error(f"❌ Ошибка запуска бота: {e}")
-    
-    elif command == "web" or command == "all":
-        # # Основной режим для Railway
+    # Если ты хочешь запускать ВСЁ (и сайт и бота) одной командой:
+    if command == "all" or command == "web":
+        # Это вызовет uvicorn.run(application)
+        # А внутри application (в web/main.py) сработает наш @app.on_event("startup")
+        # Которому пофиг, как его запустили — он сам увидит RUN_MODE=polling в .env
         start_app()
     
-    else:
-        print(f"Использование: python main.py [bot|web|all]")
+    elif command == "bot":
+        # Режим только бота, если не нужен сайт
+        try:
+            import asyncio
+            from bot.main import run_local
+            logger.info("🤖 Запуск только бота в режиме Polling...")
+            asyncio.run(run_local())
+        except Exception as e:
+            logger.error(f"❌ Ошибка запуска бота: {e}")

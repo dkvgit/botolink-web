@@ -87,29 +87,49 @@ DATABASE_URL = DIRECT_DATABASE_URL
 
 
 
-# ========== СОЗДАНИЕ FASTAPI ПРИЛОЖЕНИЯ ==========
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup
-    logger.info("🤖 Инициализация Telegram бота для Webhook...")
-    try:
-        if not bot_app.running:
-            await bot_app.initialize()
-            await bot_app.start()
-        logger.info("✅ Бот готов к приему обновлений через /webhook")
-    except Exception as e:
-        logger.error(f"❌ Ошибка инициализации бота: {e}")
+    # --- STARTUP ---
+    run_mode = os.getenv("RUN_MODE", "webhook").lower().strip()
+    
+    if run_mode == "polling":
+        logger.info("🚀 [LOCAL] Инициализация бота в режиме POLLING...")
+        try:
+            if not bot_app.running:
+                await bot_app.initialize()
+                # Удаляем вебхук, чтобы сообщения шли на комп, а не на Railway
+                await bot_app.bot.delete_webhook(drop_pending_updates=True)
+                await bot_app.start()
+                
+                if bot_app.updater:
+                    await bot_app.updater.start_polling()
+                    logger.info("✅ БОТ ЗАПУЩЕН ЛОКАЛЬНО (Polling)")
+        except Exception as e:
+            logger.error(f"❌ Ошибка старта Polling: {e}")
+    else:
+        # Режим для Railway
+        logger.info("🌐 [SERVER] Инициализация бота для Webhook...")
+        try:
+            if not bot_app.running:
+                await bot_app.initialize()
+                await bot_app.start()
+            logger.info("✅ Бот готов к приему обновлений через /webhook")
+        except Exception as e:
+            logger.error(f"❌ Ошибка инициализации Webhook: {e}")
     
     yield
     
-    # Shutdown
+    # --- SHUTDOWN ---
     logger.info("🚦 Завершение работы...")
     try:
+        if bot_app.updater and bot_app.updater.running:
+            await bot_app.updater.stop()
         if bot_app.running:
             await bot_app.stop()
     except Exception as e:
         logger.error(f"❌ Ошибка при выключении: {e}")
 
+# Не забудь обновить создание app, если оно было другим
 app = FastAPI(lifespan=lifespan)
 
 
@@ -424,7 +444,8 @@ def get_icon_class(icon_name, link_type, url, pay_details):
 
 @app.get("/{username}", response_class=HTMLResponse)
 async def user_page(request: Request, username: str):
-    conn = await asyncpg.connect(DATABASE_URL)
+    # ВАЖНО: Добавляем statement_cache_size=0 для работы с пулером Supabase (PgBouncer)
+    conn = await asyncpg.connect(DATABASE_URL, statement_cache_size=0)
     try:
         # 1. Увеличиваем счетчик просмотров
         await conn.execute("UPDATE pages SET view_count = view_count + 1 WHERE username = $1", username)
@@ -472,7 +493,7 @@ async def user_page(request: Request, username: str):
 
         # 5. Обрабатываем ссылки
         processed_links = []
-        import json # Убедись, что json импортирован в начале файла
+        import json
         
         for r in links_records:
             l_dict = dict(r)
@@ -493,7 +514,6 @@ async def user_page(request: Request, username: str):
             
             if original_url and original_url != "#":
                 original_url = str(original_url).strip()
-                # Для крипты оставляем как есть, для остального добавляем https
                 crypto_types = ['crypto', 'binance', 'bybit', 'okx', 'metamask', 'kucoin']
                 if link_type in crypto_types:
                     l_dict['url'] = original_url
@@ -516,14 +536,13 @@ async def user_page(request: Request, username: str):
                 else:
                     l_dict['icon_class'] = 'fas fa-link'
             
-            l_dict['is_external'] = l_dict['url'].startswith(('http://', 'https://'))
+            l_dict['is_external'] = str(l_dict['url']).startswith(('http://', 'https://'))
             processed_links.append(l_dict)
         
         # 6. Данные пользователя
         user_row = await conn.fetchrow("SELECT * FROM users WHERE id = $1", page_data['user_id'])
         user_data = dict(user_row) if user_row else {}
         
-        # Преобразование полей в строки для стабильности Jinja2
         user_data['first_name'] = str(user_data.get('first_name') or page_data.get('username') or 'Пользователь')
         user_data['username'] = str(user_data.get('username') or '')
 
@@ -542,14 +561,13 @@ async def user_page(request: Request, username: str):
             else:
                 categories['other'].append(link)
 
-        # ФИНАЛЬНЫЙ ОТЛАДОЧНЫЙ ПРИНТ
         print(f"✅ Rendering template: {template_file} for user: {username}")
 
-        # 8. Возврат ответа (С ИСПРАВЛЕННОЙ ПЕРЕДАЧЕЙ REQUEST)
+        # 8. Возврат ответа (УНИВЕРСАЛЬНЫЙ СПОСОБ - РАБОТАЕТ ВЕЗДЕ)
         return templates.TemplateResponse(
-            request=request,
-            name=template_file,
-            context={
+            template_file,
+            {
+                "request": request,
                 "user": user_data,
                 "page": page_data,
                 "links": processed_links,
@@ -572,20 +590,54 @@ async def user_page(request: Request, username: str):
 
 @app.on_event("startup")
 async def startup():
-    logger.info("🤖 Инициализация Telegram бота для Webhook...")
-    if not bot_app.running:
-        await bot_app.initialize()
-        await bot_app.start()
-    logger.info("✅ Бот готов к приему обновлений через /webhook")
+    # Принудительно берем значение, игнорируя кэш
+    run_mode = os.getenv("RUN_MODE", "webhook").lower().strip()
+    
+    # Прямой лог в консоль, чтобы ты видел, что прочитал Python
+    logger.info(f"🔍 ПРОВЕРКА РЕЖИМА: '{run_mode}'")
+
+    if run_mode == "polling":
+        logger.info("🚀 ЗАПУСК ЛОКАЛЬНО (POLLING)...")
+        if not bot_app.running:
+            await bot_app.initialize()
+            # Удаляем вебхук, иначе сообщения не придут на комп
+            await bot_app.bot.delete_webhook(drop_pending_updates=True)
+            await bot_app.start()
+            if bot_app.updater:
+                await bot_app.updater.start_polling()
+                logger.info("✅ БОТ ПОДКЛЮЧЕН К TELEGRAM (POLLING)")
+    else:
+        logger.info("🌐 ЗАПУСК НА СЕРВЕРЕ (WEBHOOK)...")
+        if not bot_app.running:
+            await bot_app.initialize()
+            await bot_app.start()
+        logger.info("✅ Бот готов к работе через Webhook")
+	    
+	    
+	    
 
 @app.on_event("shutdown")
 async def shutdown():
     logger.info("🚦 Завершение работы...")
+    # Останавливаем Polling, если он был включен
+    if bot_app.updater and bot_app.updater.running:
+        await bot_app.updater.stop()
+        
     if bot_app.running:
         await bot_app.stop()
+        await bot_app.shutdown()
+	    
+	    
+	    
     
+
+# // web/main.py
 
 if __name__ == "__main__":
     import uvicorn
+    from dotenv import load_dotenv
+    load_dotenv()
+    
     port = int(os.getenv("PORT", 8000))
+    # Uvicorn сам вызовет функцию startup(), которую мы написали выше
     uvicorn.run(app, host="0.0.0.0", port=port)
