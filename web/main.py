@@ -555,16 +555,12 @@ async def user_page(request: Request, username: str):
                 l_dict['pay_details'] = {}
             
             # ========== НОРМАЛИЗАЦИЯ ДАННЫХ ДЛЯ ШАБЛОНОВ ==========
-            # Приводим ключи pay_details к формату, который ждет шаблон
             pd = l_dict.get('pay_details')
             if pd and isinstance(pd, dict):
-                # Для крипты: wallet_address -> address
                 if 'wallet_address' in pd:
                     pd['address'] = pd.pop('wallet_address')
-                # Для телефонов: phone -> phone_number
                 if 'phone' in pd:
                     pd['phone_number'] = pd.pop('phone')
-                # Для карт: card_number уже в правильном формате
                 l_dict['pay_details'] = pd
             # ====================================================
             
@@ -610,53 +606,42 @@ async def user_page(request: Request, username: str):
         categories = {k: [] for k in ['social', 'messengers', 'transfers', 'donate', 'crypto', 'shops', 'partner', 'other']}
         
         for link in processed_links:
-            # Безопасно получаем link_type, защита от dict
             l_type = link.get('link_type')
             if not isinstance(l_type, str):
                 l_type = str(l_type) if l_type is not None else 'other'
             
-            # Проверка на префиксы
-            is_transfer = False
-            if isinstance(l_type, str):
-                is_transfer = any(l_type.startswith(p) for p in ['card_', 'iban_', 'phone_', 'account_', 'ach_', 'wire_'])
+            is_transfer = any(l_type.startswith(p) for p in ['card_', 'iban_', 'phone_', 'account_', 'ach_', 'wire_'])
             
             if is_transfer:
                 cat = 'transfers'
             else:
                 cat = LINK_TYPE_CATEGORY.get(l_type, 'other')
-                if not isinstance(cat, str):
-                    cat = 'other'
             
             if cat in categories:
                 categories[cat].append(link)
             else:
                 categories['other'].append(link)
 
-        # web/main.py
-        
+        # ДЕБАГ ПЕРЕД ОТПРАВКОЙ
         print(f"✅ Rendering template: {template_file} for user: {username}")
-        
-        
-        
-        # ПРОВЕРКА: убедимся что template_file - это строка
         print(f"DEBUG template_file: {template_file} (type: {type(template_file)})")
         
-        # Если это не строка - принудительно превращаем в строку
         if not isinstance(template_file, str):
             template_file = str(template_file)
             print(f"DEBUG после преобразования: {template_file} (type: {type(template_file)})")
-        
-        # 8. Возврат ответа - ФИНАЛЬНЫЙ ВАРЯНТ ДЛЯ RAILWAY (Python 3.13)
+
+        # 8. Возврат ответа (Явные аргументы для Railway/Python 3.13)
         return templates.TemplateResponse(
-            template_file,
-            {
+            name=template_file,
+            context={
                 "request": request,
                 "user": user_data,
                 "page": page_data,
                 "links": processed_links,
-                #"categories": categories,
+                "categories": categories,
                 "COUNTRY_NAMES": COUNTRY_NAMES
-            }
+            },
+            request=request
         )
     
     except Exception as e:
