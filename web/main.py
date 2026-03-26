@@ -610,11 +610,22 @@ async def user_page(request: Request, username: str):
         categories = {k: [] for k in ['social', 'messengers', 'transfers', 'donate', 'crypto', 'shops', 'partner', 'other']}
         
         for link in processed_links:
-            l_type = link['link_type']
-            if any(l_type.startswith(p) for p in ['card_', 'iban_', 'phone_', 'account_', 'ach_', 'wire_']):
+            # Безопасно получаем link_type, защита от dict
+            l_type = link.get('link_type')
+            if not isinstance(l_type, str):
+                l_type = str(l_type) if l_type is not None else 'other'
+            
+            # Проверка на префиксы
+            is_transfer = False
+            if isinstance(l_type, str):
+                is_transfer = any(l_type.startswith(p) for p in ['card_', 'iban_', 'phone_', 'account_', 'ach_', 'wire_'])
+            
+            if is_transfer:
                 cat = 'transfers'
             else:
                 cat = LINK_TYPE_CATEGORY.get(l_type, 'other')
+                if not isinstance(cat, str):
+                    cat = 'other'
             
             if cat in categories:
                 categories[cat].append(link)
