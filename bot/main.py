@@ -1,12 +1,13 @@
 # bot/main.py
-# bot/main.py
-import asyncio
-import logging
 
-import asyncio
+
 import logging
-from telegram.ext import Application
-from core.config import BOT_TOKEN
+import warnings
+
+from telegram import BotCommand, BotCommandScopeChat, Update
+from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters, \
+	ConversationHandler, ContextTypes
+from telegram.warnings import PTBUserWarning
 
 from admin_handlers import (
 	admin_delete_user_now, admin_give_pro_execute, \
@@ -17,7 +18,6 @@ from bot.avatar_handler import refresh_avatar_command
 # ===== ИМПОРТЫ ИЗ bank.py =====
 from bot.bank import (
 	# Главное меню
-	choose_country,
 	back_to_countries,
 	
 	# Международные сервисы
@@ -41,11 +41,7 @@ from bot.bankworld import (
 	toggle_method,
 	start_filling,
 	process_field_input,
-	save_all_methods,
-	
-	WAIT_FILLING_DATA,
-	WAIT_FIELD_INPUT,
-	WAIT_FINAL_CONFIRM
+	save_all_methods
 )
 from bot.constructor import back_to_categories, back_to_types, cancel_constructor
 from bot.constructor import start_constructor, handle_category, handle_type, handle_choice, handle_input, handle_skip
@@ -71,34 +67,18 @@ from bot.handlers import (
 	send_receipt_callback, admin_approve_payment, pro_info_callback,
 	admin_payment_callback, change_username_start, save_new_nickname,
 	edit_link_title_invalid, edit_link_url_invalid,
-	delete_all_links_confirm, delete_all_links_execute, handle_text_input
+	delete_all_links_confirm, delete_all_links_execute
 )
 from bot.link_constructor import back_to_previous, wallets_and_crypto_menu, select_category, select_finance_subtype, \
 	select_link_type, ask_for_multi_finance_details, process_multi_finance_data, select_crypto_network, add_link_url
 # Добавить после from bot.link_constructor import select_category
-from bot.link_social import start_social_add, WAIT_SOCIAL_STEP1, WAIT_SOCIAL_URL
-from bot.link_social import (
-	start_social_add,
-	process_social_step1,
-	process_social_url,
-	back_to_social_step1,
-	WAIT_SOCIAL_STEP1,
-	WAIT_SOCIAL_URL, process_telegram_step2, process_telegram_step3, process_telegram_step1, back_to_telegram_step1,
-	skip_telegram_title, back_to_telegram_step2, telegram_type_choice, back_to_telegram_type
-)
 from bot.states import *  # Импортируем все состояния
 from bot.states import WAIT_CONSTRUCTOR_CATEGORY, WAIT_CONSTRUCTOR_TYPE, STEP_CHOICE, STEP_INPUT
 # ===== ИМПОРТЫ ИЗ bankworld.py =====
 from bot.states import WAIT_IDRAM, WAIT_TBCPAY, WAIT_CLICK, WAIT_PAYME, WAIT_KASPI, WAIT_MONOBANK, WAIT_VKPAY, \
 	WAIT_YOOMONEY
 from bot.states import WAIT_METHOD_SELECTION
-from bot.states import WAIT_SOCIAL_STEP1, WAIT_SOCIAL_URL
 from core.config import BOT_TOKEN, ADMIN_IDS
-from telegram import BotCommand, BotCommandScopeChat, Update
-from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters, \
-	ConversationHandler, DictPersistence, ContextTypes
-from telegram.warnings import PTBUserWarning
-import warnings
 
 warnings.filterwarnings(
     action="ignore",
