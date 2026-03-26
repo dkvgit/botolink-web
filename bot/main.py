@@ -868,25 +868,38 @@ async def debug_all_messages(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
 application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, debug_all_messages), group=10)
 
+
+
 async def run_local():
-    # # Сначала собираем бота, вызывая main
-    bot_app = await main()
-    
-    async with bot_app:
-        await bot_app.initialize()
-        await bot_app.start()
-        await bot_app.updater.start_polling()
-        logger.info("🚀 Бот запущен локально.")
+    # 1. Используем уже созданный в этом файле объект application
+    # 2. Инициализируем и запускаем Polling
+    async with application:
+        await application.initialize()
+        await application.start()
+        
+        # Удаляем вебхук, чтобы Telegram переключился на твой комп
+        await application.bot.delete_webhook(drop_pending_updates=True)
+        
+        # Запускаем прослушивание
+        await application.updater.start_polling(allowed_updates=Update.ALL_TYPES)
+        logger.info("🚀 [LOCAL] Бот запущен в режиме POLLING")
+        
         try:
-            await asyncio.Event().wait()
+            # Держим процесс активным
+            while True:
+                await asyncio.sleep(3600)
         except (KeyboardInterrupt, asyncio.CancelledError):
-            pass
+            logger.info("👋 Остановка...")
+            if application.updater.running:
+                await application.updater.stop()
+            if application.running:
+                await application.stop()
 
 
-# # Блок запуска тоже БЕЗ отступов (0 пробелов)
 if __name__ == "__main__":
     import asyncio
     try:
+        # Запускаем локальную функцию
         asyncio.run(run_local())
     except (KeyboardInterrupt, SystemExit):
-        logger.info("👋 Бот остановлен.")
+        print("👋 Бот полностью остановлен.")
