@@ -630,20 +630,28 @@ async def user_page(request: Request, username: str):
             template_file = str(template_file)
             print(f"DEBUG после преобразования: {template_file} (type: {type(template_file)})")
 
-        # 8. Возврат ответа (Явные аргументы для Railway/Python 3.13)
-        return templates.TemplateResponse(
-            name=template_file,
-            context={
-                "request": request,
-                "user": user_data,
-                "page": page_data,
-                "links": processed_links,
-                "categories": categories,
-                "COUNTRY_NAMES": COUNTRY_NAMES
-            },
-            request=request
-        )
-    
+        # 8. Универсальный возврат (Для локалки и Railway одновременно)
+        context_data = {
+            "request": request,
+            "user": user_data,
+            "page": page_data,
+            "links": processed_links,
+            "categories": categories,
+            "COUNTRY_NAMES": COUNTRY_NAMES
+        }
+
+        try:
+            # Вариант для НОВЫХ версий (как на Railway)
+            return templates.TemplateResponse(
+                name=template_file,
+                context=context_data,
+                request=request
+            )
+        except TypeError:
+            # Вариант для СТАРЫХ версий (как на локалке)
+            # Если аргумент 'request' не поддерживается, вызываем по-старому
+            return templates.TemplateResponse(template_file, context_data)
+
     except Exception as e:
         print(f"🔥 КРИТИЧЕСКАЯ ОШИБКА В user_page: {e}")
         import traceback
