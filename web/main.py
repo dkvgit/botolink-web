@@ -624,7 +624,7 @@ async def user_page(request: Request, username: str):
         # web/main.py
         
         print(f"✅ Rendering template: {template_file} for user: {username}")
-
+        
         # 8. Возврат ответа - ФИНАЛЬНЫЙ ВАРЯНТ ДЛЯ RAILWAY (Python 3.13)
         return templates.TemplateResponse(
             name=template_file,      # Явно говорим: это ПУТЬ
