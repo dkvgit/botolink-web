@@ -178,23 +178,59 @@ async def telegram_webhook(request: Request):
 async def root():
     return RedirectResponse(url="https://t.me/botolinkprobot")
 
+# D:\aRabota\TelegaBoom\030_mylinkspace\web\main.py
+
 @app.get("/set_webhook")
 async def set_webhook():
-    webhook_url = f"{os.getenv('APP_URL', '')}/webhook"
-    bot_token = os.getenv("BOT_TOKEN", "")
+    # # Подготавливаем базовый URL: убираем лишние пробелы и слэши в конце
+    base_url = os.getenv('APP_URL', '').strip().rstrip('/')
+    bot_token = os.getenv("BOT_TOKEN", "").strip()
     
-    if not webhook_url or not bot_token:
-        return {"error": "APP_URL or BOT_TOKEN not set"}
+    # # Если URL не задан, пробуем вытянуть его из Railway домена (на всякий случай)
+    if not base_url:
+        base_url = f"https://{os.getenv('RAILWAY_STATIC_URL', '')}".rstrip('/')
+
+    webhook_url = f"{base_url}/webhook"
     
-    tg_url = f"https://api.telegram.org/bot{bot_token}/setWebhook?url={webhook_url}"
+    if not base_url or not bot_token:
+        return {
+            "status": "error",
+            "message": "APP_URL или BOT_TOKEN не установлены в переменных окружения!",
+            "debug": {
+                "base_url": base_url,
+                "has_token": bool(bot_token)
+            }
+        }
+    
+    # # Формируем запрос к Telegram API
+    tg_url = f"https://api.telegram.org/bot{bot_token}/setWebhook"
+    
+    # # Параметры для Telegram
+    payload = {
+        "url": webhook_url,
+        "drop_pending_updates": True,  # Очистит очередь старых сообщений, чтобы бот не захлебнулся
+        "allowed_updates": ["message", "callback_query", "edited_message"]
+    }
     
     async with httpx.AsyncClient() as client:
         try:
-            r = await client.get(tg_url)
-            return r.json()
+            # # Используем POST, так как передаем JSON с настройками
+            response = await client.post(tg_url, json=payload, timeout=10.0)
+            result = response.json()
+            
+            return {
+                "status": "ok" if result.get("ok") else "failed",
+                "webhook_url_sent": webhook_url,
+                "telegram_reply": result,
+                "note": "Если 'ok': true, значит всё четко. Проверяй бота!"
+            }
         except Exception as e:
-            return {"error": str(e)}
-	    
+            logger.error(f"❌ Ошибка при установке вебхука: {e}")
+            return {
+                "status": "exception",
+                "error": str(e),
+                "tip": "Проверь соединение сервера с api.telegram.org"
+            }
 	    
 	    
 	    
