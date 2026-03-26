@@ -4,7 +4,14 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="722a5f0e-b122-4002-a32f-b6e7799afca3" name="Changes" comment="added local run logic" />
+    <list default="true" id="722a5f0e-b122-4002-a32f-b6e7799afca3" name="Changes" comment="added local run logic">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/templates/base/base.css" beforeDir="false" afterPath="$PROJECT_DIR$/web/templates/base/base.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/templates/base/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/web/templates/base/base.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/templates/base/base.js" beforeDir="false" afterPath="$PROJECT_DIR$/web/templates/base/base.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/templates/base/blocks/base_modal_crypto.html" beforeDir="false" afterPath="$PROJECT_DIR$/web/templates/base/blocks/base_modal_crypto.html" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -99,7 +106,7 @@
       <option name="presentableId" value="Default" />
       <updated>1774490595539</updated>
       <workItem from="1774490597168" duration="2149000" />
-      <workItem from="1774492773944" duration="7820000" />
+      <workItem from="1774492773944" duration="8897000" />
     </task>
     <task id="LOCAL-00001" summary="added local run logic">
       <option name="closed" value="true" />

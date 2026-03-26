@@ -1,4 +1,4 @@
-// D:\aRabota\TelegaBoom\030_botolinkpro\web\templates\base\base.js
+// D:\aRabota\TelegaBoom\030_mylinkspace\templates\base\base.js
 
 let currentToastTimeout = null;
 let currentModalId = null;
