@@ -617,17 +617,16 @@ async def user_page(request: Request, username: str):
         # web/main.py
         
         return templates.TemplateResponse(
-            request=request,         # ПЕРВЫЙ (именованный или позиционный)
-            name=template_file,      # ВТОРОЙ (имя файла)
-            context={                # ТРЕТИЙ (словарь данных)
-                "request": request,  # Обязательно дублируем внутри для Jinja
-                "user": user_data,
-                "page": page_data,
-                "links": processed_links,
-                "categories": categories,
-                "COUNTRY_NAMES": COUNTRY_NAMES
-            }
-        )
+                    template_file,
+                    {
+                        "request": request,
+                        "user": user_data,
+                        "page": page_data,
+                        "links": processed_links,
+                        "categories": categories,
+                        "COUNTRY_NAMES": COUNTRY_NAMES
+                    }
+                )
     
     except Exception as e:
         print(f"🔥 КРИТИЧЕСКАЯ ОШИБКА В user_page: {e}")
