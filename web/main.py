@@ -621,20 +621,23 @@ async def user_page(request: Request, username: str):
             else:
                 categories['other'].append(link)
 
+        # web/main.py
+        
         print(f"✅ Rendering template: {template_file} for user: {username}")
 
-        # 8. Возврат ответа
+        # 8. Возврат ответа - ФИНАЛЬНЫЙ ВАРЯНТ ДЛЯ RAILWAY (Python 3.13)
         return templates.TemplateResponse(
-                    template_file,
-                    {
-                        "request": request,
-                        "user": user_data,
-                        "page": page_data,
-                        "links": processed_links,
-                        "categories": categories,
-                        "COUNTRY_NAMES": COUNTRY_NAMES
-                    }
-                )
+            name=template_file,      # Явно говорим: это ПУТЬ
+            request=request,         # Явно говорим: это ЗАПРОС
+            context={                # Явно говорим: это ДАННЫЕ
+                "request": request,
+                "user": user_data,
+                "page": page_data,
+                "links": processed_links,
+                "categories": categories,
+                "COUNTRY_NAMES": COUNTRY_NAMES
+            }
+        )
     
     except Exception as e:
         print(f"🔥 КРИТИЧЕСКАЯ ОШИБКА В user_page: {e}")
