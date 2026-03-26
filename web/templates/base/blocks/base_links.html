@@ -38,61 +38,61 @@
             {% set is_modal_type = (category == 'crypto' or link.url == '#modal' or category == 'transfers' or
             link.link_type in ['revolut', 'wise', 'sber', 'iban']) %}
 
-            <a href="{{ link.url if not is_modal_type else 'javascript:void(0)' }}"
-               class="link-card track-link"
-               data-link-id="{{ link.id }}"
-               {% if is_modal_type %}
-               onclick="openModal(event, '{{ link.id }}')"
-               {% else %}
-               target="_blank"
-               {% endif %}>
-                <div class="link-icon">
-                    {%- set icon_name = link.icon or link.link_type -%}
-                    {%- if icon_name -%}
-                    <img src="/static/icons/{{ icon_name }}.png" class="main-icon-img"
-                         onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"
-                         alt="icon">
-                    <i class="{{ link.icon_class or 'fas fa-link' }}" style="display: none;"></i>
-                    {%- else -%}
-                    <i class="{{ link.icon_class or 'fas fa-link' }}"></i>
-                    {%- endif -%}
-                </div>
+                <a href="{{ link.url if not is_modal_type else 'javascript:void(0)' }}"
+                   class="link-card track-link"
+                   data-link-id="{{ link.id }}"
+                   {% if is_modal_type %}
+                   onclick="openModal(event, '{{ link.id }}')"
+                   {% else %}
+                   target="_blank"
+                   {% endif %}>
+                    <div class="link-icon">
+                        {%- set icon_name = link.icon or link.link_type -%}
+                        {%- if icon_name -%}
+                        <img src="/static/icons/{{ icon_name }}.png" class="main-icon-img"
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"
+                             alt="icon">
+                        <i class="{{ link.icon_class or 'fas fa-link' }}" style="display: none;"></i>
+                        {%- else -%}
+                        <i class="{{ link.icon_class or 'fas fa-link' }}"></i>
+                        {%- endif -%}
+                    </div>
 
-                <div class="link-info" style="display:flex; flex-direction:column;">
-                    <span class="link-title" style="font-weight:600;">
-                        {{ link.title }}
-                        {% if category == 'crypto' %}
-                            <small style="opacity: 0.6; font-size: 0.8em; margin-left: 5px;">
-                                {% if link.category == 'stocks' or link.category == 'exchanges' or link.url == '#modal' or link.is_exchange %}
-                                    (Биржа)
-                                {% else %}
-                                    (Кошелек)
-                                {% endif %}
-                            </small>
-                        {% endif %}
-                    </span>
-                    {% if link.pay_details and link.pay_details.bank_name %}
-                    <div class="link-bank" style="font-size:0.75rem; font-weight:600; color:#1a73e8; margin-top:2px;">
-                        {{ link.pay_details.bank_name }}
-                        {% if link.pay_details and link.pay_details.country %}
-                        <span style="margin-left:6px; font-size:0.9rem;">
-                            {% if link.pay_details.country == 'russia' %}🇷🇺
-                            {% elif link.pay_details.country == 'ukraine' %}🇺🇦
-                            {% elif link.pay_details.country == 'kazakhstan' %}🇰🇿
-                            {% elif link.pay_details.country == 'usa' %}🇺🇸
-                            {% elif link.pay_details.country == 'uzbekistan' %}🇺🇿
-                            {% elif link.pay_details.country == 'armenia' %}🇦🇲
-                            {% elif link.pay_details.country == 'georgia' %}🇬🇪
-                            {% else %}🌍
+                    <div class="link-info" style="flex:1; display:flex; flex-direction:column;">
+                        <span class="link-title" style="font-weight:600;">
+                            {{ link.title }}
+                            {% if category == 'crypto' %}
+                                <small style="opacity: 0.6; font-size: 0.8em; margin-left: 5px;">
+                                    {% if link.category == 'stocks' or link.category == 'exchanges' or link.url == '#modal' or link.is_exchange %}
+                                        (Биржа)
+                                    {% else %}
+                                        (Кошелек)
+                                    {% endif %}
+                                </small>
                             {% endif %}
                         </span>
+                        {% if link.pay_details and link.pay_details.bank_name %}
+                        <div class="link-bank" style="font-size:0.7rem; color:#6c757d; margin-top:2px;">
+                            {{ link.pay_details.bank_name }}
+                            {% if link.pay_details and link.pay_details.country %}
+                            <span style="margin-left:6px;">
+                                {% if link.pay_details.country == 'russia' %}🇷🇺
+                                {% elif link.pay_details.country == 'ukraine' %}🇺🇦
+                                {% elif link.pay_details.country == 'kazakhstan' %}🇰🇿
+                                {% elif link.pay_details.country == 'usa' %}🇺🇸
+                                {% elif link.pay_details.country == 'uzbekistan' %}🇺🇿
+                                {% elif link.pay_details.country == 'armenia' %}🇦🇲
+                                {% elif link.pay_details.country == 'georgia' %}🇬🇪
+                                {% else %}🌍
+                                {% endif %}
+                            </span>
+                            {% endif %}
+                        </div>
                         {% endif %}
                     </div>
-                    {% endif %}
-                </div>
 
-                <i class="fas fa-chevron-right arrow-icon"></i>
-            </a>
+                    <i class="fas fa-chevron-right arrow-icon"></i>
+                </a>
             {% endfor %}
         </div>
     </div>
