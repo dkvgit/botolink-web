@@ -58,20 +58,38 @@
                     {%- endif -%}
                 </div>
 
-                <span class="link-title">
-                            {{ link.title }}
-                            {# Теперь проверяем оригинальную категорию или url для подписи #}
-                            {% if category == 'crypto' %}
-                                <small style="opacity: 0.6; font-size: 0.8em; margin-left: 5px;">
-                                    {# Если в базе категория stocks или url ведет в модалку — это Биржа #}
-                                    {% if link.category == 'stocks' or link.category == 'exchanges' or link.url == '#modal' or link.is_exchange %}
-                                        (Биржа)
-                                    {% else %}
-                                        (Кошелек)
-                                    {% endif %}
-                                </small>
+                <div class="link-info" style="display:flex; flex-direction:column;">
+                    <span class="link-title" style="font-weight:600;">
+                        {{ link.title }}
+                        {% if category == 'crypto' %}
+                            <small style="opacity: 0.6; font-size: 0.8em; margin-left: 5px;">
+                                {% if link.category == 'stocks' or link.category == 'exchanges' or link.url == '#modal' or link.is_exchange %}
+                                    (Биржа)
+                                {% else %}
+                                    (Кошелек)
+                                {% endif %}
+                            </small>
+                        {% endif %}
+                    </span>
+                    {% if link.pay_details and link.pay_details.bank_name %}
+                    <div class="link-bank" style="font-size:0.75rem; font-weight:600; color:#1a73e8; margin-top:2px;">
+                        {{ link.pay_details.bank_name }}
+                        {% if link.pay_details and link.pay_details.country %}
+                        <span style="margin-left:6px; font-size:0.9rem;">
+                            {% if link.pay_details.country == 'russia' %}🇷🇺
+                            {% elif link.pay_details.country == 'ukraine' %}🇺🇦
+                            {% elif link.pay_details.country == 'kazakhstan' %}🇰🇿
+                            {% elif link.pay_details.country == 'usa' %}🇺🇸
+                            {% elif link.pay_details.country == 'uzbekistan' %}🇺🇿
+                            {% elif link.pay_details.country == 'armenia' %}🇦🇲
+                            {% elif link.pay_details.country == 'georgia' %}🇬🇪
+                            {% else %}🌍
                             {% endif %}
                         </span>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
 
                 <i class="fas fa-chevron-right arrow-icon"></i>
             </a>

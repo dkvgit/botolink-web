@@ -41,7 +41,7 @@ from bot.bankworld import (
 	toggle_method,
 	start_filling,
 	process_field_input,
-	save_all_methods
+	save_all_methods, restart_filling
 )
 from bot.constructor import back_to_categories, back_to_types, cancel_constructor
 from bot.constructor import start_constructor, handle_category, handle_type, handle_choice, handle_input, handle_skip
@@ -250,6 +250,7 @@ constructor_conv = ConversationHandler(
         WAIT_FINAL_CONFIRM: [
             CallbackQueryHandler(save_all_methods, pattern="^save_all_methods$"),
             CallbackQueryHandler(back_to_countries, pattern="^back_to_countries$"),
+	        CallbackQueryHandler(restart_filling, pattern="^restart_filling$"),  # ← это должно быть
             CallbackQueryHandler(back_to_categories, pattern="^back_to_categories$")
         ],
 
@@ -832,6 +833,7 @@ bank_world_conv = ConversationHandler(
 		],
 		WAIT_FINAL_CONFIRM: [
 			CallbackQueryHandler(save_all_methods, pattern="^save_all_methods$"),
+			CallbackQueryHandler(restart_filling, pattern="^restart_filling$"),  # ← ДОБАВЬ ЭТО
 			CallbackQueryHandler(back_to_countries, pattern="^back_to_countries$")
 		],
 	},

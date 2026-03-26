@@ -158,7 +158,7 @@ function copyAllBankDetails(linkId) {
     const title = modal.querySelector('.modal-content span[style*="font-size:1.2rem"]');
     if (title) {
         textToCopy += title.textContent + '\n';
-        textToCopy += '─'.repeat(20) + '\n\n';
+        // textToCopy += '─'.repeat(20) + '\n\n';
     }
 
     // Собираем все поля

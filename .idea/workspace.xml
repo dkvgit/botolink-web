@@ -4,7 +4,16 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="722a5f0e-b122-4002-a32f-b6e7799afca3" name="Changes" comment="added local run logic" />
+    <list default="true" id="722a5f0e-b122-4002-a32f-b6e7799afca3" name="Changes" comment="added local run logic">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bot/bankworld.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot/bankworld.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bot/handlers.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot/handlers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bot/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/templates/base/base.js" beforeDir="false" afterPath="$PROJECT_DIR$/web/templates/base/base.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/templates/base/blocks/base_links.html" beforeDir="false" afterPath="$PROJECT_DIR$/web/templates/base/blocks/base_links.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/templates/base/blocks/base_modal_bank.html" beforeDir="false" afterPath="$PROJECT_DIR$/web/templates/base/blocks/base_modal_bank.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/templates/base/blocks/finance.html" beforeDir="false" afterPath="$PROJECT_DIR$/web/templates/base/blocks/finance.html" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -99,7 +108,9 @@
       <option name="presentableId" value="Default" />
       <updated>1774490595539</updated>
       <workItem from="1774490597168" duration="2149000" />
-      <workItem from="1774492773944" duration="15738000" />
+      <workItem from="1774492773944" duration="18230000" />
+      <workItem from="1774521698754" duration="1482000" />
+      <workItem from="1774523261735" duration="5166000" />
     </task>
     <task id="LOCAL-00001" summary="added local run logic">
       <option name="closed" value="true" />

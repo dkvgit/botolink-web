@@ -50,106 +50,106 @@ COUNTRY_METHODS = {
 	],
 	
 	# 🇪🇺 ПРИБАЛТИКА (SEPA)
-	"lithuania": [
-		{"id": "card_lithuania", "name": "Банковская карта", "fields": ["card_number"]},
-		{"id": "iban_lithuania", "name": "Банковский счет (SEPA)", "fields": ["iban", "bic", "beneficiary"]}
-	],
-	"latvia": [
-		{"id": "card_latvia", "name": "Банковская карта", "fields": ["card_number"]},
-		{"id": "iban_latvia", "name": "Банковский счет (SEPA)", "fields": ["iban", "bic", "beneficiary"]}
-	],
-	"estonia": [
-		{"id": "card_estonia", "name": "Банковская карта", "fields": ["card_number"]},
-		{"id": "iban_estonia", "name": "Банковский счет (SEPA)", "fields": ["iban", "bic", "beneficiary"]}
-	],
-	
-	# 🇺🇸 США
-	"usa": [
-		{"id": "card_usa", "name": "Карта (+ ZIP)", "fields": ["card_number", "card_holder", "zip"]},
-		{"id": "ach_usa", "name": "ACH (местный)", "fields": ["routing", "account", "beneficiary"]},
-		{"id": "wire_usa", "name": "Wire (международный)", "fields": ["swift", "account", "beneficiary"]}
-	],
-	
-	# 🇷🇺 РОССИЯ
-	"russia": [
-		{"id": "card_russia", "name": "Банковская карта", "fields": ["card_number"]},
-		{"id": "phone_russia", "name": "По номеру телефона (СБП)", "fields": ["phone"]},
-		{"id": "account_russia", "name": "Банковский счет", "fields": ["account_number", "bik", "beneficiary"]}
-	],
-	
-	# 🇺🇦 УКРАИНА
-	"ukraine": [
-		{"id": "card_ukraine", "name": "Банковская карта", "fields": ["card_number"]},
-		{"id": "iban_ukraine", "name": "IBAN счет", "fields": ["iban", "beneficiary"]}
-	],
-	
-	# 🇧🇾 БЕЛАРУСЬ
-	"belarus": [
-		{"id": "card_belarus", "name": "Банковская карта", "fields": ["card_number"]},
-		{"id": "iban_belarus", "name": "IBAN счет", "fields": ["iban", "bic", "beneficiary"]}
-	],
-	
-	# 🇰🇿 КАЗАХСТАН
-	"kazakhstan": [
-		{"id": "card_kazakhstan", "name": "Банковская карта", "fields": ["card_number"]},
-		{"id": "iban_kazakhstan", "name": "IBAN счет", "fields": ["iban", "bic", "beneficiary"]}
-	],
-	
-	# 🇦🇲 АРМЕНИЯ
-	"armenia": [
-		{"id": "card_armenia", "name": "Банковская карта", "fields": ["card_number"]},
-		{"id": "account_armenia", "name": "🏦 Банковский счет", "fields": ["account", "bic", "beneficiary"]}
-	],
-	
-	# 🇦🇿 АЗЕРБАЙДЖАН
-	"azerbaijan": [
-		{"id": "card_azerbaijan", "name": "Банковская карта", "fields": ["card_number"]},
-		{"id": "iban_azerbaijan", "name": "IBAN счет", "fields": ["iban", "bic", "beneficiary"]}
-	],
-	
-	# 🇬🇪 ГРУЗИЯ
-	"georgia": [
-		{"id": "card_georgia", "name": "Банковская карта", "fields": ["card_number"]},
-		{"id": "iban_georgia", "name": "IBAN счет", "fields": ["iban", "bic", "beneficiary"]}
-	],
-	
-	# 🇲🇩 МОЛДОВА
-	"moldova": [
-		{"id": "card_moldova", "name": "Банковская карта", "fields": ["card_number"]},
-		{"id": "iban_moldova", "name": "IBAN счет", "fields": ["iban", "bic", "beneficiary"]}
-	],
-	
-	# 🇺🇿 УЗБЕКИСТАН
-	"uzbekistan": [
-		{"id": "card_uzbekistan", "name": "Банковская карта", "fields": ["card_number"]},
-		{"id": "phone_uzbekistan", "name": "По номеру телефона", "fields": ["phone"]},
-		{"id": "account_uzbekistan", "name": "Банковский счет", "fields": ["account", "mfo", "beneficiary"]}
-	],
-	
-	# 🇹🇯 ТАДЖИКИСТАН
-	"tajikistan": [
-		{"id": "card_tajikistan", "name": "Банковская карта", "fields": ["card_number"]},
-		{"id": "account_tajikistan", "name": "Банковский счет", "fields": ["account", "bic", "beneficiary"]}
-	],
-	
-	# 🇰🇬 КЫРГЫЗСТАН
-	"kyrgyzstan": [
-		{"id": "card_kyrgyzstan", "name": "Банковская карта", "fields": ["card_number"]},
-		{"id": "account_kyrgyzstan", "name": "Банковский счет", "fields": ["account", "bic", "beneficiary"]}
-	],
-	
-	# 🇹🇲 ТУРКМЕНИСТАН
-	"turkmenistan": [
-		{"id": "card_turkmenistan", "name": "Банковская карта", "fields": ["card_number"]},
-		{"id": "account_turkmenistan", "name": "Банковский счет", "fields": ["account", "bic", "beneficiary"]}
-	],
-	
-	# 🇻🇳 ВЬЕТНАМ
-	"vietnam": [
-		{"id": "non_res_vietnam", "name": "Счет нерезидента", "fields": ["account_number"]},
-		{"id": "card_vietnam", "name": "Банковская карта", "fields": ["card_number"]},
-		{"id": "account_vietnam", "name": "Банковский счет", "fields": ["account", "bic", "beneficiary"]}
-	]
+    "lithuania": [
+        {"id": "card_lithuania", "name": "Банковская карта", "fields": ["bank_name", "card_number"]},
+        {"id": "iban_lithuania", "name": "Банковский счет (SEPA)", "fields": ["bank_name", "iban", "bic", "beneficiary"]}
+    ],
+    "latvia": [
+        {"id": "card_latvia", "name": "Банковская карта", "fields": ["bank_name", "card_number"]},
+        {"id": "iban_latvia", "name": "Банковский счет (SEPA)", "fields": ["bank_name", "iban", "bic", "beneficiary"]}
+    ],
+    "estonia": [
+        {"id": "card_estonia", "name": "Банковская карта", "fields": ["bank_name", "card_number"]},
+        {"id": "iban_estonia", "name": "Банковский счет (SEPA)", "fields": ["bank_name", "iban", "bic", "beneficiary"]}
+    ],
+    
+    # 🇺🇸 США
+    "usa": [
+        {"id": "card_usa", "name": "Карта (+ ZIP)", "fields": ["bank_name", "card_number", "card_holder", "zip"]},
+        {"id": "ach_usa", "name": "ACH (местный)", "fields": ["bank_name", "routing", "account", "beneficiary"]},
+        {"id": "wire_usa", "name": "Wire (международный)", "fields": ["bank_name", "swift", "account", "beneficiary"]}
+    ],
+    
+    # 🇷🇺 РОССИЯ
+    "russia": [
+        {"id": "card_russia", "name": "Банковская карта", "fields": ["bank_name", "card_number"]},
+        {"id": "phone_russia", "name": "По номеру телефона (СБП)", "fields": ["bank_name", "phone"]},
+        {"id": "account_russia", "name": "Банковский счет", "fields": ["bank_name", "account_number", "bik", "beneficiary"]}
+    ],
+    
+    # 🇺🇦 УКРАИНА
+    "ukraine": [
+        {"id": "card_ukraine", "name": "Банковская карта", "fields": ["bank_name", "card_number"]},
+        {"id": "iban_ukraine", "name": "IBAN счет", "fields": ["bank_name", "iban", "beneficiary"]}
+    ],
+    
+    # 🇧🇾 БЕЛАРУСЬ
+    "belarus": [
+        {"id": "card_belarus", "name": "Банковская карта", "fields": ["bank_name", "card_number"]},
+        {"id": "iban_belarus", "name": "IBAN счет", "fields": ["bank_name", "iban", "bic", "beneficiary"]}
+    ],
+    
+    # 🇰🇿 КАЗАХСТАН
+    "kazakhstan": [
+        {"id": "card_kazakhstan", "name": "Банковская карта", "fields": ["bank_name", "card_number"]},
+        {"id": "iban_kazakhstan", "name": "IBAN счет", "fields": ["bank_name", "iban", "bic", "beneficiary"]}
+    ],
+    
+    # 🇦🇲 АРМЕНИЯ
+    "armenia": [
+        {"id": "card_armenia", "name": "Банковская карта", "fields": ["bank_name", "card_number"]},
+        {"id": "account_armenia", "name": "🏦 Банковский счет", "fields": ["bank_name", "account", "bic", "beneficiary"]}
+    ],
+    
+    # 🇦🇿 АЗЕРБАЙДЖАН
+    "azerbaijan": [
+        {"id": "card_azerbaijan", "name": "Банковская карта", "fields": ["bank_name", "card_number"]},
+        {"id": "iban_azerbaijan", "name": "IBAN счет", "fields": ["bank_name", "iban", "bic", "beneficiary"]}
+    ],
+    
+    # 🇬🇪 ГРУЗИЯ
+    "georgia": [
+        {"id": "card_georgia", "name": "Банковская карта", "fields": ["bank_name", "card_number"]},
+        {"id": "iban_georgia", "name": "IBAN счет", "fields": ["bank_name", "iban", "bic", "beneficiary"]}
+    ],
+    
+    # 🇲🇩 МОЛДОВА
+    "moldova": [
+        {"id": "card_moldova", "name": "Банковская карта", "fields": ["bank_name", "card_number"]},
+        {"id": "iban_moldova", "name": "IBAN счет", "fields": ["bank_name", "iban", "bic", "beneficiary"]}
+    ],
+    
+    # 🇺🇿 УЗБЕКИСТАН
+    "uzbekistan": [
+        {"id": "card_uzbekistan", "name": "Банковская карта", "fields": ["bank_name", "card_number"]},
+        {"id": "phone_uzbekistan", "name": "По номеру телефона", "fields": ["bank_name", "phone"]},
+        {"id": "account_uzbekistan", "name": "Банковский счет", "fields": ["bank_name", "account", "mfo", "beneficiary"]}
+    ],
+    
+    # 🇹🇯 ТАДЖИКИСТАН
+    "tajikistan": [
+        {"id": "card_tajikistan", "name": "Банковская карта", "fields": ["bank_name", "card_number"]},
+        {"id": "account_tajikistan", "name": "Банковский счет", "fields": ["bank_name", "account", "bic", "beneficiary"]}
+    ],
+    
+    # 🇰🇬 КЫРГЫЗСТАН
+    "kyrgyzstan": [
+        {"id": "card_kyrgyzstan", "name": "Банковская карта", "fields": ["bank_name", "card_number"]},
+        {"id": "account_kyrgyzstan", "name": "Банковский счет", "fields": ["bank_name", "account", "bic", "beneficiary"]}
+    ],
+    
+    # 🇹🇲 ТУРКМЕНИСТАН
+    "turkmenistan": [
+        {"id": "card_turkmenistan", "name": "Банковская карта", "fields": ["bank_name", "card_number"]},
+        {"id": "account_turkmenistan", "name": "Банковский счет", "fields": ["bank_name", "account", "bic", "beneficiary"]}
+    ],
+    
+    # 🇻🇳 ВЬЕТНАМ
+    "vietnam": [
+        {"id": "non_res_vietnam", "name": "Счет нерезидента", "fields": ["account_number"]},
+        {"id": "card_vietnam", "name": "Банковская карта", "fields": ["bank_name", "card_number"]},
+        {"id": "account_vietnam", "name": "Банковский счет", "fields": ["bank_name", "account", "bic", "beneficiary"]}
+    ]
 }
 # ============================================
 # НАЗВАНИЯ СТРАН ДЛЯ ОТОБРАЖЕНИЯ
@@ -469,64 +469,6 @@ async def start_filling(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return ConversationHandler.END
 
 
-async def process_field_input(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Принимает текст от юзера, валидирует и сохраняет в структуру метода."""
-    print("\n" + "🔵" * 10 + " process_field_input " + "🔵" * 10)
-    
-    if not update.message or not update.message.text:
-        return WAIT_FIELD_INPUT
-
-    user_input = update.message.text.strip()
-    
-    # 1. Достаем текущее состояние из памяти
-    queue = context.user_data.get('filling_queue')
-    methods_dict = context.user_data.get('selected_methods_full', {})
-    field_index = context.user_data.get('current_field_index', 0)
-    
-    if not queue or not methods_dict:
-        print("🚨 ОШИБКА: Данные сессии потеряны!")
-        await update.message.reply_text("❌ Сессия истекла. Начните заново.")
-        return ConversationHandler.END
-
-    current_method_id = queue[0]
-    current_method = methods_dict.get(current_method_id)
-    fields = current_method.get('fields', [])
-    field_name = fields[field_index]
-
-    # 2. ВАЛИДАЦИЯ (длина текста)
-    limits = {"bank_name": 50, "card_number": 25, "phone": 20, "iban": 34}
-    if len(user_input) > limits.get(field_name, 100):
-        await update.message.reply_text(f"❌ Слишком длинно. Повторите ввод:")
-        return WAIT_FIELD_INPUT
-
-    # 3. СОХРАНЕНИЕ
-    current_method['data'][field_name] = user_input
-    print(f"💾 СОХРАНЕНО: {current_method_id} -> {field_name} = {user_input}")
-
-    # 4. ЛОГИКА ПЕРЕКЛЮЧЕНИЯ
-    # Если в текущем методе ЕЩЕ есть поля — просто увеличиваем индекс
-    if field_index + 1 < len(fields):
-        context.user_data['current_field_index'] = field_index + 1
-        print(f"➡️ Переходим к следующему полю этого же метода (индекс {field_index + 1})")
-    else:
-        # Если поля кончились — выкидываем метод из очереди и сбрасываем индекс
-        print(f"🏁 Метод {current_method_id} заполнен.")
-        
-        if 'collected_methods' not in context.user_data:
-            context.user_data['collected_methods'] = {}
-        
-        # Копируем результат в итоговое хранилище
-        context.user_data['collected_methods'][current_method_id] = current_method
-        
-        queue.pop(0) # Удаляем завершенный метод
-        context.user_data['filling_queue'] = queue
-        context.user_data['current_field_index'] = 0
-        
-        await update.message.reply_text(f"✅ Данные для <b>{current_method.get('name')}</b> приняты.", parse_mode='HTML')
-
-    # 5. ВСЕГДА В КОНЦЕ вызываем ask_next_method (она сама решит, спросить новое поле или закончить)
-    from bot.bankworld import ask_next_method
-    return await ask_next_method(update, context)
 
 
 # // bot/bankworld.py
@@ -566,10 +508,10 @@ async def ask_next_method(update_or_query, context):
     done = total - len(queue)
     
     text = (
-        f"📝 <b>Заполнение: Метод {done + 1} из {total}</b>\n"
-        f"───────────────────\n"
-        f"Способ: <b>{method['name']}</b>\n"
-        f"Поле {idx + 1} из {len(fields)}\n\n"
+        f"📝 <b>Заполнение: </b>\n\n"
+      
+        
+        
         f"👉 Введите <b>{display_name}</b>:"
     )
 
@@ -690,7 +632,7 @@ async def process_field_input(update: Update, context: ContextTypes.DEFAULT_TYPE
     
     print(f"📉 Осталось методов в очереди: {len(queue)}")
     
-    await update.message.reply_text(f"✅ Метод <b>{current_method.get('name')}</b> готов!", parse_mode='HTML')
+    # await update.message.reply_text(f"✅ Метод <b>{current_method.get('name')}</b> готов!", parse_mode='HTML')
 
     # Идем к следующему методу (или финишу)
     print("🔄 Вызываем ask_next_method...")
@@ -1108,38 +1050,42 @@ async def save_all_methods(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return ConversationHandler.END
 
 async def restart_filling(update: Update, context: ContextTypes.DEFAULT_TYPE):
-	"""Полностью перезапускает процесс заполнения для текущей страны"""
-	query = update.callback_query
-	await query.answer()
-	
-	print(f"🌍 bankworld.py получил: {update.callback_query.data}")
-	
-	# Сохраняем выбранную страну
-	selected_country = context.user_data.get('selected_country')
-	
-	# Очищаем все временные данные, связанные с заполнением
-	keys_to_clear = [
-		'selected_methods',  # выбранные методы
-		'filling_queue',  # очередь заполнения
-		'collected_methods',  # собранные данные
-		'current_method',  # текущий метод
-		'current_field_index',  # индекс текущего поля
-		'payment_data',  # платежные данные
-		'revolut_data',  # данные Revolut
-		'wise_data'  # данные Wise
-	]
-	
-	for key in keys_to_clear:
-		context.user_data.pop(key, None)
-	
-	# Восстанавливаем страну, если она была
-	if selected_country:
-		context.user_data['selected_country'] = selected_country
-		logger.info(f"🔄 Перезапуск заполнения для страны: {selected_country}")
-	
-	# Возвращаемся к выбору методов для этой страны
-	return await show_country_methods(update, context)
-
+    """Полностью перезапускает процесс заполнения для текущей страны"""
+    query = update.callback_query
+    await query.answer()
+    
+    print(f"🌍 bankworld.py получил: {update.callback_query.data}")
+    
+    # Сохраняем выбранную страну
+    selected_country = context.user_data.get('selected_country')
+    
+    # Очищаем все временные данные, связанные с заполнением
+    keys_to_clear = [
+        'selected_methods',
+        'filling_queue',
+        'collected_methods',
+        'current_method',
+        'current_field_index',
+        'payment_data',
+        'revolut_data',
+        'wise_data',
+        'selected_methods_full'
+    ]
+    
+    for key in keys_to_clear:
+        context.user_data.pop(key, None)
+    
+    # Восстанавливаем страну, если она была
+    if selected_country:
+        context.user_data['selected_country'] = selected_country
+        logger.info(f"🔄 Перезапуск заполнения для страны: {selected_country}")
+        
+        # Возвращаемся к выбору методов
+        return await show_country_methods(update, context)
+    else:
+        # Если страны нет - возвращаемся к выбору страны
+        from bot.bank import choose_country
+        return await choose_country(update, context)
 
 # ============================================
 # ОТМЕНА ВСЕГО ПРОЦЕССА
