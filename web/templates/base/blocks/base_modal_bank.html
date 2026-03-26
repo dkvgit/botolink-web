@@ -18,7 +18,7 @@
         </div>
 
         <!-- QR-код (для всех кроме счета нерезидента) -->
-        {% if link.link_type != 'non_res_vietnam' %}
+        {% if link.link_type != 'non_res_vietnam' and link.url and link.url != '#' %}
         <div style="text-align:center; margin:8px 0; min-height:120px;">
             <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data={{ link.url }}"
                  alt="QR Code"

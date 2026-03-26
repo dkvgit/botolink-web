@@ -627,9 +627,8 @@ async def user_page(request: Request, username: str):
         
         # 8. Возврат ответа - ФИНАЛЬНЫЙ ВАРЯНТ ДЛЯ RAILWAY (Python 3.13)
         return templates.TemplateResponse(
-            name=template_file,      # Явно говорим: это ПУТЬ
-            request=request,         # Явно говорим: это ЗАПРОС
-            context={                # Явно говорим: это ДАННЫЕ
+            template_file,
+            {
                 "request": request,
                 "user": user_data,
                 "page": page_data,
