@@ -554,20 +554,6 @@ async def user_page(request: Request, username: str):
             elif not isinstance(pay_details, (dict, list)):
                 l_dict['pay_details'] = {}
             
-            # ========== НОРМАЛИЗАЦИЯ ДАННЫХ ДЛЯ ШАБЛОНОВ ==========
-            # Приводим ключи pay_details к формату, который ждет шаблон
-            pd = l_dict.get('pay_details')
-            if pd and isinstance(pd, dict):
-                # Для крипты: wallet_address -> address
-                if 'wallet_address' in pd:
-                    pd['address'] = pd.pop('wallet_address')
-                # Для телефонов: phone -> phone_number
-                if 'phone' in pd:
-                    pd['phone_number'] = pd.pop('phone')
-                # Для карт: card_number уже в правильном формате
-                l_dict['pay_details'] = pd
-            # ====================================================
-            
             # Обработка URL
             original_url = l_dict.get('url')
             link_type = l_dict.get('link_type', 'standard')
@@ -623,7 +609,13 @@ async def user_page(request: Request, username: str):
 
         print(f"✅ Rendering template: {template_file} for user: {username}")
 
-        # 8. Возврат ответа
+        # 8. Возврат ответа (УНИВЕРСАЛЬНЫЙ СПОСОБ - РАБОТАЕТ ВЕЗДЕ)
+        # web/main.py
+        
+        # web/main.py
+        
+        # web/main.py
+        
         return templates.TemplateResponse(
                     template_file,
                     {
@@ -643,6 +635,7 @@ async def user_page(request: Request, username: str):
         return HTMLResponse(f"Ошибка сервера: {e}", status_code=500)
     finally:
         await conn.close()
+
 
 
     
