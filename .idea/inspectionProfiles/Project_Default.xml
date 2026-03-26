@@ -1,0 +1,17 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="MethodOnlyUsedFromInnerClass" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoreMethodsAccessedFromAnonymousClass" value="false" />
+      <option name="ignoreStaticMethodsFromNonStaticInnerClass" value="false" />
+      <option name="onlyReportStaticMethods" value="false" />
+    </inspection_tool>
+    <inspection_tool class="PyPep8Inspection" enabled="false" level="INFORMATION" enabled_by_default="false" />
+    <inspection_tool class="UtilityClassWithoutPrivateConstructor" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignorableAnnotations">
+        <value />
+      </option>
+      <option name="ignoreClassesWithOnlyMain" value="false" />
+    </inspection_tool>
+  </profile>
+</component>

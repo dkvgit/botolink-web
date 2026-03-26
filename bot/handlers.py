@@ -8,7 +8,7 @@ import re
 import sys
 import time
 from io import BytesIO
-from bot.utils import get_db_connection
+from bot.utils import get_db_connection, log_error
 import aiohttp
 import asyncpg
 import qrcode
@@ -378,6 +378,8 @@ async def start_handler(update, context):
             [InlineKeyboardButton("⚙️ Профиль", callback_data="profile")]
         ]
 
+        # bot/handlers.py
+        
         # # Проверка админа через переменную окружения
         raw_admins = os.getenv("ADMIN_IDS", "")
         admin_list = [a.strip() for a in raw_admins.split(',') if a.strip()]
@@ -386,21 +388,41 @@ async def start_handler(update, context):
 
         reply_markup = InlineKeyboardMarkup(keyboard)
 
-        # # Логика отправки
-        if update.callback_query and not was_deleted:
-            sent_msg = await update.callback_query.edit_message_text(
-                text=text_msg, reply_markup=reply_markup, parse_mode='HTML', disable_web_page_preview=True
-            )
-        else:
-            if update.callback_query:
-                await update.callback_query.answer()
+        # # Логика отправки (Универсальная)
+        send_params = {
+            "text": text_msg,
+            "reply_markup": reply_markup,
+            "parse_mode": 'HTML',
+            "disable_web_page_preview": True
+        }
+
+        try:
+            # 1. Если это кнопка и сообщение НЕ удаляли — редактируем
+            if update.callback_query and not was_deleted:
+                sent_msg = await update.callback_query.edit_message_text(**send_params)
             
-            sent_msg = await update.message.reply_text(
-                text=text_msg, reply_markup=reply_markup, parse_mode='HTML', disable_web_page_preview=True
+            # 2. В остальных случаях (команда или старое удалено) — шлем новое
+            else:
+                if update.callback_query:
+                    await update.callback_query.answer()
+                
+                # Используем context.bot.send_message (это всегда работает)
+                sent_msg = await context.bot.send_message(
+                    chat_id=update.effective_chat.id,
+                    **send_params
+                )
+            
+            context.user_data['last_success_msg_id'] = sent_msg.message_id
+            print(f"--- [DEBUG] !!! ВСЁ ОК, СООБЩЕНИЕ {sent_msg.message_id} ОТПРАВЛЕНО ---")
+
+        except Exception as send_error:
+            # Фолбэк: если edit не прошел, просто шлем новое сообщение
+            print(f"--- [DEBUG] Ошибка отправки (пробуем send_message): {send_error}")
+            sent_msg = await context.bot.send_message(
+                chat_id=update.effective_chat.id,
+                **send_params
             )
-        
-        context.user_data['last_success_msg_id'] = sent_msg.message_id
-        print("--- [DEBUG] !!! ВСЁ ОК, СООБЩЕНИЕ ОТПРАВЛЕНО ---")
+            context.user_data['last_success_msg_id'] = sent_msg.message_id
 
     except Exception as e:
         print(f"--- [DEBUG] !!! КРИТИЧЕСКАЯ ОШИБКА В START_HANDLER: {e}")
@@ -2322,48 +2344,78 @@ async def confirm_self_delete(update: Update, context: ContextTypes.DEFAULT_TYPE
 
 
 async def execute_self_delete(update: Update, context: ContextTypes.DEFAULT_TYPE):
-	"""Шаг 2: Выполнение удаления через SQLAlchemy engine"""
-	query = update.callback_query
-	tg_id = update.effective_user.id
-	
-	# // Используем engine из админки
-	from admin_handlers import engine
-	from sqlalchemy import text
-	
-	try:
-		async with engine.begin() as db_conn:
-			# // 1. Получаем ID
-			result = await db_conn.execute(
-				text("SELECT id FROM users WHERE telegram_id = :tid"),
-				{"tid": tg_id}
-			)
-			user_row = result.fetchone()
-			
-			if not user_row:
-				await query.edit_message_text("❌ Пользователь не найден.")
-				return
-			
-			u_id = user_row.id
-			
-			# // 2. Чистим Links -> Pages -> Users
-			await db_conn.execute(
-				text("DELETE FROM links WHERE page_id IN (SELECT id FROM pages WHERE user_id = :uid)"),
-				{"uid": u_id}
-			)
-			await db_conn.execute(text("DELETE FROM pages WHERE user_id = :uid"), {"uid": u_id})
-			await db_conn.execute(text("DELETE FROM users WHERE id = :uid"), {"uid": u_id})
-		
-		await query.answer("Аккаунт удален", show_alert=True)
-		await query.edit_message_text(
-			"👋 **Ваш аккаунт успешно удален.**\n\n"
-			"Все данные стерты. Чтобы начать заново, напишите /start",
-			parse_mode='Markdown'
-		)
-	
-	except Exception as e:
-		logger.error(f"Ошибка при самоудалении {tg_id}: {e}")
-		await query.edit_message_text("❌ Ошибка при удалении. Обратитесь в поддержку.")
+    """Шаг 2: Выполнение удаления через asyncpg (get_db_connection)"""
+    # # Для Python комментариев используется символ #
+    query = update.callback_query
+    tg_id = update.effective_user.id
+    
+    # # Импортируем наш стандартный метод подключения
+    from bot.utils import get_db_connection
+    import logging
 
+    logger = logging.getLogger("BotoLinkPro")
+    
+    if not query:
+        return
+
+    conn = await get_db_connection()
+    try:
+        # # Начинаем транзакцию через asyncpg
+        async with conn.transaction():
+            # # 1. Получаем внутренний ID пользователя
+            user_row = await conn.fetchrow(
+                "SELECT id FROM users WHERE telegram_id = $1", tg_id
+            )
+            
+            if not user_row:
+                await query.answer("❌ Пользователь не найден", show_alert=True)
+                await query.edit_message_text("❌ Ошибка: профиль уже удален.")
+                return
+            
+            u_id = user_row['id']
+            
+            # # 2. Каскадное удаление: Links -> Pages -> Users
+            # # Удаляем ссылки
+            await conn.execute(
+                "DELETE FROM links WHERE page_id IN (SELECT id FROM pages WHERE user_id = $1)",
+                u_id
+            )
+            # # Удаляем страницы
+            await conn.execute("DELETE FROM pages WHERE user_id = $1", u_id)
+            # # Удаляем самого юзера
+            await conn.execute("DELETE FROM users WHERE id = $1", u_id)
+        
+        # # 3. Завершение
+        await query.answer("Аккаунт и все данные полностью удалены", show_alert=True)
+        
+        # # Очищаем сессию бота
+        context.user_data.clear()
+
+        final_text = (
+            "👋 **Ваш аккаунт успешно удален.**\n\n"
+            "Все ваши данные стерты из базы. Чтобы начать заново, напишите /start"
+        )
+
+        try:
+            await query.edit_message_text(text=final_text, parse_mode='Markdown')
+        except Exception:
+            await context.bot.send_message(
+                chat_id=update.effective_chat.id,
+                text=final_text,
+                parse_mode='Markdown'
+            )
+        
+        print(f"--- [DEBUG] Юзер {tg_id} (ID: {u_id}) удален через asyncpg ---")
+
+    except Exception as e:
+        logger.error(f"❌ Ошибка при самоудалении {tg_id}: {e}", exc_info=True)
+        try:
+            await query.answer("Ошибка базы данных", show_alert=True)
+        except:
+            pass
+    finally:
+        await conn.close()
+        print(f"--- [DEBUG] Соединение закрыто после удаления {tg_id} ---")
 
 async def receipt_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 	# Проверяем флаг ожидания чека
