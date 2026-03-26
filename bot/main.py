@@ -181,6 +181,8 @@ logger.info("🤖 Запуск бота...")
 #         НОВЫЙ КОНСТРУКТОР ССЫЛОК (ПОЛНЫЙ НАБОР СТЕЙТОВ)
 # ============================================
 
+# bot/main.py
+
 constructor_conv = ConversationHandler(
     entry_points=[
         CallbackQueryHandler(start_constructor, pattern="^add_link$"),
@@ -199,13 +201,15 @@ constructor_conv = ConversationHandler(
         ],
         STEP_CHOICE: [
             CallbackQueryHandler(handle_choice, pattern="^choice_"),
-            CallbackQueryHandler(back_to_types, pattern="^back_to_types$")
+            CallbackQueryHandler(back_to_types, pattern="^back_to_types$"),
+            CallbackQueryHandler(back_to_categories, pattern="^back_to_categories$")
         ],
         STEP_INPUT: [
             MessageHandler(filters.TEXT & ~filters.COMMAND, handle_input),
             CallbackQueryHandler(back_to_types, pattern="^back_to_types$"),
             CallbackQueryHandler(back_to_previous, pattern="^back_to_previous$"),
-            CallbackQueryHandler(handle_skip, pattern="^skip_step$")
+            CallbackQueryHandler(handle_skip, pattern="^skip_step$"),
+            CallbackQueryHandler(back_to_categories, pattern="^back_to_categories$")
         ],
 
         # === 2. ФИНАНСЫ, КРИПТО И ВЫБОР КАТЕГОРИЙ ===
@@ -214,7 +218,7 @@ constructor_conv = ConversationHandler(
             CallbackQueryHandler(select_category, pattern="^cat_wallets$"),
             CallbackQueryHandler(select_category, pattern="^cat_stocks$"),
             CallbackQueryHandler(select_category, pattern="^cat_transfers$"),
-            CallbackQueryHandler(show_country_methods, pattern="^country_.*$"), # Важно для банков
+            CallbackQueryHandler(show_country_methods, pattern="^country_.*$"),
             CallbackQueryHandler(back_to_categories, pattern="^back_to_categories$"),
         ],
         SELECT_CRYPTO_NETWORK: [
@@ -227,66 +231,119 @@ constructor_conv = ConversationHandler(
             CallbackQueryHandler(back_to_categories, pattern="^back_to_categories$"),
         ],
 
-        # === 3. УНИВЕРСАЛЬНЫЕ БАНКОВСКИЕ СТЕЙТЫ (ТОТ САМЫЙ 502) ===
+        # === 3. УНИВЕРСАЛЬНЫЕ БАНКОВСКИЕ СТЕЙТЫ (УБИРАЕМ ТУПИК 502) ===
         WAIT_METHOD_SELECTION: [
             CallbackQueryHandler(toggle_method, pattern="^method_[a-z]+_[a-z_]+$"),
-            CallbackQueryHandler(start_filling, pattern="^start_filling$")
+            CallbackQueryHandler(start_filling, pattern="^start_filling$"),
+            CallbackQueryHandler(back_to_categories, pattern="^back_to_categories$")
         ],
-        WAIT_FIELD_INPUT: [  # 502 - Самый важный для тебя сейчас
+        WAIT_FIELD_INPUT: [
             MessageHandler(filters.TEXT & ~filters.COMMAND, process_field_input),
-            CallbackQueryHandler(back_to_countries, pattern="^back_to_countries$")
+            CallbackQueryHandler(back_to_countries, pattern="^back_to_countries$"),
+            CallbackQueryHandler(back_to_categories, pattern="^back_to_categories$")
         ],
-        WAIT_FILLING_DATA: [  # 501
+        WAIT_FILLING_DATA: [
             MessageHandler(filters.TEXT & ~filters.COMMAND, process_field_input),
-            CallbackQueryHandler(back_to_countries, pattern="^back_to_countries$")
+            CallbackQueryHandler(back_to_countries, pattern="^back_to_countries$"),
+            CallbackQueryHandler(back_to_categories, pattern="^back_to_categories$")
         ],
-        WAIT_FINAL_CONFIRM: [  # 503
+        WAIT_FINAL_CONFIRM: [
             CallbackQueryHandler(save_all_methods, pattern="^save_all_methods$"),
-            CallbackQueryHandler(back_to_countries, pattern="^back_to_countries$")
+            CallbackQueryHandler(back_to_countries, pattern="^back_to_countries$"),
+            CallbackQueryHandler(back_to_categories, pattern="^back_to_categories$")
         ],
 
         # === 4. СНГ И МЕЖДУНАРОДНЫЕ БАНКИ (ВВОД ДАННЫХ) ===
-        # Россия, Беларусь, Казахстан и др.
-        WAIT_RUSSIA_CARD: [MessageHandler(filters.TEXT & ~filters.COMMAND, process_card_input)],
-        WAIT_RUSSIA_PHONE: [MessageHandler(filters.TEXT & ~filters.COMMAND, process_phone_input)],
-        WAIT_KAZAKHSTAN_CARD: [MessageHandler(filters.TEXT & ~filters.COMMAND, process_card_input)],
-        WAIT_KAZAKHSTAN_PHONE: [MessageHandler(filters.TEXT & ~filters.COMMAND, process_phone_input)],
-        WAIT_UKRAINE_CARD: [MessageHandler(filters.TEXT & ~filters.COMMAND, process_card_input)],
-        WAIT_UZBEKISTAN_CARD: [MessageHandler(filters.TEXT & ~filters.COMMAND, process_card_input)],
-        WAIT_EUROPE_IBAN: [MessageHandler(filters.TEXT & ~filters.COMMAND, process_iban_input)],
-        WAIT_USA_ACH: [MessageHandler(filters.TEXT & ~filters.COMMAND, process_card_input)],
+        WAIT_RUSSIA_CARD: [
+            MessageHandler(filters.TEXT & ~filters.COMMAND, process_card_input),
+            CallbackQueryHandler(back_to_categories, pattern="^back_to_categories$")
+        ],
+        WAIT_RUSSIA_PHONE: [
+            MessageHandler(filters.TEXT & ~filters.COMMAND, process_phone_input),
+            CallbackQueryHandler(back_to_categories, pattern="^back_to_categories$")
+        ],
+        WAIT_KAZAKHSTAN_CARD: [
+            MessageHandler(filters.TEXT & ~filters.COMMAND, process_card_input),
+            CallbackQueryHandler(back_to_categories, pattern="^back_to_categories$")
+        ],
+        WAIT_KAZAKHSTAN_PHONE: [
+            MessageHandler(filters.TEXT & ~filters.COMMAND, process_phone_input),
+            CallbackQueryHandler(back_to_categories, pattern="^back_to_categories$")
+        ],
+        WAIT_UKRAINE_CARD: [
+            MessageHandler(filters.TEXT & ~filters.COMMAND, process_card_input),
+            CallbackQueryHandler(back_to_categories, pattern="^back_to_categories$")
+        ],
+        WAIT_UZBEKISTAN_CARD: [
+            MessageHandler(filters.TEXT & ~filters.COMMAND, process_card_input),
+            CallbackQueryHandler(back_to_categories, pattern="^back_to_categories$")
+        ],
+        WAIT_EUROPE_IBAN: [
+            MessageHandler(filters.TEXT & ~filters.COMMAND, process_iban_input),
+            CallbackQueryHandler(back_to_categories, pattern="^back_to_categories$")
+        ],
+        WAIT_USA_ACH: [
+            MessageHandler(filters.TEXT & ~filters.COMMAND, process_card_input),
+            CallbackQueryHandler(back_to_categories, pattern="^back_to_categories$")
+        ],
         
         # Специальные кошельки
-        WAIT_YOOMONEY: [MessageHandler(filters.TEXT & ~filters.COMMAND, process_yoomoney_input)],
-        WAIT_VKPAY: [MessageHandler(filters.TEXT & ~filters.COMMAND, process_vkpay_input)],
-        WAIT_KASPI: [MessageHandler(filters.TEXT & ~filters.COMMAND, process_kaspi_input)],
-        WAIT_PAYME: [MessageHandler(filters.TEXT & ~filters.COMMAND, process_payme_input)],
+        WAIT_YOOMONEY: [
+            MessageHandler(filters.TEXT & ~filters.COMMAND, process_yoomoney_input),
+            CallbackQueryHandler(back_to_categories, pattern="^back_to_categories$")
+        ],
+        WAIT_VKPAY: [
+            MessageHandler(filters.TEXT & ~filters.COMMAND, process_vkpay_input),
+            CallbackQueryHandler(back_to_categories, pattern="^back_to_categories$")
+        ],
+        WAIT_KASPI: [
+            MessageHandler(filters.TEXT & ~filters.COMMAND, process_kaspi_input),
+            CallbackQueryHandler(back_to_categories, pattern="^back_to_categories$")
+        ],
+        WAIT_PAYME: [
+            MessageHandler(filters.TEXT & ~filters.COMMAND, process_payme_input),
+            CallbackQueryHandler(back_to_categories, pattern="^back_to_categories$")
+        ],
 
         # === 5. REVOLUT & WISE (СЛОЖНЫЕ ЦЕПОЧКИ) ===
         WAIT_REVOLUT_CHOICE: [
             CallbackQueryHandler(revolut_choice_handler, pattern="^revolut_(quick|full)$"),
-            CallbackQueryHandler(back_to_countries, pattern="^back_to_countries$")
+            CallbackQueryHandler(back_to_countries, pattern="^back_to_countries$"),
+            CallbackQueryHandler(back_to_categories, pattern="^back_to_categories$")
         ],
-        WAIT_REVOLUT_LOGIN: [MessageHandler(filters.TEXT & ~filters.COMMAND, process_revolut_login)],
-        WAIT_REVOLUT_IBAN: [MessageHandler(filters.TEXT & ~filters.COMMAND, process_revolut_iban)],
+        WAIT_REVOLUT_LOGIN: [
+            MessageHandler(filters.TEXT & ~filters.COMMAND, process_revolut_login),
+            CallbackQueryHandler(back_to_categories, pattern="^back_to_categories$")
+        ],
+        WAIT_REVOLUT_IBAN: [
+            MessageHandler(filters.TEXT & ~filters.COMMAND, process_revolut_iban),
+            CallbackQueryHandler(back_to_categories, pattern="^back_to_categories$")
+        ],
         
         WAIT_WISE_CHOICE: [
             CallbackQueryHandler(wise_choice_handler, pattern="^wise_(quick|full)$"),
-            CallbackQueryHandler(back_to_countries, pattern="^back_to_countries$")
+            CallbackQueryHandler(back_to_countries, pattern="^back_to_countries$"),
+            CallbackQueryHandler(back_to_categories, pattern="^back_to_categories$")
         ],
-        WAIT_WISE_LOGIN: [MessageHandler(filters.TEXT & ~filters.COMMAND, process_wise_login)],
-        WAIT_WISE_IBAN: [MessageHandler(filters.TEXT & ~filters.COMMAND, process_wise_iban)],
+        WAIT_WISE_LOGIN: [
+            MessageHandler(filters.TEXT & ~filters.COMMAND, process_wise_login),
+            CallbackQueryHandler(back_to_categories, pattern="^back_to_categories$")
+        ],
+        WAIT_WISE_IBAN: [
+            MessageHandler(filters.TEXT & ~filters.COMMAND, process_wise_iban),
+            CallbackQueryHandler(back_to_categories, pattern="^back_to_categories$")
+        ],
     },
     fallbacks=[
         CommandHandler("cancel", cancel_constructor),
-        CallbackQueryHandler(cancel_constructor, pattern="^cancel$")
+        CallbackQueryHandler(cancel_constructor, pattern="^cancel$"),
+        CallbackQueryHandler(cancel_constructor, pattern="^back_to_main$")
     ],
     name="constructor_conversation",
     per_user=True,
     per_chat=True,
     allow_reentry=True
 )
-
 print(f"DEBUG: WAIT_FIELD_INPUT is {WAIT_FIELD_INPUT}")
 print(f"DEBUG: process_field_input is {process_field_input}")
 
