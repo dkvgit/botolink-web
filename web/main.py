@@ -636,6 +636,16 @@ async def user_page(request: Request, username: str):
         
         print(f"✅ Rendering template: {template_file} for user: {username}")
         
+        
+        
+        # ПРОВЕРКА: убедимся что template_file - это строка
+        print(f"DEBUG template_file: {template_file} (type: {type(template_file)})")
+        
+        # Если это не строка - принудительно превращаем в строку
+        if not isinstance(template_file, str):
+            template_file = str(template_file)
+            print(f"DEBUG после преобразования: {template_file} (type: {type(template_file)})")
+        
         # 8. Возврат ответа - ФИНАЛЬНЫЙ ВАРЯНТ ДЛЯ RAILWAY (Python 3.13)
         return templates.TemplateResponse(
             template_file,
