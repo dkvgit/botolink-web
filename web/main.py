@@ -610,9 +610,11 @@ async def user_page(request: Request, username: str):
         print(f"✅ Rendering template: {template_file} for user: {username}")
 
         # 8. Возврат ответа (УНИВЕРСАЛЬНЫЙ СПОСОБ - РАБОТАЕТ ВЕЗДЕ)
+        # web/main.py
+        
         return templates.TemplateResponse(
-            template_file,
-            {
+            name=template_file,  # Явно задаем имя шаблона
+            context={            # Явно задаем контекст
                 "request": request,
                 "user": user_data,
                 "page": page_data,
