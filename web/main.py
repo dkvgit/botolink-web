@@ -654,7 +654,7 @@ async def user_page(request: Request, username: str):
                 "user": user_data,
                 "page": page_data,
                 "links": processed_links,
-                "categories": categories,
+                #"categories": categories,
                 "COUNTRY_NAMES": COUNTRY_NAMES
             }
         )
