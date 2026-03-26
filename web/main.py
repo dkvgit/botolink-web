@@ -87,50 +87,60 @@ DATABASE_URL = DIRECT_DATABASE_URL
 
 
 
+# D:\aRabota\TelegaBoom\030_mylinkspace\web\main.py
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # --- STARTUP ---
-    run_mode = os.getenv("RUN_MODE", "webhook").lower().strip()
+    # --- STARTUP (Запуск) ---
+    # 1. Определяем, где мы находимся
+    is_railway = os.getenv("RAILWAY_ENVIRONMENT_NAME") is not None
+    # Принудительно берем режим, если задан вручную, иначе автоопределение
+    run_mode = os.getenv("RUN_MODE", "webhook" if is_railway else "polling").lower().strip()
     
-    if run_mode == "polling":
-        logger.info("🚀 [LOCAL] Инициализация бота в режиме POLLING...")
-        try:
-            if not bot_app.running:
-                await bot_app.initialize()
-                # Удаляем вебхук, чтобы сообщения шли на комп, а не на Railway
-                await bot_app.bot.delete_webhook(drop_pending_updates=True)
-                await bot_app.start()
-                
-                if bot_app.updater:
-                    await bot_app.updater.start_polling()
-                    logger.info("✅ БОТ ЗАПУЩЕН ЛОКАЛЬНО (Polling)")
-        except Exception as e:
-            logger.error(f"❌ Ошибка старта Polling: {e}")
-    else:
-        # Режим для Railway
-        logger.info("🌐 [SERVER] Инициализация бота для Webhook...")
-        try:
-            if not bot_app.running:
-                await bot_app.initialize()
-                await bot_app.start()
-            logger.info("✅ Бот готов к приему обновлений через /webhook")
-        except Exception as e:
-            logger.error(f"❌ Ошибка инициализации Webhook: {e}")
-    
+    logger.info(f"🚀 [HYBRID] Запуск в режиме: {run_mode.upper()}")
+
+    try:
+        if not bot_app.running:
+            await bot_app.initialize()
+            await bot_app.start()
+
+        if run_mode == "polling":
+            # Режим для твоего компа
+            logger.info("📡 [LOCAL] Удаляем вебхук и запускаем POLLING...")
+            await bot_app.bot.delete_webhook(drop_pending_updates=True)
+            if bot_app.updater:
+                await bot_app.updater.start_polling()
+            logger.info("✅ Бот успешно запущен локально!")
+        else:
+            # Режим для Railway
+            logger.info("🌐 [SERVER] Настройка WEBHOOK...")
+            webhook_url = f"{os.getenv('APP_URL')}/webhook"
+            if os.getenv('APP_URL'):
+                await bot_app.bot.set_webhook(url=webhook_url, drop_pending_updates=True)
+                logger.info(f"✅ Webhook установлен на: {webhook_url}")
+            logger.info("✅ Бот готов принимать POST-запросы на /webhook")
+
+    except Exception as e:
+        logger.error(f"❌ КРИТИЧЕСКАЯ ОШИБКА ПРИ СТАРТЕ: {e}", exc_info=True)
+
     yield
-    
-    # --- SHUTDOWN ---
-    logger.info("🚦 Завершение работы...")
+
+    # --- SHUTDOWN (Выключение) ---
+    logger.info("🚦 [HYBRID] Завершение работы...")
     try:
         if bot_app.updater and bot_app.updater.running:
             await bot_app.updater.stop()
         if bot_app.running:
             await bot_app.stop()
+            await bot_app.shutdown()
     except Exception as e:
         logger.error(f"❌ Ошибка при выключении: {e}")
 
-# Не забудь обновить создание app, если оно было другим
+# ОБЯЗАТЕЛЬНО: Привязываем lifespan к приложению
 app = FastAPI(lifespan=lifespan)
+
+# Удаляй все @app.on_event("startup") и @app.on_event("shutdown"),
+# которые у тебя были ниже в коде! Они больше не нужны.
 
 
 # ========== СТАТИЧЕСКИЕ ФАЙЛЫ И ШАБЛОНЫ ==========
@@ -588,50 +598,7 @@ async def user_page(request: Request, username: str):
 
     
 
-@app.on_event("startup")
-async def startup():
-    # Принудительно берем значение, игнорируя кэш
-    run_mode = os.getenv("RUN_MODE", "webhook").lower().strip()
-    
-    # Прямой лог в консоль, чтобы ты видел, что прочитал Python
-    logger.info(f"🔍 ПРОВЕРКА РЕЖИМА: '{run_mode}'")
 
-    if run_mode == "polling":
-        logger.info("🚀 ЗАПУСК ЛОКАЛЬНО (POLLING)...")
-        if not bot_app.running:
-            await bot_app.initialize()
-            # Удаляем вебхук, иначе сообщения не придут на комп
-            await bot_app.bot.delete_webhook(drop_pending_updates=True)
-            await bot_app.start()
-            if bot_app.updater:
-                await bot_app.updater.start_polling()
-                logger.info("✅ БОТ ПОДКЛЮЧЕН К TELEGRAM (POLLING)")
-    else:
-        logger.info("🌐 ЗАПУСК НА СЕРВЕРЕ (WEBHOOK)...")
-        if not bot_app.running:
-            await bot_app.initialize()
-            await bot_app.start()
-        logger.info("✅ Бот готов к работе через Webhook")
-	    
-	    
-	    
-
-@app.on_event("shutdown")
-async def shutdown():
-    logger.info("🚦 Завершение работы...")
-    # Останавливаем Polling, если он был включен
-    if bot_app.updater and bot_app.updater.running:
-        await bot_app.updater.stop()
-        
-    if bot_app.running:
-        await bot_app.stop()
-        await bot_app.shutdown()
-	    
-	    
-	    
-    
-
-# // web/main.py
 
 if __name__ == "__main__":
     import uvicorn
