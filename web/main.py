@@ -617,10 +617,10 @@ async def user_page(request: Request, username: str):
         # web/main.py
         
         return templates.TemplateResponse(
-            request=request,         # 1. ОБЯЗАТЕЛЬНО (для новых версий)
-            name=template_file,      # 2. Имя файла
-            context={                # 3. Словарь с данными
-                "request": request,  # Дублируем внутри для Jinja
+            request=request,         # ПЕРВЫЙ (именованный или позиционный)
+            name=template_file,      # ВТОРОЙ (имя файла)
+            context={                # ТРЕТИЙ (словарь данных)
+                "request": request,  # Обязательно дублируем внутри для Jinja
                 "user": user_data,
                 "page": page_data,
                 "links": processed_links,
