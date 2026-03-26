@@ -2,10 +2,7 @@
 
 <!-- ========== МОДАЛЬНОЕ ОКНО ДЛЯ БАНКОВСКИХ РЕКВИЗИТОВ ========== -->
 {% for link in categories.transfers %}
-{% if (link.link_type in ['revolut', 'wise', 'swift', 'iban', 'ach_usa', 'wire_usa', 'non_res_vietnam'] or
-link.link_type.startswith('iban_') or
-link.link_type.startswith('account_') or
-link.link_type.startswith('card_usa')) and link.pay_details %}
+{% if link.pay_details %}
 
 {% set details = link.pay_details %}
 {% set username = details.login or details.username or link.url.split('/')[-1] %}
