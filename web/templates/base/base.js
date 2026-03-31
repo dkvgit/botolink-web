@@ -644,14 +644,14 @@ window.openModal = function(modalId, event) {
         if (typeof event.stopPropagation === 'function') event.stopPropagation();
     }
 
-    // Если ID битый или это наша почта (86), которой модалка не нужна — просто выходим
+    // Если ID битый или это системное исключение (86) — выходим
     if (!modalId || modalId === 'modal_86' || modalId.includes('undefined')) {
         return;
     }
 
     const modal = document.getElementById(modalId);
 
-    // ГЛАВНОЕ: Убираем console.warn. Если модалки нет в HTML — молча выходим.
+    // Если модалки нет в HTML — молча выходим без ошибок в консоли
     if (!modal) {
         return;
     }
@@ -659,48 +659,49 @@ window.openModal = function(modalId, event) {
     // Закрываем другие активные модалки перед открытием новой
     document.querySelectorAll('.modal-overlay.active').forEach(m => {
         m.classList.remove('active');
+        // Ожидаем завершения анимации исчезновения (0.3s)
         setTimeout(() => { m.style.display = 'none'; }, 300);
     });
 
-    // Блокируем скролл основной страницы
+    // Блокируем скролл страницы
     document.body.classList.add('modal-open');
 
-    // Сначала показываем блок, потом запускаем анимацию
+    // Сначала display, потом анимация через класс active
     modal.style.display = 'flex';
 
     setTimeout(() => {
         modal.classList.add('active');
 
-        // Генерируем QR-коды, если в модалке есть контейнеры .auto-qr
+        // Генерируем QR-коды, если внутри есть нужный контейнер
         const hasQR = modal.querySelector('.auto-qr');
         if (hasQR && typeof generateQRCodes === 'function') {
             generateQRCodes(modal);
         }
     }, 50);
-};
+}
 
 window.closeModal = function(modalId) {
-    // Если передан ID — ищем по нему, если нет — берем последнюю активную модалку
+    // Если ID нет — закрываем текущую активную
     const modal = modalId ? document.getElementById(modalId) : document.querySelector('.modal-overlay.active');
 
     if (modal) {
         modal.classList.remove('active');
 
-        // Ждем окончания анимации (300мс), прежде чем убрать из DOM-дерева видимость
+        // Ждем 300мс (время анимации), прежде чем скрыть элемент из видимости
         setTimeout(() => {
             modal.style.display = 'none';
 
-            // Проверяем, остались ли еще открытые модалки
+            // Проверяем, не осталось ли других открытых окон
             const activeModals = document.querySelectorAll('.modal-overlay.active');
 
             if (activeModals.length === 0) {
+                // Если всё закрыто — возвращаем скролл основной странице
                 document.body.classList.remove('modal-open');
-                // На всякий случай сбрасываем инлайновый стиль, если он затесался
                 document.body.style.overflow = '';
             }
         }, 300);
     }
-};
+}
 
 
 function finishClose(modalElement) {
