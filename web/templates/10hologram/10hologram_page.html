@@ -1,3 +1,4 @@
+<!-- D:\aRabota\TelegaBoom\030_botolinkpro\web\templates\10hologram\10hologram_page.html -->
 <!DOCTYPE html>
 <html lang="ru">
 
@@ -27,6 +28,30 @@
     {% include 'base/blocks/base_footer.html' %}
 </div>
 
+{# МОДАЛКИ #}
+<div id="modals-container">
+    {% include 'base/blocks/base_modal_bank.html' ignore missing %}
+    {% include 'base/blocks/base_modal_crypto.html' ignore missing %}
+    {% include 'base/blocks/base_modal_usa.html' ignore missing %}
+</div>
+
+<div id="toast" class="toast hidden"></div>
 <script src="/templates/base/base.js"></script>
+
+<!-- 🔧 ФИКС ПОЗИЦИОНИРОВАНИЯ МОДАЛОК -->
+<!-- Переносит все модалки в BODY, чтобы position: fixed работал корректно -->
+<script>
+(function() {
+    const allModals = document.querySelectorAll('.modal-overlay');
+    if (allModals.length > 0) {
+        console.log('🔧 Модалок найдено:', allModals.length);
+        allModals.forEach((modal, index) => {
+            document.body.appendChild(modal);
+        });
+        console.log('✅ Все модалки перенесены в BODY');
+    }
+})();
+</script>
+
 </body>
 </html>

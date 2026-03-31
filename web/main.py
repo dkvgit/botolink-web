@@ -348,8 +348,8 @@ LINK_TYPE_CATEGORY = {
 	
 	# Мессенджеры
 	'telegram': 'messengers', 'whatsapp': 'messengers', 'viber': 'messengers', 'signal': 'messengers',
-	'wechat': 'messengers', 'zalo': 'messengers', 'facetime': 'messengers',
-	'googlechat': 'messengers', 'max': 'messengers',
+	'zalo': 'messengers', 'facetime': 'messengers',
+	'max': 'messengers',
 	
 	# Переводы
 	'revolut': 'transfers', 'wise': 'transfers', 'paypal': 'transfers',

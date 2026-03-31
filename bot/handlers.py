@@ -8,6 +8,8 @@ import re
 import sys
 import time
 from io import BytesIO
+
+from bot.constructor import start_constructor, process_current_step
 from bot.utils import get_db_connection, log_error
 import aiohttp
 import asyncpg
@@ -267,7 +269,10 @@ logger = logging.getLogger(__name__)
 
 
 
+# // bot/handlers.py
+
 async def start_handler(update, context):
+    """Главное меню бота (команда /start)"""
     # # Используем # для Python комментариев
     from bot.utils import get_or_create_user, get_db_connection, check_subscription
     from bot.avatar_handler import setup_user_avatar
@@ -299,140 +304,127 @@ async def start_handler(update, context):
             print(f"--- [DEBUG] Не удалось удалить сообщение: {e}")
         context.user_data.pop('last_success_msg_id', None)
 
-    conn = None
     try:
-        conn = await get_db_connection()
-        print("--- [DEBUG] 1. Соединение с БД установлено")
-        
-        # # Синхронизируем пользователя
-        db_user = await get_or_create_user(
-            conn, user.id, user.username, user.first_name, user.last_name
-        )
-        
-        # # 2. ПРОВЕРЯЕМ ПОДПИСКУ
-        sub_status = await check_subscription(conn, user.id)
-        
-        if sub_status['active']:
-            status_text = f"💎 <b>Статус:</b> PRO ({sub_status['time_left_str']})"
-        else:
-            status_text = "💡 <b>Статус:</b> Бесплатный"
-
-        current_name = db_user['first_name'] or user.username or f"ID_{user.id}"
-        page_title = f"Страница {current_name}"
-        
-        await conn.execute(
-            "UPDATE pages SET title = $1 WHERE user_id = $2",
-            page_title, db_user['id']
-        )
-
-        # # Аватар
-        try:
-            await setup_user_avatar(user.id, context.bot, conn)
-            print("--- [DEBUG] 2. Аватар обработан")
-        except Exception as e:
-            print(f"--- [DEBUG] Ошибка аватара (не критично): {e}")
-
-        page = await conn.fetchrow("""
-            SELECT p.*, t.name as template_name, t.is_pro as template_is_pro
-            FROM pages p
-            LEFT JOIN templates t ON p.template_id = t.id
-            WHERE p.user_id = $1
-        """, db_user['id'])
-
-        if not page:
-            page_username = user.username or f"user_{user.id}"
-            page = await conn.fetchrow("""
-                INSERT INTO pages (user_id, username, title, template_id)
-                VALUES ($1, $2, $3, 1) RETURNING *
-            """, db_user['id'], page_username, page_title)
-
-        links_count = await conn.fetchval(
-            "SELECT COUNT(*) FROM links WHERE page_id = $1 AND is_active = true",
-            page['id']
-        ) or 0
-
-        # # БЕРЕМ URL ИЗ ENV
-        base_url = os.getenv("APP_URL", "https://botolink.pro").rstrip('/')
-
-        text_msg = (
-            f"👋 Привет, <b>{db_user['first_name']}</b>!\n"
-            f"Твоя главная команда: /start\n\n"
-            f"📌 <b>Твоя страница уже работает:</b>\n"
-            f"👉 <a href='{base_url}/{page['username']}'>{base_url}/{page['username']}</a>\n\n"
-            f"🎨 <b>Шаблон:</b> {page['template_name'] or 'Классический'} {'(⭐ PRO)' if page.get('template_is_pro') else '(🆓 Бесплатный)'}\n"
-            f"🔗 <b>Ссылок:</b> {links_count}\n"
-            f"👀 <b>Просмотров:</b> {page['view_count'] or 0}\n"
-            f"────────────────────\n"
-            f"{status_text}\n\n"
-            f"Что хочешь сделать?"
-        )
-
-        keyboard = [
-            [InlineKeyboardButton("📋 Моя страница", callback_data="mysite"),
-             InlineKeyboardButton("🔳 QR-код", callback_data="qr")],
-            [InlineKeyboardButton("🔗 Изменить адрес (URL)", callback_data="change_nick")],
-            [InlineKeyboardButton("🔗 Управление ссылками", callback_data="links"),
-             InlineKeyboardButton("➕ Добавить ссылку", callback_data="add_link")],
-            [InlineKeyboardButton("🎨 Выбрать шаблон", callback_data="templates_menu"),
-             InlineKeyboardButton("📊 Статистика", callback_data="stats")],
-            [InlineKeyboardButton("⚙️ Профиль", callback_data="profile")]
-        ]
-
-        # bot/handlers.py
-        
-        # # Проверка админа через переменную окружения
-        raw_admins = os.getenv("ADMIN_IDS", "")
-        admin_list = [a.strip() for a in raw_admins.split(',') if a.strip()]
-        if str(user.id) in admin_list:
-            keyboard.append([InlineKeyboardButton("👑 АДМИН-ПАНЕЛЬ", callback_data="admin_list_users")])
-
-        reply_markup = InlineKeyboardMarkup(keyboard)
-
-        # # Логика отправки (Универсальная)
-        send_params = {
-            "text": text_msg,
-            "reply_markup": reply_markup,
-            "parse_mode": 'HTML',
-            "disable_web_page_preview": True
-        }
-
-        try:
-            # 1. Если это кнопка и сообщение НЕ удаляли — редактируем
-            if update.callback_query and not was_deleted:
-                sent_msg = await update.callback_query.edit_message_text(**send_params)
+        # ПРАВИЛЬНЫЙ ВЫЗОВ ЧЕРЕЗ ASYNC WITH
+        async with get_db_connection() as conn:
+            print("--- [DEBUG] 1. Соединение с БД установлено через контекстный менеджер")
             
-            # 2. В остальных случаях (команда или старое удалено) — шлем новое
+            # # Синхронизируем пользователя
+            db_user = await get_or_create_user(
+                conn, user.id, user.username, user.first_name, user.last_name
+            )
+            
+            # # 2. ПРОВЕРЯЕМ ПОДПИСКУ
+            sub_status = await check_subscription(conn, user.id)
+            
+            if sub_status['active']:
+                status_text = f"💎 <b>Статус:</b> PRO ({sub_status['time_left_str']})"
             else:
-                if update.callback_query:
-                    await update.callback_query.answer()
+                status_text = "💡 <b>Статус:</b> Бесплатный"
+
+            current_name = db_user['first_name'] or user.username or f"ID_{user.id}"
+            page_title = f"Страница {current_name}"
+            
+            await conn.execute(
+                "UPDATE pages SET title = $1 WHERE user_id = $2",
+                page_title, db_user['id']
+            )
+
+            # # Аватар
+            try:
+                await setup_user_avatar(user.id, context.bot, conn)
+                print("--- [DEBUG] 2. Аватар обработан")
+            except Exception as e:
+                print(f"--- [DEBUG] Ошибка аватара (не критично): {e}")
+
+            page = await conn.fetchrow("""
+                SELECT p.*, t.name as template_name, t.is_pro as template_is_pro
+                FROM pages p
+                LEFT JOIN templates t ON p.template_id = t.id
+                WHERE p.user_id = $1
+            """, db_user['id'])
+
+            if not page:
+                page_username = user.username or f"user_{user.id}"
+                page = await conn.fetchrow("""
+                    INSERT INTO pages (user_id, username, title, template_id)
+                    VALUES ($1, $2, $3, 1) RETURNING *
+                """, db_user['id'], page_username, page_title)
+
+            links_count = await conn.fetchval(
+                "SELECT COUNT(*) FROM links WHERE page_id = $1 AND is_active = true",
+                page['id']
+            ) or 0
+
+            # # БЕРЕМ URL ИЗ ENV
+            base_url = os.getenv("APP_URL", "https://botolink.pro").rstrip('/')
+
+            text_msg = (
+                f"👋 Привет, <b>{db_user['first_name']}</b>!\n"
+                f"Твоя главная команда: /start\n\n"
+                f"📌 <b>Твоя страница уже работает:</b>\n"
+                f"👉 <a href='{base_url}/{page['username']}'>{base_url}/{page['username']}</a>\n\n"
+                f"🎨 <b>Шаблон:</b> {page['template_name'] or 'Классический'} {'(⭐ PRO)' if page.get('template_is_pro') else '(🆓 Бесплатный)'}\n"
+                f"🔗 <b>Ссылок:</b> {links_count}\n"
+                f"👀 <b>Просмотров:</b> {page['view_count'] or 0}\n"
+                f"────────────────────\n"
+                f"{status_text}\n\n"
+                f"Что хочешь сделать?"
+            )
+
+            keyboard = [
+                [InlineKeyboardButton("📋 Моя страница", callback_data="mysite"),
+                 InlineKeyboardButton("🔳 QR-код", callback_data="qr")],
                 
-                # Используем context.bot.send_message (это всегда работает)
+                [InlineKeyboardButton("🔗 Управление ссылками", callback_data="links"),
+                 InlineKeyboardButton("➕ Добавить ссылку", callback_data="add_link")],
+                [InlineKeyboardButton("🎨 Выбрать шаблон", callback_data="templates_menu"),
+                 InlineKeyboardButton("📊 Статистика", callback_data="stats")],
+                [InlineKeyboardButton("⚙️ Профиль", callback_data="profile")]
+            ]
+
+            # Проверка админа
+            raw_admins = os.getenv("ADMIN_IDS", "")
+            admin_list = [a.strip() for a in raw_admins.split(',') if a.strip()]
+            if str(user.id) in admin_list:
+                keyboard.append([InlineKeyboardButton("👑 АДМИН-ПАНЕЛЬ", callback_data="admin_list_users")])
+
+            reply_markup = InlineKeyboardMarkup(keyboard)
+
+            send_params = {
+                "text": text_msg,
+                "reply_markup": reply_markup,
+                "parse_mode": 'HTML',
+                "disable_web_page_preview": True
+            }
+
+            try:
+                if update.callback_query and not was_deleted:
+                    sent_msg = await update.callback_query.edit_message_text(**send_params)
+                else:
+                    if update.callback_query:
+                        await update.callback_query.answer()
+                    sent_msg = await context.bot.send_message(
+                        chat_id=update.effective_chat.id,
+                        **send_params
+                    )
+                context.user_data['last_success_msg_id'] = sent_msg.message_id
+                print(f"--- [DEBUG] !!! ВСЁ ОК, СООБЩЕНИЕ {sent_msg.message_id} ОТПРАВЛЕНО ---")
+
+            except Exception as send_error:
+                print(f"--- [DEBUG] Ошибка отправки (пробуем send_message): {send_error}")
                 sent_msg = await context.bot.send_message(
                     chat_id=update.effective_chat.id,
                     **send_params
                 )
-            
-            context.user_data['last_success_msg_id'] = sent_msg.message_id
-            print(f"--- [DEBUG] !!! ВСЁ ОК, СООБЩЕНИЕ {sent_msg.message_id} ОТПРАВЛЕНО ---")
-
-        except Exception as send_error:
-            # Фолбэк: если edit не прошел, просто шлем новое сообщение
-            print(f"--- [DEBUG] Ошибка отправки (пробуем send_message): {send_error}")
-            sent_msg = await context.bot.send_message(
-                chat_id=update.effective_chat.id,
-                **send_params
-            )
-            context.user_data['last_success_msg_id'] = sent_msg.message_id
+                context.user_data['last_success_msg_id'] = sent_msg.message_id
 
     except Exception as e:
         print(f"--- [DEBUG] !!! КРИТИЧЕСКАЯ ОШИБКА В START_HANDLER: {e}")
         traceback.print_exc()
         logger.error(f"❌ Ошибка в start_handler: {e}", exc_info=True)
-    finally:
-        if conn:
-            await conn.close()
-            print("--- [DEBUG] 8. Соединение закрыто")
-            
+    
+    # ПРИМЕЧАНИЕ: Блок finally с close() больше не нужен, async with закроет всё сам.
             
             
             
@@ -683,6 +675,26 @@ async def save_new_nickname(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return ConversationHandler.END
 
 
+
+# D:\aRabota\TelegaBoom\030_mylinkspace\bot\handlers.py
+
+async def cat_transfers_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    Быстрый переход к выбору страны (категория transfers).
+    Имитирует выбор категории 'transfers' в конструкторе.
+    """
+    # 1. Если это команда /cat_transfers (сообщение, а не кнопка)
+    if update.message:
+        # Устанавливаем состояние, которое ожидает choose_country
+        # Обычно это состояние начала выбора страны в твоем ConversationHandler
+        # Замени 'SELECT_COUNTRY' на твою константу (например, 1200 или что там в логах)
+        from bot.main import SELECT_COUNTRY # Импортируй константу состояния
+        await context.user_data.clear() # Чистим старый мусор, чтобы не было конфликтов
+        
+        # Вызываем твою функцию
+        return await choose_country(update, context)
+    
+    
 async def help_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Обработчик команды /help"""
     text = "❓ Помощь\n\n"
@@ -773,58 +785,59 @@ async def mysite_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # bot/handlers.py
 
 async def qr_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Генерация QR-кода с логикой PRO-статуса и полным набором кнопок"""
+    """Генерация QR-кода с логикой PRO-статуса и вводом текста через стейт 1300"""
     user = update.effective_user
     conn = await get_db_connection()
     
+    # ID стейта для ожидания текста
+    QR_STATE = 1300
+    
     try:
         # 1. ПОЛУЧАЕМ СВЕЖИЕ ДАННЫЕ
-        db_user = await conn.fetchrow(
-            "SELECT id, is_pro FROM users WHERE telegram_id = $1",
-            user.id
-        )
+        db_user = await conn.fetchrow("SELECT id, is_pro FROM users WHERE telegram_id = $1", user.id)
         if not db_user:
             db_user = await get_or_create_user(conn, user.id, user.username, user.first_name)
         
         sub = await check_subscription(conn, user.id)
         is_pro = sub['active']
         page = await get_user_page(conn, db_user['id'])
-        
-        # ===== НОВЫЙ БЛОК: ОБРАБОТКА ВЫБОРА ТИПА QR =====
+
+        # ===== ОБРАБОТКА ВВОДА ТЕКСТА =====
+        if update.message and not update.message.text.startswith('/'):
+            context.user_data['temp_qr_text'] = update.message.text[:25]
+            # Флаг для того, чтобы debug_all_messages пропустил этот текст в логах
+            context.user_data['ignore_next_text'] = True
+
+        # ===== ОБРАБОТКА CALLBACK_QUERY (Кнопки) =====
         if update.callback_query:
-            if update.callback_query.data == "qr_with_text":
-                context.user_data['waiting_for_qr_text'] = True
+            data = update.callback_query.data
+            
+            if data == "qr_with_text":
                 await update.callback_query.edit_message_text(
                     "📝 **Введите текст для вашего QR-кода**\n\n"
-                    "Пришлите фразу (до 25 символов), которая будет написана под картинкой.\n"
-                    "Отправьте /cancel чтобы отменить.",
+                    "Пришлите фразу (до 25 символов), которая будет под картинкой.",
                     parse_mode='Markdown',
-                    reply_markup=InlineKeyboardMarkup([
-                        [InlineKeyboardButton("◀️ Отмена", callback_data="qr")]
-                    ])
+                    reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("◀️ Назад", callback_data="qr")]])
                 )
-                return
+                return QR_STATE
             
-            elif update.callback_query.data == "qr_standard":
+            elif data == "qr_standard":
                 context.user_data.pop('temp_qr_text', None)
-                # Генерируем обычный QR без текста
-                # Дальше код пойдет как обычно
-        
-        # --- БЛОК 1: МЕНЮ ВЫБОРА ДЛЯ PRO ---
-        if is_pro and update.callback_query and update.callback_query.data == "qr":
-            keyboard = [
-                [InlineKeyboardButton("✨ С надписью (PRO)", callback_data="qr_with_text")],
-                [InlineKeyboardButton("🖼 Обычный", callback_data="qr_standard")],
-                [InlineKeyboardButton("◀️ Назад", callback_data="start")]
-            ]
-            await update.callback_query.edit_message_text(
-                "🌟 **У вас PRO-статус!**\n\nВы можете сгенерировать обычный QR или добавить персональную надпись под кодом.",
-                reply_markup=InlineKeyboardMarkup(keyboard),
-                parse_mode='Markdown'
-            )
-            return
-        
-        # --- БЛОК 2: ГЕНЕРАЦИЯ КАРТИНКИ ---
+            
+            elif data == "qr" and is_pro:
+                keyboard = [
+                    [InlineKeyboardButton("✨ С надписью (PRO)", callback_data="qr_with_text")],
+                    [InlineKeyboardButton("🖼 Обычный", callback_data="qr_standard")],
+                    [InlineKeyboardButton("🏠 В меню", callback_data="main_menu")]
+                ]
+                await update.callback_query.edit_message_text(
+                    "🌟 **У вас PRO-статус!**\n\nВыберите вариант генерации QR-кода:",
+                    reply_markup=InlineKeyboardMarkup(keyboard),
+                    parse_mode='Markdown'
+                )
+                return QR_STATE
+
+        # --- ГЕНЕРАЦИЯ КАРТИНКИ ---
         clean_base_url = APP_URL.strip().replace(" ", "")
         page_url = f"{clean_base_url}/{page['username']}"
         
@@ -847,7 +860,7 @@ async def qr_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             except Exception as e:
                 logger.warning(f"Logo paste error: {e}")
         
-        # --- БЛОК 3: ОТРИСОВКА ТЕКСТА (Для PRO) ---
+        # --- ОТРИСОВКА ТЕКСТА ---
         user_text = context.user_data.pop('temp_qr_text', None)
         if user_text and is_pro:
             from PIL import ImageFont
@@ -855,69 +868,50 @@ async def qr_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             new_img = Image.new('RGB', (w, h + 60), 'white')
             new_img.paste(qr_img, (0, 0))
             draw = ImageDraw.Draw(new_img)
-            try:
-                font = ImageFont.truetype("arial.ttf", 26)
-            except:
-                font = ImageFont.load_default()
+            try: font = ImageFont.truetype("arial.ttf", 26)
+            except: font = ImageFont.load_default()
             
             bbox = draw.textbbox((0, 0), user_text, font=font)
             tx = (w - (bbox[2] - bbox[0])) // 2
             draw.text((tx, h + 5), user_text, fill="black", font=font)
             qr_img = new_img
         
-        # --- БЛОК 4: СОХРАНЕНИЕ ---
+        # --- СОХРАНЕНИЕ ---
         bio = BytesIO()
         bio.name = 'qrcode.png'
         qr_img.save(bio, 'PNG')
         bio.seek(0)
         
-        # --- БЛОК 5: ПОДПИСЬ И КНОПКИ ---
+        # --- ПОДПИСЬ И КНОПКИ (Только Меню) ---
         caption = f"🔳 **Ваш QR-код готов!**\n\n🔗 **Ссылка:**\n`{page_url}`"
         keyboard_btns = []
         
-        if is_pro:
-            if user_text:
-                keyboard_btns.append([InlineKeyboardButton("✍️ Изменить текст", callback_data="qr_with_text")])
-                keyboard_btns.append([InlineKeyboardButton("🖼 Без текста", callback_data="qr_standard")])
-            else:
-                keyboard_btns.append([InlineKeyboardButton("✨ Добавить надпись", callback_data="qr_with_text")])
-        else:
-            caption += "\n\n👑 *В PRO-версии можно добавить свой текст под QR (до 30 симв.)!*"
+        if not is_pro:
+            caption += "\n\n👑 *В PRO-версии можно добавить свой текст под QR!*"
             keyboard_btns.append([InlineKeyboardButton("💎 Подключить PRO", callback_data="upgrade")])
         
-        keyboard_btns.append([
-            InlineKeyboardButton("📥 Скачать", callback_data="download_qr"),
-            InlineKeyboardButton("📤 Поделиться", callback_data="share_qr")
-        ])
-        keyboard_btns.append([InlineKeyboardButton("🏠 В меню", callback_data="start")])
+        keyboard_btns.append([InlineKeyboardButton("🏠 В меню", callback_data="main_menu")])
         
-        # --- БЛОК 6: ОТПРАВКА ---
+        # --- ОТПРАВКА ---
         if update.callback_query:
-            try:
-                await update.callback_query.message.delete()
-            except:
-                pass
-            await context.bot.send_photo(
-                chat_id=update.effective_chat.id,
-                photo=bio,
-                caption=caption,
-                reply_markup=InlineKeyboardMarkup(keyboard_btns),
-                parse_mode='Markdown'
-            )
-        else:
-            await update.message.reply_photo(
-                photo=bio,
-                caption=caption,
-                reply_markup=InlineKeyboardMarkup(keyboard_btns),
-                parse_mode='Markdown'
-            )
-    
+            try: await update.callback_query.message.delete()
+            except: pass
+
+        await context.bot.send_photo(
+            chat_id=update.effective_chat.id,
+            photo=bio,
+            caption=caption,
+            reply_markup=InlineKeyboardMarkup(keyboard_btns),
+            parse_mode='Markdown'
+        )
+
+        return ConversationHandler.END
+
     except Exception as e:
         logger.error(f"Error in qr_handler: {e}", exc_info=True)
-        await context.bot.send_message(chat_id=update.effective_chat.id, text="❌ Ошибка при генерации QR-кода.")
+        return ConversationHandler.END
     finally:
         await conn.close()
-
 
 # Вспомогательная функция для удаления временного файла
 async def delete_temp_file(file_path: str, delay: int = 60):
@@ -1702,11 +1696,77 @@ async def add_link_icon_old(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return ConversationHandler.END
 
 
+# D:\aRabota\TelegaBoom\030_mylinkspace\bot\handlers.py
+
+async def skip_step(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Пропустить текущий шаг ввода"""
+    print("\n" + "=" * 60)
+    print("⏭️ skip_step ВЫЗВАН")
+    
+    query = update.callback_query
+    await query.answer()
+    
+    config = context.user_data.get('type_config')
+    step_idx = context.user_data.get('step_index', 0)
+    
+    if config and step_idx < len(config.get('steps', [])):
+        current_step = config['steps'][step_idx]
+        field_name = current_step.get('field', f'step_{step_idx}')
+        
+        # Записываем пустое значение или None
+        if 'collected_data' not in context.user_data:
+            context.user_data['collected_data'] = {}
+        
+        context.user_data['collected_data'][field_name] = None
+        print(f"✅ Шаг '{field_name}' пропущен")
+        
+        # Идем дальше
+        context.user_data['step_index'] = step_idx + 1
+        return await process_current_step(update, context)
+
+    return 1200 # Если что-то пошло не так
+
+
+
+
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     data = query.data
     state = context.user_data.get('_state')
     user = update.effective_user
+    
+    # Если нажата кнопка "В главное меню" (после сохранения или ошибки)
+    if data == "start_over":
+        await query.answer("Возвращаюсь в конструктор...")
+        # Вызываем твою функцию, которая рисует категории (Соцсети, Банки и т.д.)
+        return await start_constructor(update, context)
+    
+    # СРАЗУ ГАСИМ БЛИК (чтобы кнопка не висела)
+    await query.answer()
+    
+    # ИСПРАВЛЕННЫЙ ПЕРЕХВАТ ДЛЯ "НАЧАТЬ ЗАНОВО"
+    if data == "cat_transfers":
+        print(f"🔄 [RESTART] Нажато Начать заново (cat_transfers)")
+        # Чистим старые данные, чтобы не было конфликтов
+        for key in ['flow_config', 'flow_step_index', 'flow_answers', 'current_bank_key']:
+            context.user_data.pop(key, None)
+        context.user_data['category'] = 'transfers'
+        
+        # Вызываем функцию выбора страны/банка напрямую
+        from bot.bank import choose_country
+        return await choose_country(update, context)
+    
+    
+    # 🛡️ 1. ЩИТ (в начале button_handler)
+    constructor_prefixes = (
+        'revolut_', 'wise_', 'method_', 'country_', 'confirm_',
+        'type_', 'add_link', 'back_to_', 'fin_sub_',
+        'choice_', 'skip_step', 'flow_'  # Добавили flow_
+    )
+    if data.startswith(constructor_prefixes):
+        return
+
+
     
     # ===== ПРОВЕРКА ФЛАГА goto_banks =====
     if context.user_data.get('goto_banks'):
@@ -2098,7 +2158,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             current_template = "Classic" if page['template_id'] == 1 else "Royal"
             links = await get_user_links(conn, page['id'])
             total_clicks = sum(link['click_count'] for link in links)
-            full_url = f"{APP_URL}/{page['username']}"
+            full_url = f"{APP_URL}{page['username']}"
             
             text = (
                 f"📋 **Ваша страница уже работает**\n\n"
@@ -3889,10 +3949,7 @@ def main_menu_keyboard(is_pro: bool = False, is_admin: bool = False):
             InlineKeyboardButton("📋 Моя страница", callback_data="mysite"),
             InlineKeyboardButton("🔳 QR-код", callback_data="qr")
         ],
-        [
-            # Кнопка смены ника, которую мы добавили
-            InlineKeyboardButton("🔗 Изменить адрес (URL)", callback_data="change_nick")
-        ],
+       
         [
             InlineKeyboardButton("🔗 Управление ссылками", callback_data="links"),
             InlineKeyboardButton("➕ Добавить ссылку", callback_data="add_link")

@@ -17,8 +17,8 @@ logger = logging.getLogger(__name__)
 # ===== КАТЕГОРИИ =====
 CATEGORIES: Dict[str, Dict[str, Any]] = {
 	"social": {
-		"name": "📱 Соцсети",
-		"description": "Добавь ссылки на свои соцсети - они появятся на твоей странице красивыми карточками с иконками. YouTube, Instagram, TikTok, VK и другие",
+		"name": "📱 Соцсети / Email",
+		"description": "Добавь ссылки на свои соцсети или электронные адреса - они появятся на твоей странице красивыми карточками с иконками. YouTube, Instagram, TikTok, VK и другие",
 		"icon": "🌐"
 	},
 	"messengers": {
@@ -565,6 +565,34 @@ LINK_TYPES: Dict[str, Dict[str, Any]] = {
 		]
 	},
 	
+	"email": {
+	    "name": "Email",
+	    "category": "social",
+	    "icon": "email",
+	    "steps": [
+	        {
+	            "type": "title",
+	            "question": "📝 <b>Заголовок карточки Email</b>\n\n"
+	                        "Например: <code>Мой Gmail</code> или <code>Email</code>\n"
+	                        "Если нажмете <b>Пропустить</b> → будет просто «Email»\n\n"
+	                        "👇 <b>Вводите текст в поле чата бота</b>",
+	            "field": "title",
+	            "optional": True,
+	            "skip_button": True
+	        },
+	        {
+	            "type": "text",
+	            "question": "✉️ <b>Введите email адрес</b>\n\n"
+	                        "Примеры:\n"
+	                        "• <code>name@example.com</code>\n"
+	                        "• <code>my.mail@gmail.com</code>\n\n"
+	                        "👇 <b>Вводите текст в поле чата бота</b>",
+	            "field": "email",
+	            "optional": False
+	        }
+	    ]
+	},
+	
 	# ===== МЕССЕНДЖЕРЫ =====
 	"whatsapp": {
 		"name": "WhatsApp",
@@ -711,137 +739,66 @@ LINK_TYPES: Dict[str, Dict[str, Any]] = {
 		]
 	},
 	
-	"wechat": {
-		"name": "WeChat",
-		"category": "messengers",
-		"icon": "wechat",
-		"steps": [
-			{
-				"type": "choice",
-				"question": "🇨🇳 <b>Выберите способ связи в WeChat</b>\n\n"
-				            "What to specify? / Что указать?\n\n"
-				            "Вы можете добавить WeChat ID или QR-код для добавления в друзья",
-				"options": [
-					{
-						"value": "id",
-						"label": "🆔 WeChat ID",
-						"next_step": 1,
-						"description": "Укажите ваш WeChat ID для поиска"
-					},
-				
-				]
-			},
-			{
-				"type": "text",
-				"question": "🆔 <b>WeChat ID</b>\n\n"
-				            "Введите ваш WeChat ID:\n"
-				            "• Латинские буквы и цифры\n"
-				            "• Например: <code>wechat_user_123</code>\n"
-				            "• Минимум 6 символов\n\n"
-				            "👇 <b>Вводите текст</b>",
-				"field": "wechat_id",
-				"optional": False
-			},
-			
-			{
-				"type": "title",
-				"question": "📝 <b>Название карточки WeChat</b>\n\n"
-				            "Придумайте название для этой карточки\n"
-				            "Например: <code>Мой WeChat</code> или <code>WeChat для Китая</code>\n\n"
-				            "👇 <b>Вводите текст</b>",
-				"field": "title",
-				"optional": True,
-				"skip_button": True
-			}
-		]
-	},
+
 	
 	"zalo": {
-		"name": "Zalo",
-		"category": "messengers",
-		"icon": "zalo",
-		"steps": [
-			{
-				"type": "text",
-				"question": "📞 <b>Номер телефона для Zalo</b>\n\n"
-				            "Введите номер в любом формате:\n"
-				            "• <code>84912345678</code> (только цифры)\n"
-				            "• <code>+84 91 234 5678</code> (Вьетнам, с плюсом)\n"
-				            "• <code>0912 345 678</code> (с пробелами)\n\n"
-				            "👇 <b>Вводите текст</b>",
-				"field": "phone",
-				"optional": False
-			},
-			{
-				"type": "title",
-				"question": "📝 <b>Название карточки Zalo</b>\n\n"
-				            "Придумайте название для этой карточки\n"
-				            "Например: <code>Мой Zalo</code> или <code>Zalo для Вьетнама</code>\n\n"
-				            "👇 <b>Вводите текст</b>",
-				"field": "title",
-				"optional": True,
-				"skip_button": True
-			}
-		]
+	    "name": "Zalo",
+	    "category": "messengers",
+	    "icon": "zalo",
+	    "steps": [
+	       {
+	          "type": "title",
+	          "question": "📝 <b>Название карточки Zalo</b>\n\n"
+	                      "Придумайте название для этой карточки\n"
+	                      "Например: <code>Мой Zalo</code>\n\n"
+	                      "👇 <b>Вводите текст</b>",
+	          "field": "title",
+	          "optional": True,
+	          "skip_button": True
+	       },
+	       {
+	          "type": "text",
+	          "question": "📞 <b>Данные для Zalo</b>\n\n"
+	                      "Введите любой из вариантов:\n"
+	                      "• <b>Номер:</b> <code>84912345678</code>\n"
+	                      "• <b>ID:</b> <code>912345678</code>\n"
+	                      "• <b>Ссылка:</b> <code>https://zalo.me/84912345678</code>\n\n"
+	                      "👇 <b>Вводите текст</b>",
+	          "field": "phone",
+	          "optional": False
+	       }
+	    ]
 	},
 	
 	"max": {
-		"name": "Max",
-		"category": "messengers",
-		"icon": "max",
-		"steps": [
-			{
-				"type": "text",
-				"question": "📞 <b>Номер телефона для Max</b>\n\n"
-				            "Введите номер в любом формате:\n"
-				            "• <code>7952544647</code> (только цифры)\n"
-				            "• <code>+7 952-544-647</code> (Россия)\n"
-				            "• <code>7 952 544 647</code> (с пробелами)\n\n"
-				            "👇 <b>Вводите текст</b>",
-				"field": "phone",
-				"optional": False
-			},
-			{
-				"type": "title",
-				"question": "📝 <b>Название карточки Max</b>\n\n"
-				            "Придумайте название для этой карточки\n"
-				            "Например: <code>Мой Max</code> или <code>Max для работы</code>\n\n"
-				            "👇 <b>Вводите текст</b>",
-				"field": "title",
-				"optional": True,
-				"skip_button": True
-			}
-		]
+	    "name": "Max",
+	    "category": "messengers",
+	    "icon": "max",
+	    "steps": [
+	       {
+	          "type": "title",
+	          "question": "📝 <b>Название карточки Max</b>\n\n"
+	                      "Придумайте название для этой карточки\n"
+	                      "Например: <code>Мой Max</code>\n\n"
+	                      "👇 <b>Вводите текст</b>",
+	          "field": "title",
+	          "optional": True,
+	          "skip_button": True
+	       },
+	       {
+	          "type": "text",
+	          "question": "🆔 <b>Идентификатор Max</b>\n\n"
+	                      "Введите данные в любом формате:\n"
+	                      "• <b>ID:</b> <code>7952544647</code>\n"
+	                      "• <b>Ссылка:</b> <code>https://max.ru/id/7952544647</code>\n\n"
+	                      "👇 <b>Вводите текст</b>",
+	          "field": "id",
+	          "optional": False
+	       }
+	    ]
 	},
 	
-	"googlechat": {
-		"name": "Google Chat",
-		"category": "messengers",
-		"icon": "googlechat",
-		"steps": [
-			{
-				"type": "text",
-				"question": "📧 <b>Email для Google Chat</b>\n\n"
-				            "Введите email адрес в любом формате:\n"
-				            "• <code>username@gmail.com</code>\n"
-				            "• <code>user@work-domain.com</code> (для Workspace)\n"
-				            "• <code>https://mail.google.com/chat/u/0/#chat/space/example</code> (ссылка на чат)\n\n"
-				            "👇 <b>Вводите текст</b>",
-				"field": "email",
-				"optional": False
-			},
-			{
-				"type": "title",
-				"question": "📝 <b>Название карточки Google Chat</b>\n\n"
-				            "Придумайте название для этой карточки\n"
-				            "Например: <code>Рабочий чат</code> или <code>Google Chat</code>\n\n"
-				            "👇 <b>Вводите текст</b>",
-				"field": "title",
-				"optional": True,
-				"skip_button": True
-			}
-		]
-	},
+
 	
 	# ===== БАНКИ (простые) =====
 	# Добавить в LINK_TYPES (после других банков)
@@ -1040,264 +997,255 @@ LINK_TYPES: Dict[str, Dict[str, Any]] = {
 		]
 	},
 	
-	# ===== КРИПТА (биржи и кошельки) =====
-	"binance": {
-		"name": "Binance",
-		"category": "crypto",
-		"icon": "binance",
-		"steps": [
-			{"type": "choice", "question": "📊 Что указать?",
-			 "options": [
-				 {"value": "uid", "label": "UID", "next_step": 1},
-				 {"value": "email", "label": "Email", "next_step": 2},
-				 {"value": "wallet", "label": "Адрес кошелька", "next_step": 3}
-			 ]},
-			{"type": "text", "question": "Введите UID:", "field": "uid"},
-			{"type": "email", "question": "Введите email:", "field": "email"},
-			{"type": "text", "question": "Введите адрес кошелька:", "field": "wallet_address"},
-			{"type": "title", "question": "📝 Название для кнопки:", "field": "title"}
-		]
-	},
 	
-	"bybit": {
-		"name": "Bybit",
-		"category": "crypto",
-		"icon": "bybit",
-		"steps": [
-			{"type": "choice", "question": "📊 Что указать?",
-			 "options": [
-				 {"value": "uid", "label": "UID", "next_step": 1},
-				 {"value": "email", "label": "Email", "next_step": 2}
-			 ]},
-			{"type": "text", "question": "Введите UID:", "field": "uid"},
-			{"type": "email", "question": "Введите email:", "field": "email"},
-			{"type": "title", "question": "📝 Название для кнопки:", "field": "title"}
-		]
-	},
 	
-	"okx": {
-		"name": "OKX",
-		"category": "crypto",
-		"icon": "okx",
-		"steps": [
-			{"type": "choice", "question": "📊 Что указать?",
-			 "options": [
-				 {"value": "uid", "label": "UID", "next_step": 1},
-				 {"value": "email", "label": "Email", "next_step": 2}
-			 ]},
-			{"type": "text", "question": "Введите UID:", "field": "uid"},
-			{"type": "email", "question": "Введите email:", "field": "email"},
-			{"type": "title", "question": "📝 Название для кнопки:", "field": "title"}
-		]
-	},
-	
-	"gateio": {
-		"name": "Gate.io",
-		"category": "crypto",
-		"icon": "gateio",
-		"steps": [
-			{"type": "email", "question": "📧 Введите email:", "field": "email"},
-			{"type": "title", "question": "📝 Название для кнопки:", "field": "title"}
-		]
-	},
-	
-	"kucoin": {
-		"name": "KuCoin",
-		"category": "crypto",
-		"icon": "kucoin",
-		"steps": [
-			{"type": "email", "question": "📧 Введите email:", "field": "email"},
-			{"type": "title", "question": "📝 Название для кнопки:", "field": "title"}
-		]
-	},
-	
-	"huobi": {
-		"name": "Huobi",
-		"category": "crypto",
-		"icon": "huobi",
-		"steps": [
-			{"type": "email", "question": "📧 Введите email:", "field": "email"},
-			{"type": "title", "question": "📝 Название для кнопки:", "field": "title"}
-		]
-	},
-	
-	"metamask": {
-		"name": "Metamask",
-		"category": "crypto",
-		"icon": "metamask",
-		"steps": [
-			{"type": "text", "question": "🦊 Введите адрес кошелька:", "field": "wallet_address"},
-			{"type": "title", "question": "📝 Название для кнопки:", "field": "title"}
-		]
-	},
+	    "metamask": {
+	        "name": "Metamask",
+	        "category": "wallets",
+	        "icon": "metamask",
+	        "steps": [
+	            {"type": "text", "field": "wallet_address", "question": "🦊 <b>Адрес вашего Metamask</b>\n\n<blockquote>Это единый адрес для всех сетей стандарта EVM (Ethereum, BSC, Polygon, Arbitrum и т.д.).</blockquote>\n\n📝 <b>Пример:</b> <code>0x71C...</code>\n\n👇 <b>Вставьте адрес кошелька:</b>"},
+	            {"type": "text", "field": "network", "question": "🌐 <b>Укажите основную сеть</b>\n\n<blockquote>Напишите, в какой сети вы чаще всего ждете переводы на этот адрес.</blockquote>\n\n📝 <b>Примеры:</b> <code>Ethereum</code>, <code>BSC (BEP20)</code>, <code>Polygon</code>\n\n👇 <b>Введите название сети:</b>"},
+	            {"type": "title", "field": "title", "optional": True, "question": "🎴 <b>Название на странице:</b>"}
+	        ]
+	    },
 	
 	"trustwallet": {
-		"name": "Trust Wallet",
-		"category": "crypto",
-		"icon": "trustwallet",
-		"steps": [
-			{"type": "text", "question": "🔐 Введите адрес кошелька:", "field": "wallet_address"},
-			{"type": "title", "question": "📝 Название для кнопки:", "field": "title"}
-		]
-	},
+	        "name": "Trust Wallet",
+	        "category": "wallets",
+	        "icon": "trustwallet",
+	        "steps": [
+	            {
+	                "type": "text",
+	                "field": "wallet_address",
+	                "question": "🔐 <b>Ваш адрес в Trust Wallet</b>\n\n<blockquote>Зайдите в кошелёк, выберите нужную монету, нажмите «Получить» и скопируйте адрес.</blockquote>\n\n👇 <b>Вставьте скопированный адрес:</b>"
+	            },
+	            {
+	                "type": "text",
+	                "field": "network",
+	                "question": "🌐 <b>Сеть для перевода (Network)</b>\n\n<blockquote>В какой сети работает этот адрес? Это очень важно для успешного зачисления средств.</blockquote>\n\n📝 <b>Например:</b> <code>BEP20 (BSC)</code>, <code>TRC20</code>, <code>Solana</code>\n\n👇 <b>Введите название сети:</b>"
+	            },
+	            {
+	                "type": "title",
+	                "field": "title",
+	                "optional": True,
+	                "question": "🎴 <b>Название для вашей страницы</b>\n\n<blockquote>Как будет подписана эта карточка в профиле? Если пропустите, будет написано «Trust Wallet».</blockquote>\n\n👇 <b>Введите название или нажмите «Пропустить»:</b>"
+	            }
+	        ]
+	    },
 	
-	"coinbase": {
-		"name": "Coinbase",
-		"category": "crypto",
-		"icon": "coinbase",
-		"steps": [
-			{"type": "choice", "question": "📊 Что указать?",
-			 "options": [
-				 {"value": "email", "label": "Email", "next_step": 1},
-				 {"value": "wallet", "label": "Адрес кошелька", "next_step": 2}
-			 ]},
-			{"type": "email", "question": "Введите email:", "field": "email"},
-			{"type": "text", "question": "Введите адрес кошелька:", "field": "wallet_address"},
-			{"type": "title", "question": "📝 Название для кнопки:", "field": "title"}
-		]
-	},
-	
-	"kraken": {
-		"name": "Kraken",
-		"category": "crypto",
-		"icon": "kraken",
-		"steps": [
-			{"type": "email", "question": "📧 Введите email:", "field": "email"},
-			{"type": "title", "question": "📝 Название для кнопки:", "field": "title"}
-		]
-	},
-	
-	# ===== КРИПТОВАЛЮТЫ (кошельки) =====
 	"usdt": {
-		"name": "USDT",
-		"category": "crypto",
-		"icon": "usdt",
-		"steps": [
-			{"type": "text", "question": "💰 Введите адрес USDT (TRC20):", "field": "wallet_address"},
-			{"type": "title", "question": "📝 Название для кнопки:", "field": "title"}
-		]
-	},
+	        "name": "USDT",
+	        "category": "wallets",
+	        "icon": "usdt",
+	        "steps": [
+	            {
+	                "type": "text",
+	                "field": "wallet_address",
+	                "question": "💰 <b>Ваш адрес USDT</b>\n\n<blockquote>Внимательно проверьте каждый символ! Ошибка приведет к безвозвратной потере средств.</blockquote>\n\n📝 <b>Пример:</b> <code>TR7NHqjeKQxGChJ...</code>\n\n👇 <b>Вставьте адрес кошелька:</b>"
+	            },
+	            {
+	                "type": "text",
+	                "field": "network",
+	                "question": "🌐 <b>Сеть для USDT (Обязательно!)</b>\n\n<blockquote>Самые популярные: <b>TRC20</b>, <b>ERC20</b> или <b>BEP20</b>. Укажите именно ту, в которой работает ваш адрес.</blockquote>\n\n👇 <b>Введите название сети:</b>"
+	            },
+	            {
+	                "type": "title",
+	                "field": "title",
+	                "optional": True,
+	                "question": "🎴 <b>Название карточки</b>\n\n<blockquote>Например: «Мой USDT (TRC20)». По умолчанию будет просто «USDT».</blockquote>\n\n👇 <b>Введите текст или нажмите «Пропустить»:</b>"
+	            }
+	        ]
+	    },
 	
 	"btc": {
-		"name": "Bitcoin",
-		"category": "crypto",
-		"icon": "btc",
-		"steps": [
-			{"type": "text", "question": "₿ Введите Bitcoin адрес:", "field": "wallet_address"},
-			{"type": "title", "question": "📝 Название для кнопки:", "field": "title"}
-		]
-	},
+	        "name": "Bitcoin",
+	        "category": "wallets",
+	        "icon": "btc",
+	        "steps": [
+	            {
+	                "type": "text",
+	                "field": "wallet_address",
+	                "question": "₿ <b>Ваш Bitcoin адрес (BTC)</b>\n\n<blockquote><b>Как выглядит адрес:</b>\n• Начинается на <code>1...</code>, <code>3...</code> или <code>bc1...</code>\n• Длинная строка из букв и цифр.</blockquote>\n\n👇 <b>Вставьте адрес кошелька:</b>"
+	            },
+	            {
+	                "type": "text",
+	                "field": "network",
+	                "question": "🌐 <b>Тип сети / Формат</b>\n\n<blockquote>Если не знаете, что писать — нажмите <b>«Пропустить»</b>.</blockquote>\n\n📝 <b>Популярные сети:</b>\n• <code>Bitcoin (Mainnet)</code> — стандарт\n• <code>Lightning</code> — для быстрых микроплатежей\n• <code>SegWit</code> — современные адреса\n\n👇 <b>Введите сеть или пропустите:</b>",
+	                "optional": True
+	            },
+	            {"type": "title", "field": "title", "optional": True, "question": "🎴 <b>Название для карточки:</b>"}
+	        ]
+	    },
 	
-	"eth": {
-		"name": "Ethereum",
-		"category": "crypto",
-		"icon": "eth",
-		"steps": [
-			{"type": "text", "question": "Ξ Введите Ethereum адрес:", "field": "wallet_address"},
-			{"type": "title", "question": "📝 Название для кнопки:", "field": "title"}
-		]
-	},
+	    "usdt": {
+	        "name": "USDT",
+	        "category": "wallets",
+	        "icon": "usdt",
+	        "steps": [
+	            {
+	                "type": "text",
+	                "field": "wallet_address",
+	                "question": "💰 <b>Ваш адрес USDT</b>\n\n<blockquote><b>Как выглядит адрес:</b>\n• В сети TRC20 начинается на <code>T...</code>\n• В сети ERC20/BEP20 начинается на <code>0x...</code></blockquote>\n\n👇 <b>Вставьте адрес:</b>"
+	            },
+	            {
+	                "type": "text",
+	                "field": "network",
+	                "question": "🌐 <b>Укажите сеть (Обязательно)</b>\n\n<blockquote>Ошибка в сети приведет к потере денег!</blockquote>\n\n📝 <b>Самые популярные:</b>\n• <code>TRC20</code> — (Сеть TRON, дешево)\n• <code>ERC20</code> — (Сеть Ethereum, дорого)\n• <code>BEP20</code> — (Сеть BSC, дешево)\n\n👇 <b>Введите название сети:</b>"
+	            },
+	            {"type": "title", "field": "title", "optional": True, "question": "🎴 <b>Название для карточки:</b>"}
+	        ]
+	    },
 	
-	"ton": {
-		"name": "TON",
-		"category": "crypto",
-		"icon": "ton",
-		"steps": [
-			{"type": "text", "question": "💎 Введите TON адрес:", "field": "wallet_address"},
-			{"type": "title", "question": "📝 Название для кнопки:", "field": "title"}
-		]
-	},
+	    "eth": {
+	        "name": "Ethereum",
+	        "category": "wallets",
+	        "icon": "eth",
+	        "steps": [
+	            {
+	                "type": "text",
+	                "field": "wallet_address",
+	                "question": "Ξ <b>Ваш Ethereum адрес (ETH)</b>\n\n<blockquote><b>Как выглядит адрес:</b>\n• Всегда начинается на <code>0x...</code></blockquote>\n\n👇 <b>Вставьте адрес кошелька:</b>"
+	            },
+	            {
+	                "type": "text",
+	                "field": "network",
+	                "question": "🌐 <b>Укажите сеть</b>\n\n📝 <b>Популярные:</b>\n• <code>ERC20</code> — (Основная сеть)\n• <code>Arbitrum One</code> — (L2 сеть)\n• <code>Optimism</code> — (L2 сеть)\n\n👇 <b>Введите сеть или пропустите:</b>",
+	                "optional": True
+	            },
+	            {"type": "title", "field": "title", "optional": True, "question": "🎴 <b>Название для карточки:</b>"}
+	        ]
+	    },
 	
-	"sol": {
-		"name": "Solana",
-		"category": "crypto",
-		"icon": "sol",
-		"steps": [
-			{"type": "text", "question": "◎ Введите Solana адрес:", "field": "wallet_address"},
-			{"type": "title", "question": "📝 Название для кнопки:", "field": "title"}
-		]
-	},
+	    "ton": {
+	        "name": "TON",
+	        "category": "wallets",
+	        "icon": "ton",
+	        "steps": [
+	            {
+	                "type": "text",
+	                "field": "wallet_address",
+	                "question": "💎 <b>Ваш адрес TON</b>\n\n<blockquote><b>Как выглядит адрес:</b>\n• Начинается на <code>UQ...</code> или <code>EQ...</code></blockquote>\n\n👇 <b>Вставьте адрес из Wallet или Tonkeeper:</b>"
+	            },
+	            {
+	                "type": "text",
+	                "field": "network",
+	                "question": "🌐 <b>Укажите сеть</b>\n\n📝 <b>Обычно это:</b>\n• <code>TON Mainnet</code>\n\n👇 <b>Введите сеть или пропустите:</b>",
+	                "optional": True
+	            },
+	            {"type": "title", "field": "title", "optional": True, "question": "🎴 <b>Название для карточки:</b>"}
+	        ]
+	    },
+	
+	    "sol": {
+	        "name": "Solana",
+	        "category": "wallets",
+	        "icon": "sol",
+	        "steps": [
+	            {
+	                "type": "text",
+	                "field": "wallet_address",
+	                "question": "◎ <b>Ваш Solana адрес (SOL)</b>\n\n<blockquote><b>Как выглядит адрес:</b>\n• Набор случайных букв и цифр (обычно длиннее BTC).</blockquote>\n\n👇 <b>Вставьте адрес:</b>"
+	            },
+	            {
+	                "type": "text",
+	                "field": "network",
+	                "question": "🌐 <b>Укажите сеть</b>\n\n📝 <b>Обычно это:</b>\n• <code>Solana Mainnet</code>\n\n👇 <b>Введите сеть или пропустите:</b>",
+	                "optional": True
+	            },
+	            {"type": "title", "field": "title", "optional": True, "question": "🎴 <b>Название для карточки:</b>"}
+	        ]
+	    },
 	
 	"trx": {
-		"name": "TRON",
-		"category": "crypto",
-		"icon": "trx",
-		"steps": [
-			{"type": "text", "question": "🔷 Введите TRON адрес:", "field": "wallet_address"},
-			{"type": "title", "question": "📝 Название для кнопки:", "field": "title"}
-		]
-	},
+		        "name": "TRON",
+		        "category": "wallets",
+		        "icon": "trx",
+		        "steps": [
+		            {"type": "text", "field": "wallet_address", "question": "🔷 <b>Ваш TRON (TRX) адрес</b>\n\n<blockquote>Обычно начинается на букву «T».</blockquote>\n\n👇 <b>Вставьте адрес:</b>"},
+		            {"type": "text", "field": "network", "question": "🌐 <b>Укажите сеть</b>\n\n👇 <b>Напишите <code>TRC20</code> или нажмите «Пропустить»:</b>", "optional": True},
+		            {"type": "title", "field": "title", "optional": True, "question": "🎴 <b>Название для карточки:</b>"}
+		        ]
+		    },
+		
+		    "bnb": {
+		        "name": "BNB (BSC)",
+		        "category": "wallets",
+		        "icon": "bnb",
+		        "steps": [
+		            {"type": "text", "field": "wallet_address", "question": "🟡 <b>Ваш адрес BNB (Smart Chain)</b>\n\n<blockquote>Адрес сети BEP20, начинается на <code>0x...</code>.</blockquote>\n\n👇 <b>Вставьте адрес:</b>"},
+		            {"type": "text", "field": "network", "question": "🌐 <b>Сеть</b>\n\n👇 <b>Напишите <code>BSC (BEP20)</code> или нажмите «Пропустить»:</b>", "optional": True},
+		            {"type": "title", "field": "title", "optional": True, "question": "🎴 <b>Название для карточки:</b>"}
+		        ]
+		    },
+		
+		    "doge": {
+		        "name": "Dogecoin",
+		        "category": "wallets",
+		        "icon": "doge",
+		        "steps": [
+		            {"type": "text", "field": "wallet_address", "question": "🐕 <b>Ваш Dogecoin адрес</b>\n\n👇 <b>Вставьте адрес (обычно начинается на «D»):</b>"},
+		            {"type": "text", "field": "network", "question": "🌐 <b>Сеть</b>\n\n👇 <b>Напишите <code>Dogecoin</code> или нажмите «Пропустить»:</b>", "optional": True},
+		            {"type": "title", "field": "title", "optional": True, "question": "🎴 <b>Название для карточки:</b>"}
+		        ]
+		    },
+		
+		    "ltc": {
+		        "name": "Litecoin",
+		        "category": "wallets",
+		        "icon": "ltc",
+		        "steps": [
+		            {"type": "text", "field": "wallet_address", "question": "Ł <b>Ваш Litecoin адрес (LTC)</b>\n\n👇 <b>Вставьте адрес:</b>"},
+		            {"type": "text", "field": "network", "question": "🌐 <b>Сеть</b>\n\n👇 <b>Напишите <code>Litecoin</code> или нажмите «Пропустить»:</b>", "optional": True},
+		            {"type": "title", "field": "title", "optional": True, "question": "🎴 <b>Название для карточки:</b>"}
+		        ]
+		    },
+		
+		    "xrp": {
+		        "name": "Ripple",
+		        "category": "wallets",
+		        "icon": "xrp",
+		        "steps": [
+		            {"type": "text", "field": "wallet_address", "question": "💧 <b>Ваш XRP адрес</b>\n\n<blockquote>Если для получения нужен <b>Tag (Memo)</b>, допишите его через пробел или укажите в названии.</blockquote>\n\n👇 <b>Вставьте адрес:</b>"},
+		            {"type": "text", "field": "network", "question": "🌐 <b>Сеть</b>\n\n👇 <b>Напишите <code>Ripple</code> или нажмите «Пропустить»:</b>", "optional": True},
+		            {"type": "title", "field": "title", "optional": True, "question": "🎴 <b>Название для карточки:</b>"}
+		        ]
+		    },
+		
+		    "ada": {
+		        "name": "Cardano",
+		        "category": "wallets",
+		        "icon": "ada",
+		        "steps": [
+		            {"type": "text", "field": "wallet_address", "question": "🔷 <b>Ваш Cardano адрес (ADA)</b>\n\n👇 <b>Вставьте адрес:</b>"},
+		            {"type": "text", "field": "network", "question": "🌐 <b>Сеть</b>\n\n👇 <b>Напишите <code>Cardano</code> или нажмите «Пропустить»:</b>", "optional": True},
+		            {"type": "title", "field": "title", "optional": True, "question": "🎴 <b>Название для карточки:</b>"}
+		        ]
+		    },
+		
+		    "dot": {
+		        "name": "Polkadot",
+		        "category": "wallets",
+		        "icon": "dot",
+		        "steps": [
+		            {"type": "text", "field": "wallet_address", "question": "⏺️ <b>Ваш Polkadot адрес (DOT)</b>\n\n👇 <b>Вставьте адрес:</b>"},
+		            {"type": "text", "field": "network", "question": "🌐 <b>Сеть</b>\n\n👇 <b>Напишите <code>Polkadot</code> или нажмите «Пропустить»:</b>", "optional": True},
+		            {"type": "title", "field": "title", "optional": True, "question": "🎴 <b>Название для карточки:</b>"}
+		        ]
+		    },
+		
+		    "matic": {
+		        "name": "Polygon",
+		        "category": "wallets",
+		        "icon": "matic",
+		        "steps": [
+		            {"type": "text", "field": "wallet_address", "question": "💜 <b>Ваш MATIC адрес</b>\n\n<blockquote>Для сети Polygon (адрес формата <code>0x...</code>).</blockquote>\n\n👇 <b>Вставьте адрес:</b>"},
+		            {"type": "text", "field": "network", "question": "🌐 <b>Сеть</b>\n\n👇 <b>Напишите <code>Polygon (MATIC)</code> или нажмите «Пропустить»:</b>", "optional": True},
+		            {"type": "title", "field": "title", "optional": True, "question": "🎴 <b>Название для карточки:</b>"}
+		        ]
+		    },
 	
-	"bnb": {
-		"name": "BNB (BSC)",
-		"category": "crypto",
-		"icon": "bnb",
-		"steps": [
-			{"type": "text", "question": "🟡 Введите BSC адрес:", "field": "wallet_address"},
-			{"type": "title", "question": "📝 Название для кнопки:", "field": "title"}
-		]
-	},
-	
-	"doge": {
-		"name": "Dogecoin",
-		"category": "crypto",
-		"icon": "doge",
-		"steps": [
-			{"type": "text", "question": "🐕 Введите Dogecoin адрес:", "field": "wallet_address"},
-			{"type": "title", "question": "📝 Название для кнопки:", "field": "title"}
-		]
-	},
-	
-	"ltc": {
-		"name": "Litecoin",
-		"category": "crypto",
-		"icon": "ltc",
-		"steps": [
-			{"type": "text", "question": "Ł Введите Litecoin адрес:", "field": "wallet_address"},
-			{"type": "title", "question": "📝 Название для кнопки:", "field": "title"}
-		]
-	},
-	
-	"xrp": {
-		"name": "Ripple",
-		"category": "crypto",
-		"icon": "xrp",
-		"steps": [
-			{"type": "text", "question": "💧 Введите XRP адрес:", "field": "wallet_address"},
-			{"type": "title", "question": "📝 Название для кнопки:", "field": "title"}
-		]
-	},
-	
-	"ada": {
-		"name": "Cardano",
-		"category": "crypto",
-		"icon": "ada",
-		"steps": [
-			{"type": "text", "question": "🔷 Введите Cardano адрес:", "field": "wallet_address"},
-			{"type": "title", "question": "📝 Название для кнопки:", "field": "title"}
-		]
-	},
-	
-	"dot": {
-		"name": "Polkadot",
-		"category": "crypto",
-		"icon": "dot",
-		"steps": [
-			{"type": "text", "question": "⏺️ Введите Polkadot адрес:", "field": "wallet_address"},
-			{"type": "title", "question": "📝 Название для кнопки:", "field": "title"}
-		]
-	},
-	
-	"matic": {
-		"name": "Polygon",
-		"category": "crypto",
-		"icon": "matic",
-		"steps": [
-			{"type": "text", "question": "💜 Введите MATIC адрес:", "field": "wallet_address"},
-			{"type": "title", "question": "📝 Название для кнопки:", "field": "title"}
-		]
-	},
-	
+
 	# ===== ДОНАТЫ =====
 	"patreon": {
 		"name": "Patreon",
@@ -1667,7 +1615,7 @@ LINK_TYPES: Dict[str, Dict[str, Any]] = {
 }
 
 
-# Добавь если нужно еще из bank.py...
+
 
 # ===== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ =====
 def get_types_by_category(category: str) -> Dict[str, Dict[str, Any]]:
@@ -1686,3 +1634,5 @@ def get_step(link_type: str, step_index: int) -> Optional[Dict[str, Any]]:
 	if 0 <= step_index < len(steps):
 		return steps[step_index]
 	return None
+
+	

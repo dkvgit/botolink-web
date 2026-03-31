@@ -4,8 +4,8 @@
 'bybit', 'binance', 'okx', 'metamask', 'kucoin', 'gateio', 'text', 'ripple', 'ton', 'tron'
 ] or link.category in ['stocks', 'exchanges', 'crypto', 'banks'] or link.url == '#modal' %}
 
-<div id="modal_{{ link.id }}" class="modal-overlay">
-    <div class="modal-content" style="border-radius: 0px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);">
+    <div id="modal_{{ link.id }}" class="modal-overlay">
+        <div class="modal-content">
 
         <div class="modal-header" style="display: flex; align-items: center; gap: 12px; margin-bottom: 24px;">
             {%- set icon_name = link.icon or link.link_type -%}
@@ -225,3 +225,4 @@
     </div>
 </div>
 {% endfor %}
+

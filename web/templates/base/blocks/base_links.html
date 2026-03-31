@@ -1,100 +1,282 @@
-<!--D:\aRabota\TelegaBoom\030_botolinkpro\web\templates\base\blocks\base_links.html-->
+{# D:\aRabota\TelegaBoom\030_mylinkspace\web\templates\base\blocks\base_links.html #}
 
-<div class="links-container">
-    {# Подготавливаем список: объединяем биржи (stocks) и крипту в одну группу #}
-    {% set processed_links = [] %}
-    {% for l in links %}
-    {# Если это биржа (stocks) или крипта — пихаем в общую категорию crypto для отображения #}
-    {% if l.category == 'stocks' or l.category == 'exchanges' or l.category == 'crypto' or l.link_type == 'binance' %}
-    {% set _ = l.update({'temp_category': 'crypto'}) %}
-    {% else %}
-    {% set _ = l.update({'temp_category': l.category or 'other'}) %}
-    {% endif %}
-    {% set _ = processed_links.append(l) %}
-    {% endfor %}
+{# 1. ПОДГОТОВКА ДАННЫХ: Нормализация категорий (Без крипты) #}
+{%- set processed_links = [] -%}
+{%- for l in links -%}
+    {# Проверяем: если это НЕ крипта и НЕ биржи, то обрабатываем #}
+    {%- if not (l.category in ['stocks', 'exchanges', 'crypto'] or l.link_type in ['binance', 'bybit', 'kucoin', 'okx', 'metamask']) -%}
+        {%- set _ = l.update({'temp_category': l.category or 'other'}) -%}
+        {%- set _ = processed_links.append(l) -%}
+    {%- endif -%}
+{%- endfor -%}
 
-    {# Группируем по нашему временному полю temp_category #}
-    {% for category, group in processed_links|groupby('temp_category') %}
-    <div class="link-group" data-category="{{ category }}">
+{# 2. ОПРЕДЕЛЕНИЕ ПРИОРИТЕТНОГО ПОРЯДКА #}
+{# Порядок: Переводы -> Соцсети -> Донаты -> Крипта -> Мессенджеры -> Магазины -> Остальные #}
+{%- set priority_order = ['transfers', 'social', 'donate', 'crypto', 'messengers', 'shops', 'wallets'] -%}
+
+{# 3. ФОРМИРОВАНИЕ ОТСТОРТИРОВАННОГО СПИСКА КАТЕГОРИЙ #}
+{%- set all_cats = processed_links | map(attribute='temp_category') | unique | list -%}
+{%- set sorted_cats = [] -%}
+
+{# Сначала добавляем приоритетные в заданном порядке #}
+{%- for cat in priority_order -%}
+    {%- if cat in all_cats -%}
+        {%- set _ = sorted_cats.append(cat) -%}
+    {%- endif -%}
+{%- endfor -%}
+
+{# Затем добавляем остальные (не из приоритетного списка) по алфавиту #}
+{%- for cat in all_cats | sort -%}
+    {%- if cat not in priority_order and cat != 'other' -%}
+        {%- set _ = sorted_cats.append(cat) -%}
+    {%- endif -%}
+{%- endfor -%}
+
+{# Если есть категория 'other', добавляем её в самый конец #}
+{%- if 'other' in all_cats -%}
+    {%- set _ = sorted_cats.append('other') -%}
+{%- endif -%}
+
+{# ========================================== #}
+{# БЛОК НАВИГАЦИИ (STORIES) #}
+{# ========================================== #}
+<div class="stories-nav-wrapper" id="stories-wrapper">
+    <!-- ДОБАВЬ ЭТИ ДВЕ СТРОКИ -->
+    <span class="arrow-left">‹</span>
+    <span class="arrow-right">›</span>
+
+    <div class="stories-container" id="stories-scroll-container">
+        <!-- Твои иконки... -->
+        {% for category in sorted_cats %}
+        {# Пропускаем 'other' в навигации, если не хочешь показывать кнопку для прочего #}
         {% if category != 'other' %}
-        <h3 class="category-title cat-{{ category }}">
-                    <span>
-                    {% if category == 'crypto' %}Криптовалюта
-                    {% elif category == 'messengers' %}Мессенджеры
-                    {% elif category == 'social' %}Соцсети
-                    {% elif category == 'transfers' %}Переводы
-                    {% elif category == 'shops' %}Магазины
-                    {% elif category == 'donate' %}Донаты
-                    {% else %}{{ category | capitalize }}
-                    {% endif %}
-                    </span>
-        </h3>
+        <a href="#cat-{{ category }}" class="story-item {% if loop.first %}active-story{% endif %}" data-category="{{ category }}">
+            <div class="story-circle">
+                <img src="/static/icons/{{ category }}.png"
+                     alt="{{ category }}"
+                     onerror="this.src='/static/icons/link.png';">
+            </div>
+            <span class="story-label">
+                {%- if category == 'crypto' -%}Крипта
+                {%- elif category == 'messengers' -%}Связь
+                {%- elif category == 'social' -%}Соцсети
+                {%- elif category == 'transfers' -%}Переводы
+                {%- elif category == 'shops' -%}Магазины
+                {%- elif category == 'donate' -%}Донаты
+                {%- elif category == 'wallets' -%}Кошельки
+                {%- else -%}{{ category | title }}
+                {%- endif -%}
+            </span>
+        </a>
         {% endif %}
-
-        <div class="category-links">
-            {% for link in group %}
-            {# Проверяем, должна ли ссылка открывать модалку вместо перехода #}
-            {# Добавляем проверку на url == '#modal', чтобы точно работало для бирж #}
-            {% set is_modal_type = (category == 'crypto' or link.url == '#modal' or category == 'transfers' or
-            link.link_type in ['revolut', 'wise', 'sber', 'iban']) %}
-
-                <a href="{{ link.url if not is_modal_type else 'javascript:void(0)' }}"
-                   class="link-card track-link"
-                   data-link-id="{{ link.id }}"
-                   {% if is_modal_type %}
-                   onclick="openModal(event, '{{ link.id }}')"
-                   {% else %}
-                   target="_blank"
-                   {% endif %}>
-                    <div class="link-icon">
-                        {%- set icon_name = link.icon or link.link_type -%}
-                        {%- if icon_name -%}
-                        <img src="/static/icons/{{ icon_name }}.png" class="main-icon-img"
-                             onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';"
-                             alt="icon">
-                        <i class="{{ link.icon_class or 'fas fa-link' }}" style="display: none;"></i>
-                        {%- else -%}
-                        <i class="{{ link.icon_class or 'fas fa-link' }}"></i>
-                        {%- endif -%}
-                    </div>
-
-                    <div class="link-info" style="flex:1; display:flex; flex-direction:column;">
-                        <span class="link-title" style="font-weight:600;">
-                            {{ link.title }}
-                            {% if category == 'crypto' %}
-                                <small style="opacity: 0.6; font-size: 0.8em; margin-left: 5px;">
-                                    {% if link.category == 'stocks' or link.category == 'exchanges' or link.url == '#modal' or link.is_exchange %}
-                                        (Биржа)
-                                    {% else %}
-                                        (Кошелек)
-                                    {% endif %}
-                                </small>
-                            {% endif %}
-                        </span>
-                        {% if link.pay_details and link.pay_details.bank_name %}
-                        <div class="link-bank" style="font-size:0.7rem; color:#6c757d; margin-top:2px;">
-                            {{ link.pay_details.bank_name }}
-                            {% if link.pay_details and link.pay_details.country %}
-                            <span style="margin-left:6px;">
-                                {% if link.pay_details.country == 'russia' %}🇷🇺
-                                {% elif link.pay_details.country == 'ukraine' %}🇺🇦
-                                {% elif link.pay_details.country == 'kazakhstan' %}🇰🇿
-                                {% elif link.pay_details.country == 'usa' %}🇺🇸
-                                {% elif link.pay_details.country == 'uzbekistan' %}🇺🇿
-                                {% elif link.pay_details.country == 'armenia' %}🇦🇲
-                                {% elif link.pay_details.country == 'georgia' %}🇬🇪
-                                {% else %}🌍
-                                {% endif %}
-                            </span>
-                            {% endif %}
-                        </div>
-                        {% endif %}
-                    </div>
-
-                    <i class="fas fa-chevron-right arrow-icon"></i>
-                </a>
-            {% endfor %}
-        </div>
+        {% endfor %}
     </div>
+</div>
+
+{# ========================================== #}
+{# БЛОК ССЫЛОК (LINKS) #}
+{# ========================================== #}
+<div class="links-container">
+    {% for category in sorted_cats %}
+        {# Фильтруем ссылки для текущей категории #}
+        {%- set group = processed_links | selectattr('temp_category', 'equalto', category) | list -%}
+
+        {# Если в группе есть ссылки, рендерим блок #}
+        {% if group | length > 0 %}
+        <div class="link-group" id="cat-{{ category }}" style="scroll-margin-top: 110px;">
+
+            {# Заголовок категории #}
+            {%- if category != 'other' -%}
+            <h3 class="category-title cat-{{ category }}">
+                <span>
+                    {%- if category == 'crypto' -%}Криптовалюта
+                    {%- elif category == 'messengers' -%}Мессенджеры
+                    {%- elif category == 'social' -%}Соцсети
+                    {%- elif category == 'transfers' -%}Денежные переводы
+                    {%- elif category == 'shops' -%}Магазины
+                    {%- elif category == 'donate' -%}Донаты
+                    {%- elif category == 'wallets' -%}Кошельки
+                    {%- else -%}{{ category | capitalize }}
+                    {%- endif -%}
+                </span>
+            </h3>
+            {%- endif -%}
+
+            <div class="category-links">
+                {%- for link in group -%}
+                {# 1. ИНИЦИАЛИЗАЦИЯ #}
+                {%- set details = link.pay_details or {} -%}
+                {%- set l_type = (link.link_type or link.icon or '') | lower -%}
+                {%- set is_payment_cat = category in ['bank', 'crypto', 'payment', 'wallets', 'transfers'] -%}
+                {%- set final_url = "" -%}
+                {%- set is_email = (link.link_type == 'email') -%}
+
+                {# 2. СБОРКА ССЫЛКИ #}
+                {%- if link.url and link.url|string|lower|truncate(4, True, '') == 'http' -%}
+                    {%- set final_url = link.url -%}
+                {%- else -%}
+                    {%- set raw_val = details.phone or details.identifier or details.id or details.username or details.invite_link or details.channel_input or details.email or link.url -%}
+
+                    {%- if raw_val and raw_val|string|trim|length > 0 -%}
+                        {%- set val_str = raw_val|string|trim -%}
+                        {%- if val_str[0:4]|lower == 'http' or val_str[0:7]|lower == 'viber://' -%}
+                            {%- set final_url = val_str -%}
+                        {%- elif is_email -%}
+                            {%- set final_url = val_str|replace('mailto:', '') -%}
+                        {%- else -%}
+                            {# Чистим ник/номер от мусора (ДЛЯ GOOGLE CHAT НЕ ЧИСТИМ @) #}
+                            {%- set nick = val_str|replace('@', '')|replace(' ', '')|replace('+', '')|replace('-', '')|trim -%}
+
+                            {%- if nick|length > 0 or '@' in val_str -%}
+                                {# МЕССЕНДЖЕРЫ #}
+                                {%- if 'zalo' in l_type -%}{%- set final_url = "https://zalo.me/" ~ nick -%}
+                                {%- elif 'telegram' in l_type -%}{%- set final_url = "https://t.me/" ~ nick -%}
+                                {%- elif 'whatsapp' in l_type -%}{%- set final_url = "https://wa.me/" ~ nick -%}
+                                {%- elif 'signal' in l_type -%}{%- set final_url = "https://signal.me/#u/" ~ nick -%}
+
+                                {# ФИКС GOOGLE CHAT: если есть собачка - это DM, если нет - это ID/Space #}
+                                {%- elif 'googlechat' in l_type -%}
+                                    {%- if '@' in val_str -%}
+                                        {%- set final_url = "https://chat.google.com/dm/" ~ val_str -%}
+                                    {%- else -%}
+                                        {%- set final_url = "https://chat.google.com/dm/" ~ nick -%}
+                                    {%- endif -%}
+
+                                {%- elif 'viber' in l_type -%}{%- set final_url = "viber://chat?number=" ~ nick -%}
+                                {%- elif 'max' in l_type -%}{%- set final_url = "https://t.me/max?start=" ~ nick -%}
+                                {# СОЦСЕТИ #}
+                                {%- elif 'instagram' in l_type -%}{%- set final_url = "https://instagram.com/" ~ nick -%}
+                                {%- elif 'tiktok' in l_type -%}{%- set final_url = "https://tiktok.com/@" ~ nick -%}
+                                {%- elif 'threads' in l_type -%}{%- set final_url = "https://threads.net/@" ~ nick -%}
+                                {%- elif 'twitter' in l_type or 'x' == l_type -%}{%- set final_url = "https://x.com/" ~ nick -%}
+                                {%- elif 'facebook' in l_type -%}{%- set final_url = "https://facebook.com/" ~ nick -%}
+                                {%- elif 'vk' in l_type -%}{%- set final_url = "https://vk.com/" ~ nick -%}
+                                {%- elif 'ok' in l_type -%}{%- set final_url = "https://ok.ru/profile/" ~ nick -%}
+                                {%- elif 'youtube' in l_type -%}{%- set final_url = "https://youtube.com/" ~ nick -%}
+                                {# ДОНАТЫ #}
+                                {%- elif 'kofi' in l_type -%}{%- set final_url = "https://ko-fi.com/" ~ nick -%}
+                                {%- elif 'patreon' in l_type -%}{%- set final_url = "https://www.patreon.com/" ~ nick -%}
+                                {%- elif 'donationalerts' in l_type -%}{%- set final_url = "https://www.donationalerts.com/r/" ~ nick -%}
+                                {%- elif 'boosty' in l_type -%}{%- set final_url = "https://boosty.to/" ~ nick -%}
+                                {%- elif 'buymeacoffee' in l_type -%}{%- set final_url = "https://www.buymeacoffee.com/" ~ nick -%}
+                                {# МАГАЗИНЫ #}
+                                {%- elif 'ozon' in l_type -%}{%- set final_url = "https://www.ozon.ru/seller/" ~ nick|replace('#', '') -%}
+                                {%- elif 'wildberries' in l_type -%}{%- set final_url = "https://www.wildberries.ru/seller/" ~ nick|replace('#', '') -%}
+                                {%- elif 'avito' in l_type -%}{%- set final_url = "https://www.avito.ru/brands/" ~ nick|replace('#', '') -%}
+                                {%- elif 'yandex_market' in l_type -%}{%- set final_url = "https://market.yandex.ru/business/" ~ nick|replace('#', '') -%}
+                                {%- elif 'aliexpress' in l_type -%}{%- set final_url = "https://aliexpress.ru/store/" ~ nick|replace('#', '') -%}
+                                {%- elif 'kazanexpress' in l_type -%}{%- set final_url = "https://kazanexpress.ru/" ~ nick|replace('#', '') -%}
+                                {%- elif 'amazon' in l_type -%}{%- set final_url = "https://www.amazon.com/shops/" ~ nick|replace('#', '') -%}
+                                {%- elif 'ebay' in l_type -%}{%- set final_url = "https://www.ebay.com/usr/" ~ nick|replace('#', '') -%}
+                                {%- elif 'etsy' in l_type -%}{%- set final_url = "https://www.etsy.com/shop/" ~ nick|replace('#', '') -%}
+                                {%- elif 'shopify' in l_type -%}{%- set final_url = "https://" ~ nick|replace('#', '') ~ ".myshopify.com" -%}
+                                {%- endif -%}
+                                                {%- endif -%}
+                                            {%- endif -%}
+                                        {%- endif -%}
+                                    {%- endif -%}
+
+                                    {# 3. ПРОВЕРКА НА МОДАЛКУ #}
+                                    {%- set simple_keys = ['type', 'payment_type', 'link', 'url', 'icon', 'choice', 'username', 'email', 'phone', 'id', 'identifier', 'phone_clean', 'id_clean'] -%}
+                                    {%- set has_extra_data = false -%}
+                                    {%- if details is mapping -%}
+                                        {%- for k, v in details.items() -%}
+                                            {%- if k not in simple_keys and v and v|string|length > 0 -%}
+                                                {%- set has_extra_data = true -%}
+                                            {%- endif -%}
+                                        {%- endfor -%}
+                                    {%- endif -%}
+
+                    {%- set final_url_str = final_url|string -%}
+                        {# Упрощенная проверка: если есть http/viber, то ссылка считается валидной #}
+                        {%- set is_valid_link = final_url and (final_url_str[0:4]|lower == 'http' or final_url_str[0:5]|lower == 'viber') -%}
+
+                        {# 4. ЛОГИКА ПРЯМОГО ПЕРЕХОДА #}
+                        {# Для магазинов, соцсетей и мессенджеров ВСЕГДА прямой переход, если есть ссылка #}
+                        {%- if category in ['social', 'donate', 'messengers', 'shops'] and not is_email -%}
+                            {%- set is_direct_link = is_valid_link -%}
+                        {%- else -%}
+                            {# Для остальных (банки и т.д.) только если нет доп. данных #}
+                            {%- set is_direct_link = is_valid_link and not has_extra_data and not is_payment_cat -%}
+                        {%- endif -%}
+
+                {# 5. РЕНДЕР #}
+                <a
+                    {% if is_email %}
+                        href="javascript:void(0)"
+                        onclick="copyText('{{ final_url }}', this); event.preventDefault();"
+                    {% elif is_direct_link %}
+                        href="{{ final_url }}"
+                        target="_blank"
+                    {% else %}
+                        href="javascript:void(0)"
+                        onclick="openModal('modal_{{ link.id }}', event)"
+                    {% endif %}
+                    class="link-card track-link {{ 'copy-trigger' if is_email }}"
+                    data-link-id="{{ link.id }}">
+
+                    <div class="link-icon">
+                        {%- set icon_val = (details.icon if (details is mapping and details.icon) else (link.icon or 'link')) | string | trim -%}
+                        {%- set clean_icon = icon_val.split('/')[-1].replace('.png', '') -%}
+                        <img src="/static/icons/{{ clean_icon }}.png" class="main-icon-img" onerror="this.src='/static/icons/link.png';">
+                    </div>
+
+                    <div class="link-info">
+                        <span class="link-title">{{ link.title }}</span>
+                        <div class="link-bank">
+                            {%- if is_email -%}
+                                {{ final_url }}
+                            {%- elif is_direct_link -%}
+                                Открыть ссылку
+                            {%- else -%}
+                                Показать подробнее
+                            {%- endif -%}
+                        </div>
+                    </div>
+
+                    <i class="fas {{ 'fa-copy' if is_email else ('fa-chevron-right' if is_direct_link else ('fa-info-circle')) }} arrow-icon"></i>
+                </a>
+                {%- endfor -%}
+            </div>
+        </div>
+        {% endif %}
     {% endfor %}
+</div>
+
+{# ========================================== #}
+{# БЛОК МОДАЛОК (HIDDEN) #}
+{# ========================================== #}
+<div id="modals-container">
+    {%- for l in links -%}
+        {# Повторяем логику определения типа ссылки, чтобы решить, нужна ли модалка #}
+        {%- set simple_keys_l = ['type', 'payment_type', 'link', 'identifier', 'phone', 'email', 'account'] -%}
+        {%- set imp_fields_l = [] -%}
+        {%- if l.pay_details -%}
+            {%- for k, v in l.pay_details.items() -%}
+                {%- if k not in simple_keys_l and v and v|string|length > 0 -%}{%- set _ = imp_fields_l.append(k) -%}{%- endif -%}
+            {%- endfor -%}
+        {%- endif -%}
+
+        {# Определяем категорию ссылки для проверки #}
+        {%- set link_cat = 'crypto' if (l.category in ['stocks', 'exchanges', 'crypto'] or l.link_type in ['binance', 'bybit', 'kucoin', 'okx', 'metamask']) else (l.category or 'other') -%}
+
+        {%- set has_real_url_l = l.url and l.url.startswith('http') and l.url != '#' -%}
+        {%- set is_modal_type_l = (link_cat == 'crypto') or (not has_real_url_l) or (imp_fields_l|length > 0) -%}
+
+        {%- if is_modal_type_l -%}
+            {%- with link = l -%}
+                {# Пытаемся включить соответствующий шаблон модалки в зависимости от типа #}
+                {%- if link.link_type == 'bank' or link.category == 'transfers' -%}
+                    {%- include "base/blocks/base_modal_bank.html" ignore missing -%}
+                {%- elif link.link_type == 'crypto' or link.category in ['crypto', 'stocks', 'exchanges'] -%}
+                    {%- include "base/blocks/base_modal_crypto.html" ignore missing -%}
+                {%- elif link.link_type == 'usa' -%}
+                    {%- include "base/blocks/base_modal_usa.html" ignore missing -%}
+                {%- else -%}
+                    {# Универсальный фоллбэк на bank, если тип не определен явно, но модалка нужна #}
+                    {%- include "base/blocks/base_modal_bank.html" ignore missing -%}
+                {%- endif -%}
+            {%- endwith -%}
+        {%- endif -%}
+    {%- endfor -%}
 </div>

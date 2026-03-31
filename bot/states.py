@@ -173,6 +173,9 @@ WAIT_CONSTRUCTOR_CHOICE = 1202
 WAIT_CONSTRUCTOR_TEXT = 1203
 SKIP_STEP = 1002
 
+RENDER_FLOW_STEP = 282
+CONFIRM_SAVE_FLOW = 503
+
 # ============================================
 # ИТОГОВЫЙ СПИСОК ДЛЯ ИМПОРТА
 # ============================================
@@ -266,5 +269,11 @@ __all__ = [
 	'WAIT_CONSTRUCTOR_CHOICE',
 	'WAIT_CONSTRUCTOR_TEXT',
 	'SKIP_STEP',
+	
+	
+	'RENDER_FLOW_STEP',
+	'CONFIRM_SAVE_FLOW',
+	
+	
 
 ]

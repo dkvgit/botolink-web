@@ -95,21 +95,19 @@ body {
     background: linear-gradient(90deg, transparent, rgba(44, 62, 80, 0.15), transparent) !important;
 }
 
-/* Карточки ссылок */
+/* --- КАРТОЧКИ ССЫЛОК (01CLASSIC) --- */
 .link-card {
     background: #f8f9fa;
     border-radius: 20px;
     padding: 16px 22px;
-    text-decoration: none;
-    display: flex;
-    align-items: center;
+    /* Убираем лишние display/align-items, так как они в base.css */
     gap: 15px;
-    transition: all 0.3s ease;
     border: 1px solid #aa3d3d4a;
     margin-bottom: 12px;
 }
 
 .link-card:hover {
+    /* Оставляем трансформацию — теперь она не мешает модалке! */
     transform: translateY(-3px);
     background: white;
     border-color: #4ca1af;
@@ -119,10 +117,7 @@ body {
 .link-icon {
     width: 40px;
     height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
+    /* Центрирование берем из базы, тут только размеры под шаблон */
 }
 
 .link-icon img.main-icon-img {
@@ -181,3 +176,5 @@ body {
     font-size: 11px;
     display: block;
 }
+
+

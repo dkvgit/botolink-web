@@ -1,12 +1,15 @@
-<!-- D:\aRabota\TelegaBoom\030_mylinkspace\web\templates\base\base.html -->
-
+<!-- D:\aRabota\TelegaBoom\030_botolinkpro\web\templates\base\base.html -->
 <!DOCTYPE html>
 <html lang="ru">
-{# Подключаем отдельный файл с head #}
-{% include 'base/blocks/base_head.html' %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>{% block title %}BotoLinkPro{% endblock %}</title>
 
+    {# Подключаем отдельный файл с head #}
+    {% include 'base/blocks/base_head.html' %}
+</head>
 
-base_modal_crypto.
 <body>
 
 <div class="gradient-bg">
@@ -27,6 +30,20 @@ base_modal_crypto.
 <script src="/templates/base/base.js"></script>
 {% block extra_js %}{% endblock %}
 
+<!-- 🔧 ФИКС ПОЗИЦИОНИРОВАНИЯ МОДАЛОК -->
+<!-- Переносит все модалки в BODY, чтобы position: fixed работал корректно -->
+<script>
+(function() {
+    const allModals = document.querySelectorAll('.modal-overlay');
+    if (allModals.length > 0) {
+        console.log('🔧 Модалок найдено:', allModals.length);
+        allModals.forEach((modal, index) => {
+            document.body.appendChild(modal);
+        });
+        console.log('✅ Все модалки перенесены в BODY');
+    }
+})();
+</script>
 
 </body>
 </html>

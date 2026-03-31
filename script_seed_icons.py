@@ -36,12 +36,12 @@ ICONS = [
     {"name": "Telegram Chat", "icon_code": "telegram_chat", "category": "messenger", "keywords": ["tg", "chat"], "font_awesome_class": "fab fa-telegram"},
     {"name": "Viber", "icon_code": "viber", "category": "messenger", "keywords": ["viber"], "font_awesome_class": "fab fa-viber"},
     {"name": "Signal", "icon_code": "signal", "category": "messenger", "keywords": ["signal"], "font_awesome_class": "fas fa-comment"},
-    {"name": "WeChat", "icon_code": "wechat", "category": "messenger", "keywords": ["wechat"], "font_awesome_class": "fab fa-weixin"},
+    
     {"name": "Messenger", "icon_code": "messenger", "category": "messenger", "keywords": ["fb", "messenger"], "font_awesome_class": "fab fa-facebook-messenger"},
     {"name": "Skype", "icon_code": "skype", "category": "messenger", "keywords": ["skype"], "font_awesome_class": "fab fa-skype"},
     {"name": "Zalo", "icon_code": "zalo", "category": "messenger", "keywords": ["zalo"], "font_awesome_class": "fas fa-comment-dots"},
     {"name": "FaceTime", "icon_code": "facetime", "category": "messenger", "keywords": ["facetime"], "font_awesome_class": "fab fa-apple"},
-    {"name": "Google Chat", "icon_code": "googlechat", "category": "messenger", "keywords": ["google chat"], "font_awesome_class": "fab fa-google"},
+    
 
     # ========== ПЛАТЕЖИ И ДОНАТЫ ==========
     {"name": "DonationAlerts", "icon_code": "donationalerts", "category": "payment", "keywords": ["donation", "donat", "alert"], "font_awesome_class": "fas fa-heart"},

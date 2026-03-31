@@ -1,10 +1,10 @@
+<!-- D:\aRabota\TelegaBoom\030_botolinkpro\web\templates\07cyberpunk\07cyberpunk_page.html -->
 <!DOCTYPE html>
 <html lang="ru">
 
 {% with template_path = '07cyberpunk/07cyberpunk_style.css' %}
     {% include 'base/blocks/base_head.html' %}
 {% endwith %}
-
 
 <body>
 <div class="container">
@@ -27,6 +27,21 @@
 
 <div id="toast" class="toast hidden"></div>
 <script src="/templates/base/base.js"></script>
+
+<!-- 🔧 ФИКС ПОЗИЦИОНИРОВАНИЯ МОДАЛОК -->
+<!-- Переносит все модалки в BODY, чтобы position: fixed работал корректно -->
+<script>
+(function() {
+    const allModals = document.querySelectorAll('.modal-overlay');
+    if (allModals.length > 0) {
+        console.log('🔧 Модалок найдено:', allModals.length);
+        allModals.forEach((modal, index) => {
+            document.body.appendChild(modal);
+        });
+        console.log('✅ Все модалки перенесены в BODY');
+    }
+})();
+</script>
 
 </body>
 </html>

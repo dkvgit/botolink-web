@@ -1,5 +1,19 @@
 /* D:\aRabota\TelegaBoom\030_mylinkspace\web\templates\base\base.css */
 
+:root {
+    --primary: #6f6db5;
+    --success: #10b981;
+    --error: #ef4444;
+    --bg: #f8fafc;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --radius: 16px;
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+
+    /* Добавь эту строку здесь, чтобы редактор не дебильничал */
+    --scrollbar-width: 0px;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -9,465 +23,563 @@
 
 body {
     font-family: 'Poppins', sans-serif;
-    line-height: 1.6;
+    background-color: var(--bg);
+    color: var(--text-main);
+    line-height: 1.5;
+}
+
+/* Добавляем это в самое начало CSS для html */
+html {
+    /* Резервирует место под скроллбар всегда, чтобы контент не прыгал */
+    scrollbar-gutter: stable;
+}
+
+body.modal-open {
+    overflow: hidden !important;
+    /* Убираем все паддинги, которые мы пытались считать через JS */
+    padding-right: 0 !important;
 }
 
 .container {
-    max-width: 680px;
+    max-width: 1000px;
     margin: 0 auto;
-    padding: 40px 20px;
+    padding: 20px;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
 }
 
-.modal-content .link-title {
-    color: #1e293b !important;
+/* --- ПРОФИЛЬ --- */
+.profile {
+    text-align: center;
+    margin-bottom: 40px;
+    padding-top: 20px;
 }
 
+.avatar-img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid white;
+    box-shadow: var(--shadow);
+}
 
-/* Общие стили для категорий (которые мы делали) */
+.username {
+    margin-top: 15px;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+/* --- СЕТКА КАТЕГОРИЙ --- */
+.links-container {
+    display: flex;
+    flex-direction: column;
+    gap: 30px; /* Расстояние между ГРУППАМИ (Мессенджеры, Крипта и т.д.) */
+}
+
 .link-group {
-    margin-top: 30px;
+    width: 100%;
 }
 
 .category-title {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     margin-bottom: 15px;
     font-size: 13px;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 1.5px;
-    color: #6f6db5;
+    letter-spacing: 1.2px;
+    color: var(--primary);
 }
 
 .category-title::after {
     content: "";
     flex: 1;
     height: 1px;
-    background: linear-gradient(to right, rgba(0, 0, 0, 0.1), transparent);
+    background: linear-gradient(to right, #e2e8f0, transparent);
 }
 
-.category-title::before {
-    font-family: "Font Awesome 6 Free";
-    font-weight: 900;
-    font-size: 14px;
+/* --- СЕТКА КАРТОЧЕК ВНУТРИ КАТЕГОРИИ --- */
+.category-links {
+    display: grid;
+    grid-template-columns: 1fr; /* По дефолту 1 колонка (мобилки) */
+    gap: 12px;
 }
 
-/* Иконки категорий */
-.cat-messengers::before {
-    content: "\f086";
+/* Адаптив для планшетов и ПК */
+@media (min-width: 640px) {
+    .category-links {
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 16px;
+    }
 }
 
-.cat-crypto::before {
-    content: "\f51e";
-}
-
-.cat-social::before {
-    content: "\f0c0";
-}
-
-.cat-transfers::before {
-    content: "\f09d";
-}
-
-.cat-shops::before {
-    content: "\f291";
-}
-
-.cat-donate::before {
-    content: "\f004";
-}
-
-/* Базовый футер */
-.footer {
-    margin-top: auto;
-    padding-top: 40px;
-    text-align: center;
-    font-size: 14px;
-}
-
-
-/* Базовые стили для модалок */
-.modal-overlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.8);
-    z-index: 99999;
-    align-items: center;
-    justify-content: center;
-}
-
-.modal-overlay.active {
-    display: flex !important; /* Переопределяем inline display:none */
-}
-
-.modal-content {
-    background: #fff;
-    padding: 20px;
-    border-radius: 12px;
-    width: 90%;
-    max-width: 350px;
-    position: relative;
-    color: #000;
-    max-height: 80vh;
-    overflow-y: auto;
-}
-
-/* Стили для закрытия */
-.close {
-    cursor: pointer;
-    font-size: 28px;
-    color: #999;
-}
-
-.close:hover {
-    color: #000;
-}
-
-
-/* D:\aRabota\TelegaBoom\030_botolinkpro\web\templates\base\base.css */
-
-.modal-overlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.8);
-    z-index: 99999;
-    align-items: center;
-    justify-content: center;
-}
-
-.modal-content {
-    background: #fff;
-    padding: 20px;
-    border-radius: 12px;
-    width: 90%;
-    max-width: 350px;
-}
-
-.modal-content h3 {
-    margin: 0 0 15px 0;
-    font-size: 18px;
-}
-
-.modal-content p {
-    margin: 8px 0;
-    font-size: 14px;
-}
-
-.modal-content strong {
-    color: #6c757d;
-    font-weight: 600;
-}
-
-.copy-btn {
-    width: 100%;
-    background: #0070ba;
-    color: white;
-    border: none;
-    padding: 12px;
-    border-radius: 8px;
-    cursor: pointer;
-    margin: 5px 0;
-    font-size: 14px;
-}
-
-.close-btn {
-    width: 100%;
-    background: #eee;
-    color: #333;
-    border: none;
-    padding: 10px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 14px;
-}
-
-
-/* ===== СТИЛИ ДЛЯ МОДАЛОК ===== */
-/* ========== МОДАЛЬНЫЕ ОКНА ========== */
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(5px);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-}
-
-.modal-overlay.active {
+/* --- КАРТОЧКА ССЫЛКИ (Базовая структура) --- */
+.link-card {
     display: flex;
-    animation: fadeIn 0.3s;
-}
-
-.modal-content {
+    align-items: center;
+    padding: 14px 18px;
     background: white;
-    border-radius: 30px;
-    padding: 25px;
-    max-width: 350px;
-    width: 90%;
-    max-height: 80vh;
-    overflow-y: auto;
-    margin: auto;
-    animation: slideUp 0.4s;
-    color: #333;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-}
-
-/* Табы валют */
-.currency-tabs {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 20px;
-    background: #f4fffe;
-    padding: 5px;
-    border-radius: 40px;
-}
-
-.currency-tab {
-    flex: 1;
-    padding: 10px;
-    border: none;
-    border-radius: 30px;
-    background: transparent;
-    cursor: pointer;
-    font-weight: 600;
-    transition: all 0.3s;
-}
-
-.currency-tab.active {
-    background: #F0B90B;
-    color: black;
-}
-
-
-/* Вставь это сразу после стилей .currency-tab.active */
-
-/* Скрываем контент вкладок по умолчанию */
-.currency-tab-content {
-    display: none !important;
-}
-
-/* Показываем контент, если у него есть класс active */
-.currency-tab-content.active {
-    display: block !important;
-}
-
-/* --- Твои существующие стили пойдут дальше --- */
-
-
-/* Информационный блок */
-.info-block {
-    background: #f8fafc;
-    border-radius: 20px;
-    padding: 20px;
-    margin: 20px 0;
-    border: 1px solid #eef2f6;
-}
-
-.info-currency {
-    color: #1a1a2e;
-    font-weight: 600;
-    font-size: 1rem;
-    margin-bottom: 12px;
-}
-
-.info-address {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: white;
-    padding: 12px 15px;
-    border-radius: 12px;
-    border: 1px solid #e0e4e8;
-    margin-bottom: 12px;
-}
-
-.address-text {
-    font-family: 'Monaco', 'Menlo', monospace;
-    font-size: 0.9rem;
-    color: #2d3748;
-    word-break: break-all;
-    flex: 1;
-    margin-right: 10px;
-}
-
-/* Кнопка копирования */
-.copy-btn-press {
-    background: none;
-    border: none;
-    cursor: pointer;
-    transition: transform 0.1s ease;
-}
-
-.copy-btn-press:active {
-    transform: scale(0.85);
-}
-
-/* D:\aRabota\TelegaBoom\030_botolinkpro\web\templates\base\base.css */
-
-.toast {
-    position: fixed;
-    bottom: 30px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(0, 0, 0, 0.85);
-    color: white;
-    padding: 12px 24px;
-    border-radius: 50px;
-    font-size: 14px;
-    z-index: 10000;
-    transition: all 0.3s ease;
-    max-width: 90vw;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-}
-
-#toast, .toast {
-    z-index: 999999 !important; /* Ставим максимально возможное число */
-}
-
-.toast.hidden {
-    opacity: 0;
-    transform: translateX(-50%) translateY(20px);
-    pointer-events: none;
-}
-
-.toast.hidden {
-    opacity: 0;
-    pointer-events: none;
-}
-
-.toast.success {
-    background: #10b981;
-}
-
-.toast.error {
-    background: #ef4444;
-}
-
-
-/* Эффект при наведении на кнопку копирования в модалках */
-.copy-btn-press {
+    border-radius: var(--radius, 16px);
+    color: inherit;
     transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 6px;
-}
-
-.copy-btn-press:hover {
-    background-color: #f0f4ff !important; /* Светло-голубой фон */
-    transform: scale(1.1); /* Легкое увеличение */
-}
-
-.copy-btn-press:hover svg path {
-    fill: #2557d6; /* Цвет иконки становится насыщеннее */
-}
-
-.copy-btn-press:active {
-    transform: scale(0.95); /* Эффект нажатия */
-}
-
-
-/* Общие стили для кнопок в модалке */
-.modal-content button {
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Кнопка копирования (иконка) */
-.copy-btn-press:hover {
-    background-color: #f0f4ff !important;
-    transform: translateY(-1px);
-}
-
-.copy-btn-press:active {
-    transform: scale(0.92);
-}
-
-/* Кнопки Сохранить и Поделиться */
-.qr-action-btn {
-    background: #ffffff !important;
-    border: 1px solid #e2e8f0 !important;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-}
-
-.qr-action-btn:hover {
-    background: #f8fafc !important;
-    border-color: #cbd5e1 !important;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-}
-
-/* Главная кнопка Закрыть внизу */
-.close-btn-main {
-    background: #1e293b !important; /* Глубокий темный цвет */
-    color: #ffffff !important;
-    border: none;
-    letter-spacing: 0.5px;
-}
-
-.close-btn-main:hover {
-    background: #0f172a !important;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
-    transform: translateY(-2px);
-}
-
-.close-btn-main:active {
-    transform: translateY(0);
-}
-
-/* Крестик в углу */
-.close-modal:hover {
-    color: #ef4444 !important;
-    transform: rotate(90deg);
-}
-
-
-/* D:\aRabota\TelegaBoom\030_botolinkpro\web\static\css\style.css */
-
-.qr-wrapper {
+    border: 1px solid #f1f5f9;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     position: relative;
-    display: inline-block;
-    background: white;
-    padding: 10px;
-    border-radius: 16px;
+    cursor: pointer;
+    text-decoration: none;
 }
 
-.qr-logo-overlay {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 35px; /* Размер иконки внутри QR */
-    height: 35px;
-    background: white;
-    padding: 3px;
-    border-radius: 6px;
+/* Безопасный hover: теперь модалка снаружи и transform ей не мешает */
+.link-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    border-color: var(--primary, #3b82f6);
+}
+
+.link-item {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    min-width: 0;
+}
+
+.link-icon {
+    width: 45px;
+    height: 45px;
+    margin-right: 15px;
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
 }
 
-.qr-logo-overlay img {
+.main-icon-img {
     width: 100%;
     height: 100%;
     object-fit: contain;
+}
+
+/* Твои текущие стили остаются */
+.link-info {
+    flex: 1;
+    min-width: 0;
+    /* Добавляем возможность выделения текста */
+    user-select: text !important;
+    -webkit-user-select: text !important;
+}
+
+/* Специально для блока с почтой/текстом ссылки */
+.link-bank {
+    user-select: text !important;
+    -webkit-user-select: text !important;
+    /* Чтобы курсор менялся на "текстовый" при наведении на саму почту */
+    cursor: text;
+}
+
+.link-card.copy-trigger {
+    -webkit-user-drag: none; /* Запрещаем "тащить" ссылку */
+    user-select: none;       /* Запрещаем выделять иконки и лишнее */
+}
+
+.link-info, .link-bank {
+    user-select: text !important;         /* Разрешаем выделять текст */
+    -webkit-user-select: text !important;
+    cursor: text;                         /* Меняем курсор на "палочку" I */
+}
+
+
+.link-title {
+    display: block;
+    font-weight: 600;
+    font-size: 1.05rem;
+    color: #1e293b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.2;
+}
+
+.link-bank {
+    font-size: 0.8rem;
+    color: var(--text-muted, #64748b);
+    margin-top: 2px;
+}
+
+/* Стрелка-кнопка */
+.link-arrow-btn {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8;
+    text-decoration: none;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    margin-left: 8px;
+    flex-shrink: 0;
+}
+
+.link-arrow-btn:hover {
+    background: #f8fafc;
+    color: var(--primary, #3b82f6);
+    transform: scale(1.1);
+}
+
+/* ====================== МОДАЛЬНОЕ ОКНО (ЖЕЛЕЗНЫЙ ПРИОРИТЕТ) ====================== */
+
+.modal-overlay {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 999999 !important;
+    background: rgba(0, 0, 0, 0.75) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    display: none !important;
+    align-items: center !important;
+    justify-content: center !important;
+    overflow: auto !important;
+}
+
+.modal-overlay.active {
+    display: flex !important;
+}
+
+/* КОНТЕНТ (БЕЛОЕ ОКНО) */
+.modal-content {
+    background: #ffffff !important;
+    width: 92% !important;
+    max-width: 420px !important;
+    padding: 28px !important;
+    border-radius: 32px !important; /* Те самые красивые углы */
+    position: relative !important;
+    margin: auto !important;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4) !important;
+
+    /* Анимация */
+    opacity: 0;
+    transform: scale(0.9) translateY(20px);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.modal-overlay.active .modal-content {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+}
+
+/* КНОПКА ЗАКРЫТЬ (НИЖНЯЯ) */
+.close-btn-main {
+    background: #1e293b;
+    color: white;
+    border: none;
+    transition: background 0.2s;
+    border-radius: 16px;
+    padding: 16px;
+    width: 100%;
+    font-weight: 700;
+}
+
+.close-btn-main:hover {
+    background: #0f172a;
+}
+
+/* КНОПКИ QR (СОХРАНИТЬ/ПОДЕЛИТЬ) */
+.qr-action-btn {
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    transition: all 0.2s;
+}
+
+.qr-action-btn:hover {
+    background: #e2e8f0;
+    transform: translateY(-1px);
+}
+
+
+.auto-qr canvas, .auto-qr img {
+    image-rendering: -webkit-optimize-contrast; /* Для четкости */
+    image-rendering: crisp-edges;
+    display: block;
+    margin: 0 auto;
+}
+
+/* Никаких трансформаций для всей строки */
+/* Старое правило (если оно осталось) — удали или замени на это: */
+.copy-trigger:active {
+    transform: scale(0.75) !important;
+    color: #2563eb !important;
+}
+
+/* На всякий случай добавим, чтобы иконка точно сжималась */
+i.copy-trigger:active {
+    transform: scale(0.7) !important;
+}
+
+/* Убираем трансформацию со всей строки */
+/* Убираем глобальное "вдавливание" */
+[onclick*="copyText"]:active {
+    transform: none !important;
+    background-color: transparent !important;
+}
+
+/* Эффект ТОЛЬКО для иконки, когда нажимают на строку */
+.copy-trigger:active .copy-icon,
+.copy-trigger:active i.fa-copy {
+    transform: scale(0.7) !important;
+    color: #2563eb !important;
+    transition: transform 0.1s ease;
+}
+
+/* Ограничиваем тост, чтобы он не был "сосиской" */
+.toast {
+    position: fixed;
+    left: 50%;
+    bottom: 30px;
+    transform: translateX(-50%);
+    background: #1e293b;
+    color: #fff;
+    padding: 10px 18px;
+    border-radius: 12px; /* Меньше радиус — лучше для 2-х строк */
+    font-size: 0.8rem;
+    font-weight: 600;
+    z-index: 1000000;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+
+    /* КРИТИЧНО ДЛЯ ДЛИННОЙ ПОЧТЫ: */
+    white-space: normal;   /* Разрешаем перенос на новую строку */
+    max-width: 280px;      /* Чтобы тост рос ВНИЗ, а не вбок */
+    text-align: center;
+    line-height: 1.4;
+}
+
+/* Когда тост активен */
+.toast.show {
+    opacity: 1;
+}
+
+.toast.hidden {
+    display: none;
+}
+
+/* Эффект только для иконки внутри кнопки копирования */
+.copy-trigger:active .fa-copy {
+    transform: scale(0.7) !important;
+    color: #2563eb !important;
+    transition: transform 0.1s ease;
+}
+
+/* =========================================
+   1. ГЛАВНАЯ ОБЕРТКА (Stories Nav)
+   ========================================= */
+.stories-nav-wrapper {
+    position: relative; /* Контекст для абсолютных стрелок */
+    top: 0;
+    z-index: 1000;
+    padding: 10px 0 0 0;
+    margin: 0 -15px 10px -15px; /* Компенсация отступов контейнера */
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(20px) saturate(170%);
+    -webkit-backdrop-filter: blur(20px) saturate(170%);
+    overflow: visible; /* Важно: не обрезать стрелки, которые могут выходить за границы */
+    border-radius: 0;
+}
+
+/* =========================================
+   2. КОНТЕЙНЕР ПРОКРУТКИ
+   ========================================= */
+.stories-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    gap: 12px;
+    padding: 10px 25px 15px 25px; /* Отступы, чтобы крайние иконки не прилипали */
+
+    /* Скрытие скроллбара */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+
+    /* Плавность и инерция (iOS) */
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth; /* Плавный скролл через JS/CSS */
+
+    position: relative;
+}
+
+.stories-container::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
+}
+
+/* =========================================
+   3. ЭЛЕМЕНТЫ СТОРИС (Иконки)
+   ========================================= */
+.story-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+
+    /* Фиксированная ширина, запрет на сжатие */
+    flex: 0 0 72px;
+
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    cursor: pointer;
+    will-change: transform;
+    position: relative;
+    z-index: 2; /* Поверх градиентов */
+}
+
+.story-circle {
+    width: 62px;
+    height: 62px;
+    border-radius: 50%;
+    background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+    padding: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    flex-shrink: 0; /* Запрет сжатия круга */
+}
+
+.story-circle img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    background: #fff;
+    border: 2px solid white;
+    display: block; /* Убирает лишние отступы снизу */
+}
+
+.story-label {
+    margin-top: 6px;
+    font-size: 10px;
+    font-weight: 800;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    transition: color 0.3s ease;
+    text-align: center;
+    max-width: 80px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.2;
+}
+
+/* Активное состояние */
+.story-item.active-story .story-circle {
+    transform: scale(1.1);
+    box-shadow: 0 8px 20px rgba(220, 39, 67, 0.4);
+    background: linear-gradient(45deg, #dc2743, #cc2366, #bc1888, #f09433);
+}
+
+.story-item.active-story .story-label {
+    color: #dc2743;
+    font-weight: 900;
+}
+
+/* Hover эффект (только для устройств с мышью) */
+@media (hover: hover) {
+    .story-item:hover .story-circle {
+        transform: translateY(-3px);
+    }
+}
+
+/* =========================================
+   4. СТРЕЛКИ И ГРАДИЕНТЫ (NAVIGATION HINTS)
+   ========================================= */
+
+/* Градиенты (псевдоэлементы обертки) */
+.stories-nav-wrapper::before,
+.stories-nav-wrapper::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 60px; /* Ширина зоны затенения */
+    pointer-events: none; /* Пропускаем клики */
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 5;
+}
+
+/* ЛЕВЫЙ градиент */
+.stories-nav-wrapper::before {
+    left: 0;
+    background: linear-gradient(to right, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0) 100%);
+}
+
+/* ПРАВЫЙ градиент */
+.stories-nav-wrapper::after {
+    right: 0;
+    background: linear-gradient(to left, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0) 100%);
+}
+
+/* СИМВОЛЫ СТРЕЛОК (Отдельные span в HTML) */
+.arrow-left, .arrow-right {
+    position: absolute;
+    top: 50%;
+    /* Начальное положение по центру по вертикали */
+    transform: translateY(-50%);
+    font-size: 32px; /* Чуть крупнее для заметности */
+    font-weight: 900;
+    color: #94a3b8;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    z-index: 6;
+    text-shadow: 0 0 8px rgba(255,255,255,0.9);
+    font-family: sans-serif;
+    line-height: 1;
+}
+
+.arrow-left {
+    left: 8px;
+}
+
+.arrow-right {
+    right: 8px;
+}
+
+/* Анимация подпрыгивания */
+@keyframes bounce-right {
+    0%, 100% { transform: translateY(-50%) translateX(0); }
+    50% { transform: translateY(-50%) translateX(6px); }
+}
+
+@keyframes bounce-left {
+    0%, 100% { transform: translateY(-50%) translateX(0); }
+    50% { transform: translateY(-50%) translateX(-6px); }
+}
+
+/* =========================================
+   5. УПРАВЛЕНИЕ ВИДИМОСТЬЮ (JS Classes)
+   ========================================= */
+
+/* ПОКАЗАТЬ ЛЕВУЮ СТРЕЛКУ И ГРАДИЕНТ */
+.stories-nav-wrapper.can-scroll-left::before,
+.stories-nav-wrapper.can-scroll-left .arrow-left {
+    opacity: 1;
+}
+.stories-nav-wrapper.can-scroll-left .arrow-left {
+    animation: bounce-left 1.5s infinite;
+}
+
+/* ПОКАЗАТЬ ПРАВУЮ СТРЕЛКУ И ГРАДИЕНТ */
+.stories-nav-wrapper.can-scroll-right::after,
+.stories-nav-wrapper.can-scroll-right .arrow-right {
+    opacity: 1;
+}
+.stories-nav-wrapper.can-scroll-right .arrow-right {
+    animation: bounce-right 1.5s infinite;
 }

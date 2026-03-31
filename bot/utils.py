@@ -14,30 +14,48 @@ logger = logging.getLogger("BotoLinkPro")
 # # РАБОТА С БАЗОЙ ДАННЫХ
 # # ============================================
 
-async def get_db_connection():
-    # # для Python
-    # # Используем данные для Supabase через Connection Pooler (порт 6543)
-    config = {
-        "user": "postgres.jqvynmpkdjtalsrhvvov",
-        "password": "baragoz07DEN05",
-        "host": "aws-1-ap-southeast-2.pooler.supabase.com",
-        "port": 6543,
-        "database": "postgres",
-        "ssl": "require",
-        "statement_cache_size": 0,
-        "timeout": 30
-    }
+# // D:\aRabota\TelegaBoom\030_mylinkspace\bot\utils.py
 
-    try:
-        conn = await asyncpg.connect(**config)
-        return conn
-    except asyncpg.exceptions.InvalidPasswordError:
-        print("❌ Пароль еще не обновился в пулере. Подожди 60 секунд...")
-        raise
-    except Exception as e:
-        print(f"❌ Ошибка подключения: {e}")
-        raise e
+# // D:\aRabota\TelegaBoom\030_mylinkspace\bot\utils.py
 
+import asyncpg
+import asyncio
+
+class SmartConnectionManager:
+    """
+    Умный менеджер: поддерживает и 'await get_db_connection()'
+    и 'async with get_db_connection()'.
+    """
+    def __init__(self):
+        self.config = {
+            "user": "postgres.jqvynmpkdjtalsrhvvov",
+            "password": "baragoz07DEN05",
+            "host": "aws-1-ap-southeast-2.pooler.supabase.com",
+            "port": 6543,
+            "database": "postgres",
+            "ssl": "require",
+            "statement_cache_size": 0,
+            "timeout": 30
+        }
+        self.conn = None
+
+    # Позволяет писать: conn = await get_db_connection()
+    def __await__(self):
+        return asyncpg.connect(**self.config).__await__()
+
+    # Позволяет писать: async with get_db_connection() as conn:
+    async def __aenter__(self):
+        self.conn = await asyncpg.connect(**self.config)
+        return self.conn
+
+    # Закрывает соединение после async with
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        if self.conn:
+            await self.conn.close()
+
+def get_db_connection():
+    """Универсальная функция подключения к БД"""
+    return SmartConnectionManager()
 
 # # bot/utils.py
 

@@ -68,22 +68,29 @@ function closeModal(modalId) {
 // === ФУНКЦИИ ДЛЯ КОПИРОВАНИЯ ===
 // bot/static/templates/11den/11den_page.js
 
-function copyText(text) {
-    navigator.clipboard.writeText(text).then(() => {
-        // Передаем текст в тост для отображения
-        showToast(`✨ Скопировано: ${text}`);
-    }).catch(err => {
-        // Fallback для старых браузеров
-        const textarea = document.createElement('textarea');
-        textarea.value = text;
-        document.body.appendChild(textarea);
-        textarea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textarea);
-        showToast(`✨ Скопировано: ${text}`);
-    });
-}
+function copyText(text, btn) {
+    if (!text) return;
 
+    const performCopy = () => {
+        // УБИРАЕМ substring(0, 30) И ${text.length > 30 ...}
+        // Должно остаться просто ${text}
+        showToast(`✨ Скопировано: ${text}`);
+
+        if (btn) {
+            const icon = btn.querySelector('i');
+            if (icon) {
+                const originalClass = icon.className;
+                icon.className = 'fas fa-check';
+                btn.style.color = '#10b981';
+                setTimeout(() => {
+                    icon.className = originalClass;
+                    btn.style.color = '';
+                }, 2000);
+            }
+        }
+    };
+    // ... далее твой код с navigator.clipboard ...
+}
 function copyAllDetails(linkId) {
     const modal = document.getElementById(`modal_${linkId}`);
     if (!modal) return;

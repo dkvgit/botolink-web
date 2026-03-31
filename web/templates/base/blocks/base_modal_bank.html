@@ -1,538 +1,178 @@
-<!--# D:\aRabota\TelegaBoom\030_botolinkpro\web\templates\base\blocks\base_modal_bank.html-->
+{% if link %}
+    {% set details = link.pay_details or {} %}
+    {% set username = details.link or details.login or details.username %}
+    {% set address_val = details.address %}
+    {% set final_url = link.url %}
 
-<!-- ========== МОДАЛЬНОЕ ОКНО ДЛЯ БАНКОВСКИХ РЕКВИЗИТОВ ========== -->
-{% for link in categories.transfers %}
-{% if link.pay_details %}
+    {# Проверка: является ли ссылка реальным веб-адресом #}
+    {% set is_http_link = final_url and final_url|string|lower|truncate(4, True, '') == 'http' %}
 
-{% set details = link.pay_details %}
-{% set username = details.login or details.username or link.url.split('/')[-1] %}
+    {# БЕЗОПАСНОЕ ОПРЕДЕЛЕНИЕ СТРАНЫ #}
+    {% set country_code = '' %}
+    {% if link.link_type and '_' in link.link_type %}
+        {% set country_code = link.link_type.split('_')[-1] %}
+    {% endif %}
 
-<div id="modal_{{ link.id }}" class="modal-overlay">
-    <div class="modal-content"
-         style="max-width:340px; width:90%; max-height:80vh; overflow-y:auto; padding:16px; background:#ffffff; border-radius:0; box-shadow:0 10px 40px rgba(0,0,0,0.2);">
+    {# БЕЗОПАСНОЕ ОПРЕДЕЛЕНИЕ ИКОНКИ #}
+    {% set raw_icon = link.icon or link.link_type or (details.type if details else 'link') %}
+    {% set icon_val = (raw_icon | string | trim | lower) if raw_icon else 'link' %}
+    {% set icon_path = "/static/icons/" ~ (icon_val.split('/')[-1] if '/' in icon_val else icon_val + '.png') %}
 
-        <!-- Шапка с логотипом, названием и флагом -->
-        <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
-            {% include 'icon_block.html' %}
-            <span style="font-size:1.2rem; font-weight:600; color:#1a1a1a;">{{ link.title }}</span>
-            {% if details.country %}
-            <span style="font-size:0.9rem; margin-left:auto; color:#6c757d;">{{ COUNTRY_NAMES[details.country] }}</span>
-            {% endif %}
-        </div>
+    <div id="modal_{{ link.id }}" class="modal-overlay">
+        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 320px; padding: 16px;">
 
-        <!-- QR-код (для всех кроме счета нерезидента) -->
-        {% if link.link_type != 'non_res_vietnam' and link.url and link.url != '#' %}
-        <div style="text-align:center; margin:8px 0; min-height:120px;">
-            <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data={{ link.url }}"
-                 alt="QR Code"
-                 style="width:120px; height:120px; border-radius:0; margin:0 auto; display:block; background:white; padding:8px; border:1px solid #e0e0e0;">
-        </div>
-        {% endif %}
+            {# ХЕДЕР: Лого с флагом + Кнопки #}
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
+                <div style="position: relative; width: 32px; height: 32px; flex-shrink: 0;">
+                    <img src="{{ icon_path }}"
+                         style="width: 100%; height: 100%; object-fit: contain;"
+                         onerror="this.src='/static/icons/link.png';">
 
-
-
-        <!-- Username отдельно и по центру (ТОЛЬКО для Revolut/Wise) -->
-        {% if username and link.link_type in ['revolut', 'wise'] %}
-        <div style="text-align:center; margin-bottom:12px;">
-            <div style="background:#f5f5f5; border-radius:0; padding:6px 12px; display:inline-flex; align-items:center; gap:8px;">
-                <span style="font-size:0.8rem; color:#0070ba; font-weight:500;">@{{ username }}</span>
-                <button onclick="copyText('{{ username }}')"
-                        style="background:none; border:none; color:#666; cursor:pointer; font-size:1rem; transition:all 0.1s ease;"
-                        onmousedown="this.style.transform='scale(0.85)'"
-                        onmouseup="this.style.transform='scale(1)'"
-                        onmouseleave="this.style.transform='scale(1)'">
-                    ⧉
-                </button>
-            </div>
-        </div>
-        {% endif %}
-
-        <!-- Блок с реквизитами -->
-        <div style="background:#f8f9fa; border-radius:0; padding:12px; margin-bottom:12px; border:1px solid #e9ecef;">
-
-
-            <!-- НАЗВАНИЕ БАНКА -->
-            {% if details.bank_name %}
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                <span style="color:#6c757d; font-size:0.7rem; width:90px;">Банк:</span>
-                <div style="display:flex; align-items:center; gap:6px; flex:1; justify-content:flex-end;">
-                    <span style="font-size:0.75rem; color:#003366;">{{ details.bank_name }}</span>
-                    <button onclick="copyText('{{ details.bank_name }}')"
-                            style="background:none; border:none; color:#003366; cursor:pointer; font-size:0.9rem;">
-                        ⧉
-                    </button>
-                </div>
-            </div>
-            {% endif %}
-
-
-            <!-- DEBUG: показать что в details -->
-            <div style="display:none;">{{ details | tojson }}</div>
-
-            <!-- ========== ТЕЛЕФОНЫ ========== -->
-            {% if details.phone_number %}
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                <span style="color:#6c757d; font-size:0.7rem; width:90px;">Телефон:</span>
-                <div style="display:flex; align-items:center; gap:6px; flex:1; justify-content:flex-end;">
-                    <span style="font-size:0.75rem; color:#003366;">{{ details.phone_number }}</span>
-                    <button onclick="copyText('{{ details.phone_number }}')"
-                            style="background:none; border:none; color:#003366; cursor:pointer; font-size:0.9rem;">
-                        ⧉
-                    </button>
-                </div>
-            </div>
-            {% endif %}
-
-            <!-- ========== КАРТЫ ========== -->
-            {% if details.card_number %}
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                <span style="color:#6c757d; font-size:0.7rem; width:90px;">Карта:</span>
-                <div style="display:flex; align-items:center; gap:6px; flex:1; justify-content:flex-end;">
-                    <span style="font-size:0.75rem; color:#003366;">{{ details.card_number }}</span>
-                    <button onclick="copyText('{{ details.card_number }}')"
-                            style="background:none; border:none; color:#003366; cursor:pointer; font-size:0.9rem;">
-                        ⧉
-                    </button>
-                </div>
-            </div>
-            {% endif %}
-
-            <!-- Для IBAN и банковских счетов -->
-
-            {% if link.link_type == 'iban' or link.link_type.startswith('iban_') %}
-            <div style="font-weight:600; color:#003366; margin-bottom:8px; font-size:0.9rem;">💶 Euro (SEPA)</div>
-
-            <!-- Beneficiary / Получатель -->
-            {% if details.beneficiary and details.beneficiary != 'null' %}
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                <span style="color:#6c757d; font-size:0.7rem; width:90px;">Получатель:</span>
-                <div style="display:flex; align-items:center; gap:6px; flex:1; justify-content:flex-end;">
-                    <span style="font-size:0.75rem; color:#003366;">{{ details.beneficiary }}</span>
-                    <button onclick="copyText('{{ details.beneficiary }}')"
-                            style="background:none; border:none; color:#003366; cursor:pointer; font-size:0.9rem; transition:all 0.1s ease;"
-                            onmousedown="this.style.transform='scale(0.85)'"
-                            onmouseup="this.style.transform='scale(1)'"
-                            onmouseleave="this.style.transform='scale(1)'">
-                        ⧉
-                    </button>
-                </div>
-            </div>
-            {% endif %}
-
-            <!-- IBAN -->
-            {% if details.iban and details.iban != 'null' %}
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                <span style="color:#6c757d; font-size:0.7rem; width:90px;">IBAN:</span>
-                <div style="display:flex; align-items:center; gap:6px; flex:1; justify-content:flex-end;">
-                    <span style="font-size:0.7rem; color:#003366;">{{ details.iban }}</span>
-                    <button onclick="copyText('{{ details.iban }}')"
-                            style="background:none; border:none; color:#003366; cursor:pointer; font-size:0.9rem; transition:all 0.1s ease;"
-                            onmousedown="this.style.transform='scale(0.85)'"
-                            onmouseup="this.style.transform='scale(1)'"
-                            onmouseleave="this.style.transform='scale(1)'">
-                        ⧉
-                    </button>
-                </div>
-            </div>
-            {% endif %}
-
-            <!-- BIC/SWIFT -->
-            {% if details.bic and details.bic != 'null' %}
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                <span style="color:#6c757d; font-size:0.7rem; width:90px;">BIC:</span>
-                <div style="display:flex; align-items:center; gap:6px; flex:1; justify-content:flex-end;">
-                    <span style="font-size:0.7rem; color:#003366;">{{ details.bic }}</span>
-                    <button onclick="copyText('{{ details.bic }}')"
-                            style="background:none; border:none; color:#003366; cursor:pointer; font-size:0.9rem; transition:all 0.1s ease;"
-                            onmousedown="this.style.transform='scale(0.85)'"
-                            onmouseup="this.style.transform='scale(1)'"
-                            onmouseleave="this.style.transform='scale(1)'">
-                        ⧉
-                    </button>
-                </div>
-            </div>
-            {% endif %}
-
-            <!-- Для ACH USA -->
-            {% elif link.link_type == 'ach_usa' %}
-            <div style="font-weight:600; color:#003366; margin-bottom:8px; font-size:0.9rem;">🇺🇸 ACH Transfer</div>
-
-            <!-- Банк -->
-            {% if details.bank_name and details.bank_name != 'null' %}
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                <span style="color:#6c757d; font-size:0.7rem; width:90px;">Банк:</span>
-                <div style="display:flex; align-items:center; gap:6px; flex:1; justify-content:flex-end;">
-                    <span style="font-size:0.75rem; color:#003366;">{{ details.bank_name }}</span>
-                    <button onclick="copyText('{{ details.bank_name }}')"
-                            style="background:none; border:none; color:#003366; cursor:pointer; font-size:0.9rem; transition:all 0.1s ease;"
-                            onmousedown="this.style.transform='scale(0.85)'"
-                            onmouseup="this.style.transform='scale(1)'"
-                            onmouseleave="this.style.transform='scale(1)'">
-                        ⧉
-                    </button>
-                </div>
-            </div>
-            {% endif %}
-
-            <!-- Routing Number -->
-            {% if details.routing and details.routing != 'null' %}
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                <span style="color:#6c757d; font-size:0.7rem; width:90px;">Routing:</span>
-                <div style="display:flex; align-items:center; gap:6px; flex:1; justify-content:flex-end;">
-                    <span style="font-size:0.7rem; color:#003366;">{{ details.routing }}</span>
-                    <button onclick="copyText('{{ details.routing }}')"
-                            style="background:none; border:none; color:#003366; cursor:pointer; font-size:0.9rem; transition:all 0.1s ease;"
-                            onmousedown="this.style.transform='scale(0.85)'"
-                            onmouseup="this.style.transform='scale(1)'"
-                            onmouseleave="this.style.transform='scale(1)'">
-                        ⧉
-                    </button>
-                </div>
-            </div>
-            {% endif %}
-
-            <!-- Account Number -->
-            {% if details.account and details.account != 'null' %}
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                <span style="color:#6c757d; font-size:0.7rem; width:90px;">Account:</span>
-                <div style="display:flex; align-items:center; gap:6px; flex:1; justify-content:flex-end;">
-                    <span style="font-size:0.7rem; color:#003366;">{{ details.account }}</span>
-                    <button onclick="copyText('{{ details.account }}')"
-                            style="background:none; border:none; color:#003366; cursor:pointer; font-size:0.9rem; transition:all 0.1s ease;"
-                            onmousedown="this.style.transform='scale(0.85)'"
-                            onmouseup="this.style.transform='scale(1)'"
-                            onmouseleave="this.style.transform='scale(1)'">
-                        ⧉
-                    </button>
-                </div>
-            </div>
-            {% endif %}
-
-            <!-- Beneficiary -->
-            {% if details.beneficiary and details.beneficiary != 'null' %}
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                <span style="color:#6c757d; font-size:0.7rem; width:90px;">Получатель:</span>
-                <div style="display:flex; align-items:center; gap:6px; flex:1; justify-content:flex-end;">
-                    <span style="font-size:0.75rem; color:#003366;">{{ details.beneficiary }}</span>
-                    <button onclick="copyText('{{ details.beneficiary }}')"
-                            style="background:none; border:none; color:#003366; cursor:pointer; font-size:0.9rem; transition:all 0.1s ease;"
-                            onmousedown="this.style.transform='scale(0.85)'"
-                            onmouseup="this.style.transform='scale(1)'"
-                            onmouseleave="this.style.transform='scale(1)'">
-                        ⧉
-                    </button>
-                </div>
-            </div>
-            {% endif %}
-
-            <!-- Для WIRE USA -->
-            {% elif link.link_type == 'wire_usa' %}
-            <div style="font-weight:600; color:#003366; margin-bottom:8px; font-size:0.9rem;">🇺🇸 Wire Transfer</div>
-
-            <!-- Банк -->
-            {% if details.bank_name and details.bank_name != 'null' %}
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                <span style="color:#6c757d; font-size:0.7rem; width:90px;">Банк:</span>
-                <div style="display:flex; align-items:center; gap:6px; flex:1; justify-content:flex-end;">
-                    <span style="font-size:0.75rem; color:#003366;">{{ details.bank_name }}</span>
-                    <button onclick="copyText('{{ details.bank_name }}')"
-                            style="background:none; border:none; color:#003366; cursor:pointer; font-size:0.9rem; transition:all 0.1s ease;"
-                            onmousedown="this.style.transform='scale(0.85)'"
-                            onmouseup="this.style.transform='scale(1)'"
-                            onmouseleave="this.style.transform='scale(1)'">
-                        ⧉
-                    </button>
-                </div>
-            </div>
-            {% endif %}
-
-            <!-- SWIFT -->
-            {% if details.swift and details.swift != 'null' %}
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                <span style="color:#6c757d; font-size:0.7rem; width:90px;">SWIFT:</span>
-                <div style="display:flex; align-items:center; gap:6px; flex:1; justify-content:flex-end;">
-                    <span style="font-size:0.7rem; color:#003366;">{{ details.swift }}</span>
-                    <button onclick="copyText('{{ details.swift }}')"
-                            style="background:none; border:none; color:#003366; cursor:pointer; font-size:0.9rem; transition:all 0.1s ease;"
-                            onmousedown="this.style.transform='scale(0.85)'"
-                            onmouseup="this.style.transform='scale(1)'"
-                            onmouseleave="this.style.transform='scale(1)'">
-                        ⧉
-                    </button>
-                </div>
-            </div>
-            {% endif %}
-
-            <!-- Account Number -->
-            {% if details.account and details.account != 'null' %}
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                <span style="color:#6c757d; font-size:0.7rem; width:90px;">Account:</span>
-                <div style="display:flex; align-items:center; gap:6px; flex:1; justify-content:flex-end;">
-                    <span style="font-size:0.7rem; color:#003366;">{{ details.account }}</span>
-                    <button onclick="copyText('{{ details.account }}')"
-                            style="background:none; border:none; color:#003366; cursor:pointer; font-size:0.9rem; transition:all 0.1s ease;"
-                            onmousedown="this.style.transform='scale(0.85)'"
-                            onmouseup="this.style.transform='scale(1)'"
-                            onmouseleave="this.style.transform='scale(1)'">
-                        ⧉
-                    </button>
-                </div>
-            </div>
-            {% endif %}
-
-            <!-- Beneficiary -->
-            {% if details.beneficiary and details.beneficiary != 'null' %}
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                <span style="color:#6c757d; font-size:0.7rem; width:90px;">Получатель:</span>
-                <div style="display:flex; align-items:center; gap:6px; flex:1; justify-content:flex-end;">
-                    <span style="font-size:0.75rem; color:#003366;">{{ details.beneficiary }}</span>
-                    <button onclick="copyText('{{ details.beneficiary }}')"
-                            style="background:none; border:none; color:#003366; cursor:pointer; font-size:0.9rem; transition:all 0.1s ease;"
-                            onmousedown="this.style.transform='scale(0.85)'"
-                            onmouseup="this.style.transform='scale(1)'"
-                            onmouseleave="this.style.transform='scale(1)'">
-                        ⧉
-                    </button>
-                </div>
-            </div>
-            {% endif %}
-
-                <!-- Для счетов (account_*) -->
-                {% elif link.link_type.startswith('account_') %}
-                <div style="font-weight:600; color:#003366; margin-bottom:8px; font-size:0.9rem;">🏦 Банковский счет</div>
-
-                <!-- Номер счета (account_number) -->
-                {% if details.account_number and details.account_number != 'null' %}
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                    <span style="color:#6c757d; font-size:0.7rem; width:90px;">Счет:</span>
-                    <div style="display:flex; align-items:center; gap:6px; flex:1; justify-content:flex-end;">
-                        <span style="font-size:0.75rem; color:#003366;">{{ details.account_number }}</span>
-                        <button onclick="copyText('{{ details.account_number }}')"
-                                style="background:none; border:none; color:#003366; cursor:pointer; font-size:0.9rem;">
-                            ⧉
-                        </button>
-                    </div>
-                </div>
-                {% endif %}
-
-                <!-- БИК -->
-                {% if details.bik and details.bik != 'null' %}
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                    <span style="color:#6c757d; font-size:0.7rem; width:90px;">БИК:</span>
-                    <div style="display:flex; align-items:center; gap:6px; flex:1; justify-content:flex-end;">
-                        <span style="font-size:0.75rem; color:#003366;">{{ details.bik }}</span>
-                        <button onclick="copyText('{{ details.bik }}')"
-                                style="background:none; border:none; color:#003366; cursor:pointer; font-size:0.9rem;">
-                            ⧉
-                        </button>
-                    </div>
-                </div>
-                {% endif %}
-
-                <!-- Получатель -->
-                {% if details.beneficiary and details.beneficiary != 'null' %}
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                    <span style="color:#6c757d; font-size:0.7rem; width:90px;">Получатель:</span>
-                    <div style="display:flex; align-items:center; gap:6px; flex:1; justify-content:flex-end;">
-                        <span style="font-size:0.75rem; color:#003366;">{{ details.beneficiary }}</span>
-                        <button onclick="copyText('{{ details.beneficiary }}')"
-                                style="background:none; border:none; color:#003366; cursor:pointer; font-size:0.9rem;">
-                            ⧉
-                        </button>
-                    </div>
-                </div>
-                {% endif %}
-
-            <!-- MFO для Узбекистана -->
-            {% if details.mfo and details.mfo != 'null' %}
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                <span style="color:#6c757d; font-size:0.7rem; width:90px;">МФО:</span>
-                <div style="display:flex; align-items:center; gap:6px; flex:1; justify-content:flex-end;">
-                    <span style="font-size:0.7rem; color:#003366;">{{ details.mfo }}</span>
-                    <button onclick="copyText('{{ details.mfo }}')"
-                            style="background:none; border:none; color:#003366; cursor:pointer; font-size:0.9rem; transition:all 0.1s ease;"
-                            onmousedown="this.style.transform='scale(0.85)'"
-                            onmouseup="this.style.transform='scale(1)'"
-                            onmouseleave="this.style.transform='scale(1)'">
-                        ⧉
-                    </button>
-                </div>
-            </div>
-            {% endif %}
-
-
-            <!-- Для счетов нерезидента -->
-            {% elif link.link_type == 'non_res_vietnam' %}
-
-
-            <!-- QR-код из статической папки -->
-            <div style="text-align:center; margin:15px 0 10px;">
-                <img src="/static/icons/bidv_qr.png"
-                     alt="QR Code"
-                     style="width:150px; height:180px; border-radius:8px; margin:0 auto; display:block; background:white; padding:5px; border:1px solid #e0e0e0; cursor:pointer;"
-                     onclick="openQRImageModal('/static/icons/bidv_qr.png', 'Счет нерезидента')">
-            </div>
-
-
-            <!-- Банк -->
-            {% if details.bank_name and details.bank_name != 'null' %}
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                <span style="color:#6c757d; font-size:0.7rem; width:90px;">Банк:</span>
-                <div style="display:flex; align-items:center; gap:6px; flex:1; justify-content:flex-end;">
-                    <span style="font-size:0.75rem; color:#003366;">{{ details.bank_name }}</span>
-                    <button onclick="copyText('{{ details.bank_name }}')"
-                            style="background:none; border:none; color:#003366; cursor:pointer; font-size:0.9rem; transition:all 0.1s ease;"
-                            onmousedown="this.style.transform='scale(0.85)'"
-                            onmouseup="this.style.transform='scale(1)'"
-                            onmouseleave="this.style.transform='scale(1)'">
-                        ⧉
-                    </button>
-                </div>
-            </div>
-            {% endif %}
-
-            <!-- Номер счета (account_number) -->
-            {% if details.account_number and details.account_number != 'null' %}
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                <span style="color:#6c757d; font-size:0.7rem; width:90px;">Счет:</span>
-                <div style="display:flex; align-items:center; gap:6px; flex:1; justify-content:flex-end;">
-                    <span style="font-size:0.7rem; color:#003366;">{{ details.account_number }}</span>
-                    <button onclick="copyText('{{ details.account_number }}')"
-                            style="background:none; border:none; color:#003366; cursor:pointer; font-size:0.9rem; transition:all 0.1s ease;"
-                            onmousedown="this.style.transform='scale(0.85)'"
-                            onmouseup="this.style.transform='scale(1)'"
-                            onmouseleave="this.style.transform='scale(1)'">
-                        ⧉
-                    </button>
-                </div>
-            </div>
-            {% endif %}
-
-
-            <!-- Страна -->
-            {% if details.country %}
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0px;">
-                <span style="color:#6c757d; font-size:0.7rem; width:90px;">Страна:</span>
-                <div style="display:flex; align-items:center; gap:6px; flex:1; justify-content:flex-end;">
-                    <span style="font-size:0.7rem; color:#003366;">{{ COUNTRY_NAMES[details.country] }}</span>
-                </div>
-            </div>
-            {% endif %}
-
-            <!-- Для Revolut/Wise -->
-            {% else %}
-            <!-- Beneficiary -->
-            {% if details.beneficiary and details.beneficiary != 'null' %}
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                <span style="color:#6c757d; font-size:0.7rem; width:90px;">Получатель:</span>
-                <div style="display:flex; align-items:center; gap:6px; flex:1; justify-content:flex-end;">
-                    <span style="font-size:0.75rem; color:#003366;">{{ details.beneficiary }}</span>
-                    <button onclick="copyText('{{ details.beneficiary }}')"
-                            style="background:none; border:none; color:#003366; cursor:pointer; font-size:0.9rem; transition:all 0.1s ease;"
-                            onmousedown="this.style.transform='scale(0.85)'"
-                            onmouseup="this.style.transform='scale(1)'"
-                            onmouseleave="this.style.transform='scale(1)'">
-                        ⧉
-                    </button>
-                </div>
-            </div>
-            {% endif %}
-
-            <!-- IBAN -->
-            {% if details.iban and details.iban != 'null' %}
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                <span style="color:#6c757d; font-size:0.7rem; width:90px;">IBAN:</span>
-                <div style="display:flex; align-items:center; gap:6px; flex:1; justify-content:flex-end;">
-                    <span style="font-size:0.7rem; color:#003366;">{{ details.iban }}</span>
-                    <button onclick="copyText('{{ details.iban }}')"
-                            style="background:none; border:none; color:#003366; cursor:pointer; font-size:0.9rem; transition:all 0.1s ease;"
-                            onmousedown="this.style.transform='scale(0.85)'"
-                            onmouseup="this.style.transform='scale(1)'"
-                            onmouseleave="this.style.transform='scale(1)'">
-                        ⧉
-                    </button>
-                </div>
-            </div>
-            {% endif %}
-
-            <!-- BIC -->
-            {% if details.bic and details.bic != 'null' %}
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                <span style="color:#6c757d; font-size:0.7rem; width:90px;">BIC:</span>
-                <div style="display:flex; align-items:center; gap:6px; flex:1; justify-content:flex-end;">
-                    <span style="font-size:0.7rem; color:#003366;">{{ details.bic }}</span>
-                    <button onclick="copyText('{{ details.bic }}')"
-                            style="background:none; border:none; color:#003366; cursor:pointer; font-size:0.9rem; transition:all 0.1s ease;"
-                            onmousedown="this.style.transform='scale(0.85)'"
-                            onmouseup="this.style.transform='scale(1)'"
-                            onmouseleave="this.style.transform='scale(1)'">
-                        ⧉
-                    </button>
-                </div>
-            </div>
-            {% endif %}
-            {% endif %}
-
-            <!-- Correspondent (для всех где есть) -->
-            {% if details.correspondent and details.correspondent != 'null' and details.correspondent != '' %}
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                <span style="color:#6c757d; font-size:0.7rem; width:90px;">Корреспондент:</span>
-                <div style="display:flex; align-items:center; gap:6px; flex:1; justify-content:flex-end;">
-                    <span style="font-size:0.7rem; color:#003366;">{{ details.correspondent }}</span>
-                    <button onclick="copyText('{{ details.correspondent }}')"
-                            style="background:none; border:none; color:#003366; cursor:pointer; font-size:0.9rem; transition:all 0.1s ease;"
-                            onmousedown="this.style.transform='scale(0.85)'"
-                            onmouseup="this.style.transform='scale(1)'"
-                            onmouseleave="this.style.transform='scale(1)'">
-                        ⧉
-                    </button>
-                </div>
-            </div>
-            {% endif %}
-
-            <!-- Адрес -->
-            {% if details.address and details.address != 'null' and details.address|trim != '' %}
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                <span style="color:#6c757d; font-size:0.7rem; width:90px;">Адрес:</span>
-                <div style="display:flex; align-items:center; gap:6px; flex:1; justify-content:flex-end;">
-                    <span style="font-size:0.7rem; color:#003366;">{{ details.address }}</span>
-                    <button onclick="copyText('{{ details.address }}')"
-                            style="background:none; border:none; color:#003366; cursor:pointer; font-size:0.9rem; transition:all 0.1s ease;"
-                            onmousedown="this.style.transform='scale(0.85)'"
-                            onmouseup="this.style.transform='scale(1)'"
-                            onmouseleave="this.style.transform='scale(1)'">
-                        ⧉
-                    </button>
-                </div>
-            </div>
-            {% endif %}
-
-            <!-- Страна (для всех) -->
-                    {% if details.country %}
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                        <span style="color:#6c757d; font-size:0.7rem; width:90px;">Страна:</span>
-                        <div style="display:flex; align-items:center; gap:6px; flex:1; justify-content:flex-end;">
-                            <span style="font-size:0.75rem; color:#003366;">{{ COUNTRY_NAMES[details.country] }}</span>
-                        </div>
-                    </div>
+                    {% if country_code %}
+                    <img src="/static/icons/{{ country_code }}.png"
+                         style="position: absolute; bottom: -2px; right: -2px; width: 14px; height: 14px; border-radius: 50%; border: 2px solid #fff; object-fit: cover; box-shadow: 0 1px 3px rgba(0,0,0,0.1);"
+                         onerror="this.style.display='none';">
                     {% endif %}
+                </div>
+
+                <div style="display: flex; flex-direction: column; min-width: 0; flex-grow: 1;">
+                    <span style="font-size: 0.95rem; font-weight: 700; color: #1e293b; letter-spacing: -0.3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                        {{ (link.title or 'Платеж') | title }}
+                    </span>
+                    {% if country_code %}
+                    <span style="font-size: 0.6rem; color: #94a3b8; text-transform: uppercase; font-weight: 800; letter-spacing: 0.5px;">{{ country_code }}</span>
+                    {% endif %}
+                </div>
+
+                <div style="display: flex; gap: 6px; align-items: center; margin-left: auto;">
+                    <div onclick="shareLink('{{ link.id }}')"
+                         style="width: 28px; height: 28px; background: #f1f5f9; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #6366f1; cursor: pointer;">
+                        <i class="fas fa-share-alt" style="font-size: 11px;"></i>
+                    </div>
+
+                    <div onclick="downloadQR('{{ link.id }}')"
+                         style="width: 28px; height: 28px; background: #f1f5f9; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #10b981; cursor: pointer;">
+                        <i class="fas fa-download" style="font-size: 11px;"></i>
+                    </div>
+
+                    <div onclick="closeModal('modal_{{ link.id }}')"
+                         onmouseover="this.style.background='#fee2e2'; this.style.color='#ef4444';"
+                         onmouseout="this.style.background='#e5e2fe'; this.style.color='#1b1b1b';"
+                         style="width: 28px; height: 28px; background: #e5e2fe; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #1b1b1b; cursor: pointer; font-size: 18px; line-height: 1; transition: all 0.2s ease;">
+                        &times;
+                    </div>
+                </div>
+            </div>
+
+            {# СБОРКА ДАННЫХ ДЛЯ QR (Чистим от card://) #}
+            {% set qr_payload = [] %}
+            {% if details.bank_name %}{% set _ = qr_payload.append("Bank: " ~ details.bank_name) %}{% endif %}
+            {% if details.recipient or details.beneficiary %}{% set _ = qr_payload.append("Recipient: " ~ (details.recipient or details.beneficiary)) %}{% endif %}
+            {% if details.card_number %}{% set _ = qr_payload.append("Card: " ~ details.card_number) %}{% endif %}
+            {% if details.iban %}{% set _ = qr_payload.append("IBAN: " ~ details.iban) %}{% endif %}
+            {% if details.swift or details.bic %}{% set _ = qr_payload.append("SWIFT: " ~ (details.swift or details.bic)) %}{% endif %}
+            {% if address_val %}{% set _ = qr_payload.append("Address: " ~ address_val) %}{% endif %}
+            {% if is_http_link %}{% set _ = qr_payload.append("Link: " ~ final_url) %}{% endif %}
+
+            {% set qr_final_text = qr_payload | join('\n') | trim %}
+
+            {% if qr_final_text %}
+            <div style="text-align: center; margin-bottom: 20px;">
+                <div style="display: inline-flex; padding: 12px; background: #fff; border-radius: 20px; border: 1px solid #f1f5f9; box-shadow: 0 4px 15px rgba(0,0,0,0.04);">
+                    <div id="qr_{{ link.id }}"
+                         class="auto-qr"
+                         data-qr-text="{{ qr_final_text | e }}"
+                         data-qr-icon="{{ icon_path }}"
+                         style="width: 160px; height: 160px;">
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {# СПИСОК РЕКВИЗИТОВ #}
+            <div style="background: #f8fafc; border-radius: 16px; padding: 14px; border: 1px solid #f1f5f9;">
+                {% set fields = [
+                    ('User ID', username),
+                    ('Банк', details.bank_name),
+                    ('Получатель', details.recipient or details.beneficiary),
+                    ('Данные', details.identifier or (details.link if not is_http_link else none)),
+                    ('Телефон', details.phone_number or details.phone or details.tel),
+                    ('Карта', details.card_number),
+                    ('IBAN', details.iban),
+                    ('Счет', details.account or details.account_number),
+                    ('SWIFT/BIC', details.swift or details.bic),
+                    ('Routing', details.routing),
+                    ('МФО', details.mfo),
+                    ('Ссылка', final_url if is_http_link else none)
+                ] %}
+
+                {% for label, value in fields %}
+                    {% if value and value|string|length > 0 and value|string|lower != 'none' and value|string != 'null' %}
+
+                        {% set display_label = label %}
+                        {% set skip_field = false %}
+
+                        {# 1. КОРРЕКТИРОВКА ДЛЯ ПОЛЯ "ССЫЛКА" #}
+                        {% if label == 'Ссылка' %}
+                            {# Скрываем, если это технические протоколы банков (tel://, card://) #}
+                            {% if 'card://' in value|string|lower or 'tel://' in value|string|lower %}
+                                {% set skip_field = true %}
+                            {% endif %}
+                        {% endif %}
+
+                        {# 2. ТВОЯ ЛОГИКА ПЕРЕИМЕНОВАНИЙ (Kaspi, Sber, Кошельки) #}
+                        {% if not skip_field and icon_val %}
+                            {% if label == 'User ID' and ('kaspi' in icon_val or 'sber' in icon_val or 'payme' in icon_val or 'click' in icon_val) %}
+                                {% set skip_field = true %}
+                            {% elif label == 'Данные' %}
+                                {% if 'phone' in icon_val or 'tel' in icon_val or 'kaspi' in icon_val or 'click' in icon_val %}
+                                    {% set display_label = 'Телефон' %}
+                                {% elif 'yoomoney' in icon_val or 'vkpay' in icon_val %}
+                                    {% set display_label = 'Номер счета' %}
+                                {% endif %}
+                            {% endif %}
+                        {% endif %}
+
+                        {% if not skip_field %}
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                            <span style="color: #94a3b8; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; width: 75px; flex-shrink: 0;">{{ display_label }}</span>
+                            <div style="display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; justify-content: flex-end;">
+                                {% if label == 'Ссылка' %}
+                                    <a href="{{ value }}" target="_blank" style="font-size: 0.8rem; color: #6366f1; font-weight: 700; text-align: right; word-break: break-all; text-decoration: underline;">
+                                        {{ value }}
+                                    </a>
+                                {% else %}
+                                    <span style="font-size: 0.85rem; color: #334155; font-weight: 700; text-align: right; word-break: break-all;">
+                                        {{ '@' ~ value if display_label == 'User ID' else value }}
+                                    </span>
+                                {% endif %}
+                                <i class="far fa-copy copy-icon copy-trigger"
+                                   style="color: #cbd5e1; font-size: 0.8rem; cursor: pointer; padding: 4px; flex-shrink: 0;"
+                                   onclick="copyText('{{ value }}', event)">
+                                </i>
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+
+                {# АДРЕС #}
+                {% if address_val and address_val|string|length > 0 and address_val|string|lower != 'none' %}
+                <div style="margin-top: 10px; padding-top: 12px; border-top: 1px dashed #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
+                    <span style="color: #94a3b8; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; width: 75px; flex-shrink: 0;">Адрес</span>
+                    <div style="display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; justify-content: flex-end;">
+                        <span style="font-size: 0.75rem; color: #64748b; font-weight: 500; text-align: right; word-break: break-all;">
+                            {{ address_val }}
+                        </span>
+                        <i class="far fa-copy copy-icon copy-trigger" style="color: #cbd5e1; font-size: 0.8rem; cursor: pointer; padding: 4px; flex-shrink: 0;" onclick="copyText('{{ address_val }}', event)"></i>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            <button onclick="closeModal('modal_{{ link.id }}')"
+                    style="width: 100%; background: #1e293b; color: white; border: none; padding: 14px; border-radius: 14px; font-size: 0.9rem; font-weight: 700; cursor: pointer; margin-top: 16px;">
+                Готово
+            </button>
         </div>
-
-        <!-- Кнопка копировать всё (только для счетов) -->
-        {% if link.link_type.startswith('account_') or link.link_type == 'iban' or link.link_type == 'ach_usa' or link.link_type == 'wire_usa' %}
-        <button onclick="copyAllBankDetails('{{ link.id }}')"
-                style="width:100%; background:#0070ba; border:none; color:white; padding:10px; border-radius:0; font-size:0.85rem; font-weight:600; cursor:pointer; margin-bottom:8px; display:flex; align-items:center; justify-content:center; gap:6px;">
-            ⧉ Копировать всё
-        </button>
-        {% endif %}
-
-        <!-- Кнопка закрыть -->
-        <button onclick="closeModal('modal_{{ link.id }}')"
-                style="width:100%; background:transparent; border:1px solid #dee2e6; color:#495057; padding:8px; border-radius:0; font-size:0.8rem; cursor:pointer;">
-            Закрыть
-        </button>
-
     </div>
-</div>
 {% endif %}
-{% endfor %}

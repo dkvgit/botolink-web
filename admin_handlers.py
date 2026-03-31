@@ -14,7 +14,6 @@ def is_admin(user_id: int) -> bool:
 
 
 async def admin_list_users(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    # # Список ВСЕХ пользователей с кнопками действий
     query = update.callback_query
     user_id = update.effective_user.id
 
@@ -28,28 +27,36 @@ async def admin_list_users(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     conn = await get_db_connection()
     try:
-        # # Запрос через asyncpg
+        # Сортировка по дате (сначала новые)
         users = await conn.fetch("""
-            SELECT id, telegram_id, username, first_name, is_pro, is_admin
+            SELECT id, telegram_id, username, first_name, is_pro, is_admin, created_at
             FROM users
-            ORDER BY id DESC
+            ORDER BY created_at DESC
         """)
 
         text_header = f"👥 <b>Все пользователи ({len(users)}):</b>\n\n👇 Нажмите на пользователя для управления:"
 
         if not users:
             msg_text = "📭 Нет пользователей"
-            if query: await query.edit_message_text(msg_text)
-            else: await update.message.reply_text(msg_text)
+            if query:
+                await query.edit_message_text(msg_text)
+            else:
+                await update.message.reply_text(msg_text)
             return
 
         keyboard = []
         for user in users:
+            # Возвращаем статус (иконку)
             icon = "👑" if user['is_admin'] else "💎" if user['is_pro'] else "👤"
-            raw_name = user['first_name'] or "No Name"
-            name = raw_name[:15] + "..." if len(raw_name) > 15 else raw_name
-            username = f"@{user['username']}" if user['username'] else "no username"
-            btn_text = f"{icon} {name} | {username} | ID: {user['telegram_id']}"
+            
+            reg_date = user['created_at'].strftime('%d.%m') if user['created_at'] else "??.??"
+            
+            first_name = user['first_name'] or "NoName"
+            short_name = first_name[:10] + ".." if len(first_name) > 10 else first_name
+            username = f"@{user['username']}" if user['username'] else "no_user"
+            
+            # Полная строка: [Дата] Статус Имя | Юзернейм | TG_ID
+            btn_text = f"[{reg_date}] {icon} {short_name} | {username} | {user['telegram_id']}"
             keyboard.append([InlineKeyboardButton(btn_text, callback_data=f"admin_user_{user['telegram_id']}")])
 
         keyboard.append([InlineKeyboardButton("◀️ Назад", callback_data="start")])
@@ -67,7 +74,6 @@ async def admin_list_users(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await log_error(e, "в admin_list_users")
     finally:
         await conn.close()
-
 
 async def admin_user_detail(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # # Детальная информация о пользователе с кнопками действий

@@ -1,18 +1,34 @@
-<div class="link-card" id="link-{{ link.id }}">
-    <a href="/click/{{ link.id }}" target="_blank" class="link-item">
+<div class="link-card {{ 'is-copyable' if (is_email or link.link_type == 'email') else ('is-direct' if is_direct_link else 'has-modal') }}"
+     id="link-{{ link.id }}"
+     data-link-id="{{ link.id }}"
+     data-url="{{ final_url_str if is_direct_link else '' }}"
+     data-copy-text="{{ final_url_str if (is_email or link.link_type == 'email') else '' }}"
+     onclick="{% if is_direct_link %}window.open('{{ final_url_str }}', '_blank'){% else %}handleLinkClick(this, event){% endif %}">
+
+    <div class="link-item">
         <div class="link-icon">
-            <img src="/static/icons/{{ link.icon }}.png"
-                 onerror="this.src='/static/icons/default_link.png'"
+            {%- set raw_icon = link.icon or link.link_type or (details.type if details else 'link') -%}
+            {%- set icon_val = raw_icon | string | trim -%}
+            {%- set clean_icon = icon_val.split('/')[-1].replace('.png', '') -%}
+            <img src="/static/icons/{{ clean_icon }}.png"
+                 onerror="this.src='/static/icons/link.png';"
                  alt="{{ link.title }}">
         </div>
         <div class="link-info">
             <div class="link-title">{{ link.title }}</div>
-            {% if link.description %}
-            <div class="link-description">{{ link.description }}</div>
+            {# Если это почта, выводим сам адрес в описании #}
+            {% if is_email or link.link_type == 'email' %}
+                <div class="link-description" style="user-select: text;" onclick="event.stopPropagation();">{{ final_url_str }}</div>
+            {% elif link.description %}
+                <div class="link-description">{{ link.description }}</div>
+            {% elif is_direct_link %}
+                <div class="link-description">Открыть ссылку</div>
             {% endif %}
         </div>
-        <div class="link-arrow">
-            <i class="fas fa-chevron-right"></i>
-        </div>
-    </a>
+    </div>
+
+    {# Правая кнопка (стрелочка, иконка копирования или внешняя ссылка) #}
+    <div class="link-arrow-btn">
+        <i class="fas {{ 'fa-copy' if (is_email or link.link_type == 'email') else ('fa-external-link-alt' if is_direct_link else 'fa-chevron-right') }}"></i>
+    </div>
 </div>
