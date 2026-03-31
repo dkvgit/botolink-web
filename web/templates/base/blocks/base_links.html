@@ -144,8 +144,12 @@
 
                                 {%- elif 'viber' in l_type -%}{%- set final_url = "viber://chat?number=" ~ nick -%}
                                 {%- elif 'max' in l_type -%}{%- set final_url = "https://t.me/max?start=" ~ nick -%}
-                                {# СОЦСЕТИ #}
-                                {%- elif 'instagram' in l_type -%}{%- set final_url = "https://instagram.com/" ~ nick -%}
+                                    {# СОЦСЕТИ #}
+                                {%- elif 'instagram' in l_type -%}
+                                    {# Убираем собачку из ника и принудительно ставим домен инсты #}
+                                    {%- set clean_nick = nick|replace('@', '') -%}
+                                    {%- set final_url = "https://instagram.com/" ~ clean_nick -%}
+
                                 {%- elif 'tiktok' in l_type -%}{%- set final_url = "https://tiktok.com/@" ~ nick -%}
                                 {%- elif 'threads' in l_type -%}{%- set final_url = "https://threads.net/@" ~ nick -%}
                                 {%- elif 'twitter' in l_type or 'x' == l_type -%}{%- set final_url = "https://x.com/" ~ nick -%}
@@ -153,7 +157,7 @@
                                 {%- elif 'vk' in l_type -%}{%- set final_url = "https://vk.com/" ~ nick -%}
                                 {%- elif 'ok' in l_type -%}{%- set final_url = "https://ok.ru/profile/" ~ nick -%}
                                 {%- elif 'youtube' in l_type -%}{%- set final_url = "https://youtube.com/" ~ nick -%}
-                                {# ДОНАТЫ #}
+                                 {# ДОНАТЫ #}
                                 {%- elif 'kofi' in l_type -%}{%- set final_url = "https://ko-fi.com/" ~ nick -%}
                                 {%- elif 'patreon' in l_type -%}{%- set final_url = "https://www.patreon.com/" ~ nick -%}
                                 {%- elif 'donationalerts' in l_type -%}{%- set final_url = "https://www.donationalerts.com/r/" ~ nick -%}
@@ -191,14 +195,18 @@
                         {# Упрощенная проверка: если есть http/viber, то ссылка считается валидной #}
                         {%- set is_valid_link = final_url and (final_url_str[0:4]|lower == 'http' or final_url_str[0:5]|lower == 'viber') -%}
 
-                        {# 4. ЛОГИКА ПРЯМОГО ПЕРЕХОДА #}
-                        {# Для магазинов, соцсетей и мессенджеров ВСЕГДА прямой переход, если есть ссылка #}
-                        {%- if category in ['social', 'donate', 'messengers', 'shops'] and not is_email -%}
-                            {%- set is_direct_link = is_valid_link -%}
-                        {%- else -%}
-                            {# Для остальных (банки и т.д.) только если нет доп. данных #}
-                            {%- set is_direct_link = is_valid_link and not has_extra_data and not is_payment_cat -%}
-                        {%- endif -%}
+                    {# 4. ЛОГИКА ПРЯМОГО ПЕРЕХОДА #}
+                            {# Список сервисов, которые ВСЕГДА идут по прямой ссылке #}
+                            {%- set direct_services = ['paypal', 'yoomoney', 'vkpay', 'monobank', 'kaspi', 'payme', 'click_uz'] -%}
+
+                            {# ПРОВЕРКА: Если сервис в списке или это соцсеть/шоп — даем прямой переход #}
+                            {%- if is_valid_link and (l_type in direct_services or category in ['social', 'donate', 'messengers', 'shops']) and not is_email -%}
+                                {%- set is_direct_link = true -%}
+
+                            {# Для всех остальных (Revolut, Wise, банки) — только если нет доп. данных и это не платежная категория #}
+                            {%- else -%}
+                                {%- set is_direct_link = is_valid_link and not has_extra_data and not is_payment_cat -%}
+                            {%- endif -%}
 
                 {# 5. РЕНДЕР #}
                 <a

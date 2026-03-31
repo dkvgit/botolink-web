@@ -6,6 +6,9 @@
   <component name="ChangeListManager">
     <list default="true" id="722a5f0e-b122-4002-a32f-b6e7799afca3" name="Changes" comment="added local run logic">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/templates/base/blocks/base_head.html" beforeDir="false" afterPath="$PROJECT_DIR$/web/templates/base/blocks/base_head.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/templates/base/blocks/base_links.html" beforeDir="false" afterPath="$PROJECT_DIR$/web/templates/base/blocks/base_links.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/templates/common/link_block.html" beforeDir="false" afterPath="$PROJECT_DIR$/web/templates/common/link_block.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -129,6 +132,7 @@
       <workItem from="1774934872269" duration="2490000" />
       <workItem from="1774937818207" duration="518000" />
       <workItem from="1774940860921" duration="18261000" />
+      <workItem from="1774968693809" duration="2014000" />
     </task>
     <task id="LOCAL-00001" summary="added local run logic">
       <option name="closed" value="true" />

@@ -3,8 +3,7 @@
      data-link-id="{{ link.id }}"
      data-url="{{ final_url_str if is_direct_link else '' }}"
      data-copy-text="{{ final_url_str if (is_email or link.link_type == 'email') else '' }}"
-     onclick="{% if is_direct_link %}window.open('{{ final_url_str }}', '_blank'){% else %}handleLinkClick(this, event){% endif %}">
-
+     onclick="{% if is_direct_link %}window.open('{{ final_url_str }}', '_blank');{% else %}handleLinkClick(this, event);{% endif %}">
     <div class="link-item">
         <div class="link-icon">
             {%- set raw_icon = link.icon or link.link_type or (details.type if details else 'link') -%}
