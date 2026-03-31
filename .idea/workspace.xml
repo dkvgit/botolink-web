@@ -4,48 +4,7 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="722a5f0e-b122-4002-a32f-b6e7799afca3" name="Changes" comment="added local run logic">
-      <change afterPath="$PROJECT_DIR$/bot/bankper.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/admin_handlers.py" beforeDir="false" afterPath="$PROJECT_DIR$/admin_handlers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bot/bank.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot/bank.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bot/bankworld.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot/bankworld.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bot/constructor.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot/constructor.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bot/handlers.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot/handlers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bot/link_constructor.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot/link_constructor.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bot/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bot/parsers.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot/parsers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bot/states.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot/states.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bot/types_config.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot/types_config.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bot/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot/utils.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/script_seed_icons.py" beforeDir="false" afterPath="$PROJECT_DIR$/script_seed_icons.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/web/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/static/icons/click.png" beforeDir="false" afterPath="$PROJECT_DIR$/web/static/icons/click_uz.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/templates/01classic/01classic_page.html" beforeDir="false" afterPath="$PROJECT_DIR$/web/templates/01classic/01classic_page.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/templates/01classic/01classic_style.css" beforeDir="false" afterPath="$PROJECT_DIR$/web/templates/01classic/01classic_style.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/templates/02minimal/02minimal_page.html" beforeDir="false" afterPath="$PROJECT_DIR$/web/templates/02minimal/02minimal_page.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/templates/03bright/03bright_page.html" beforeDir="false" afterPath="$PROJECT_DIR$/web/templates/03bright/03bright_page.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/templates/04neon/04neon_page.html" beforeDir="false" afterPath="$PROJECT_DIR$/web/templates/04neon/04neon_page.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/templates/05glass/05glass_page.html" beforeDir="false" afterPath="$PROJECT_DIR$/web/templates/05glass/05glass_page.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/templates/06deepspace/06deepspace_page.html" beforeDir="false" afterPath="$PROJECT_DIR$/web/templates/06deepspace/06deepspace_page.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/templates/07cyberpunk/07cyberpunk_page.html" beforeDir="false" afterPath="$PROJECT_DIR$/web/templates/07cyberpunk/07cyberpunk_page.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/templates/08royalgold/08royalgold_page.html" beforeDir="false" afterPath="$PROJECT_DIR$/web/templates/08royalgold/08royalgold_page.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/templates/09aurora/09aurora_page.html" beforeDir="false" afterPath="$PROJECT_DIR$/web/templates/09aurora/09aurora_page.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/templates/10hologram/10hologram_page.html" beforeDir="false" afterPath="$PROJECT_DIR$/web/templates/10hologram/10hologram_page.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/templates/11den/11den_page.js" beforeDir="false" afterPath="$PROJECT_DIR$/web/templates/11den/11den_page.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/templates/12den/12den_page.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/templates/12den/12den_page.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/templates/12den/12den_page.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/templates/base/base.css" beforeDir="false" afterPath="$PROJECT_DIR$/web/templates/base/base.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/templates/base/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/web/templates/base/base.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/templates/base/base.js" beforeDir="false" afterPath="$PROJECT_DIR$/web/templates/base/base.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/templates/base/blocks/base_head.html" beforeDir="false" afterPath="$PROJECT_DIR$/web/templates/base/blocks/base_head.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/templates/base/blocks/base_links.html" beforeDir="false" afterPath="$PROJECT_DIR$/web/templates/base/blocks/base_links.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/templates/base/blocks/base_modal_bank.html" beforeDir="false" afterPath="$PROJECT_DIR$/web/templates/base/blocks/base_modal_bank.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/templates/base/blocks/base_modal_crypto.html" beforeDir="false" afterPath="$PROJECT_DIR$/web/templates/base/blocks/base_modal_crypto.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/web/templates/common/link_block.html" beforeDir="false" afterPath="$PROJECT_DIR$/web/templates/common/link_block.html" afterDir="false" />
-    </list>
+    <list default="true" id="722a5f0e-b122-4002-a32f-b6e7799afca3" name="Changes" comment="added local run logic" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -167,7 +126,7 @@
       <workItem from="1774840211147" duration="27888000" />
       <workItem from="1774934872269" duration="2490000" />
       <workItem from="1774937818207" duration="518000" />
-      <workItem from="1774940860921" duration="16163000" />
+      <workItem from="1774940860921" duration="16676000" />
     </task>
     <task id="LOCAL-00001" summary="added local run logic">
       <option name="closed" value="true" />
