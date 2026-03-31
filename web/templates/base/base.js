@@ -842,3 +842,21 @@ window.downloadQR = function(id) {
     link.click();
     document.body.removeChild(link);
 };
+
+// Обработка клика по фону (оверлею) и клавиши Esc
+document.addEventListener('mousedown', (event) => {
+    // Если кликнули именно по подложке (оверлею), а не по контенту внутри
+    if (event.target.classList.contains('modal-overlay')) {
+        window.closeModal(event.target.id);
+    }
+});
+
+document.addEventListener('keydown', (event) => {
+    // Если нажали Esc (Escape)
+    if (event.key === 'Escape') {
+        const activeModal = document.querySelector('.modal-overlay.active');
+        if (activeModal) {
+            window.closeModal(activeModal.id);
+        }
+    }
+});
