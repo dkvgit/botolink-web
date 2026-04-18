@@ -160,9 +160,9 @@ async def lifespan(app: FastAPI):
         logger.info("✅ [SYSTEM] Все процессы корректно завершены")
     except Exception as e:
         logger.error(f"❌ [ERROR] Ошибка при выключении: {e}")
-	    
-	    
-	    
+        
+        
+        
 app = FastAPI(lifespan=lifespan)
 
 
@@ -268,11 +268,11 @@ async def set_webhook():
                 "error": str(e),
                 "tip": "Проверь соединение сервера с api.telegram.org"
             }
-	    
-	    
-	    
-	    
-	    
+        
+        
+        
+        
+        
 
 
 
@@ -339,213 +339,217 @@ async def track_details_click(link_id: int, request: Request):
 
 # Словари для иконок
 BRAND_ICONS = {
-	'instagram': 'fab fa-instagram',
-	'tiktok': 'fab fa-tiktok',
-	'youtube': 'fab fa-youtube',
-	'twitch': 'fab fa-twitch',
-	'telegram': 'fab fa-telegram',
-	'vk': 'fab fa-vk',
-	'twitter': 'fab fa-twitter',
-	'facebook': 'fab fa-facebook',
-	'github': 'fab fa-github',
-	'whatsapp': 'fab fa-whatsapp',
-	'snapchat': 'fab fa-snapchat',
-	'spotify': 'fab fa-spotify',
-	'discord': 'fab fa-discord',
-	'linkedin': 'fab fa-linkedin',
-	'pinterest': 'fab fa-pinterest',
-	'reddit': 'fab fa-reddit',
-	'medium': 'fab fa-medium',
-	'tumblr': 'fab fa-tumblr',
-	'flickr': 'fab fa-flickr',
-	'behance': 'fab fa-behance',
-	'dribbble': 'fab fa-dribbble',
-	'soundcloud': 'fab fa-soundcloud',
-	'bandcamp': 'fab fa-bandcamp',
-	'etsy': 'fab fa-etsy',
-	'amazon': 'fab fa-amazon',
-	'apple': 'fab fa-apple',
-	'google': 'fab fa-google',
-	'microsoft': 'fab fa-microsoft',
-	'steam': 'fab fa-steam',
-	'epicgames': 'fab fa-epic-games',
-	'xbox': 'fab fa-xbox',
-	'playstation': 'fab fa-playstation',
-	'nintendo': 'fab fa-nintendo-switch',
+    'instagram': 'fab fa-instagram',
+    'tiktok': 'fab fa-tiktok',
+    'youtube': 'fab fa-youtube',
+    'twitch': 'fab fa-twitch',
+    'telegram': 'fab fa-telegram',
+    'vk': 'fab fa-vk',
+    'twitter': 'fab fa-twitter',
+    'facebook': 'fab fa-facebook',
+    'github': 'fab fa-github',
+    'whatsapp': 'fab fa-whatsapp',
+    'snapchat': 'fab fa-snapchat',
+    'spotify': 'fab fa-spotify',
+    'discord': 'fab fa-discord',
+    'linkedin': 'fab fa-linkedin',
+    'pinterest': 'fab fa-pinterest',
+    'reddit': 'fab fa-reddit',
+    'medium': 'fab fa-medium',
+    'tumblr': 'fab fa-tumblr',
+    'flickr': 'fab fa-flickr',
+    'behance': 'fab fa-behance',
+    'dribbble': 'fab fa-dribbble',
+    'soundcloud': 'fab fa-soundcloud',
+    'bandcamp': 'fab fa-bandcamp',
+    'etsy': 'fab fa-etsy',
+    'amazon': 'fab fa-amazon',
+    'apple': 'fab fa-apple',
+    'google': 'fab fa-google',
+    'microsoft': 'fab fa-microsoft',
+    'steam': 'fab fa-steam',
+    'epicgames': 'fab fa-epic-games',
+    'xbox': 'fab fa-xbox',
+    'playstation': 'fab fa-playstation',
+    'nintendo': 'fab fa-nintendo-switch',
 }
 
 # Словарь соответствия link_type -> категория
 LINK_TYPE_CATEGORY = {
-	# Соцсети
-	'instagram': 'social', 'youtube': 'social',
-	'tiktok': 'social', 'vk': 'social', 'ok': 'social', 'facebook': 'social',
-	'twitter': 'social', 'discord': 'social', 'twitch': 'social', 'rutube': 'social',
-	'dzen': 'social', 'tenchat': 'social', 'snapchat': 'social', 'likee': 'social',
-	'threads': 'social',
-	
-	# Мессенджеры
-	'telegram': 'messengers', 'whatsapp': 'messengers', 'viber': 'messengers', 'signal': 'messengers',
-	'zalo': 'messengers', 'facetime': 'messengers',
-	'max': 'messengers',
-	
-	# Переводы
-	'revolut': 'transfers', 'wise': 'transfers', 'paypal': 'transfers',
-	'yoomoney': 'transfers', 'vkpay': 'transfers', 'monobank': 'transfers',
-	'kaspi': 'transfers', 'payme': 'transfers', 'click': 'transfers',
-	'tbcpay': 'transfers', 'idram': 'transfers',
-	'cryptobot': 'transfers', 'sber': 'transfers',
-	'tinkoff': 'transfers', 'bidv': 'transfers', 'korona': 'transfers',
-	'westernunion': 'transfers', 'unistream': 'transfers', 'contact': 'transfers',
-	'card': 'transfers', 'iban': 'transfers', 'arc': 'transfers', 'wire': 'transfers',
-	'phone': 'transfers', 'account': 'transfers', 'non_res_vietnam': 'transfers',
-	
-	# Донат
-	'patreon': 'donate', 'boosty': 'donate', 'donationalerts': 'donate',
-	'kofi': 'donate', 'buymeacoffee': 'donate', 'cloudtips': 'donate',
-	
-	# Крипта (теперь всё летит в categories.crypto)
-	'crypto': 'crypto',  # Наш новый универсальный тип для "Своей валюты"
-	'binance': 'crypto',
-	'bybit': 'crypto',
-	'okx': 'crypto',
-	'kucoin': 'crypto',
-	'gateio': 'crypto',
-	'huobi': 'crypto',
-	'metamask': 'crypto',
-	'trustwallet': 'crypto',
-	'coinbase': 'crypto',
-	'kraken': 'crypto',
-	'bitget': 'crypto',  # Добавил на будущее
-	'phantom': 'crypto',  # Добавил на будущее
-	'tronlink': 'crypto',  # Добавил на будущее
-	'exodus': 'crypto',  # Добавил на будущее
-	'tonkeeper': 'crypto',  # Важно для TON веток
-	
-	# Магазины
-	'ozon': 'shops', 'wildberries': 'shops', 'avito': 'shops', 'yandex_market': 'shops',
-	'aliexpress': 'shops', 'kazanexpress': 'shops', 'amazon': 'shops', 'ebay': 'shops',
-	'etsy': 'shops', 'shopify': 'shops',
-	
-	# Партнерки
-	'partner': 'partner', 'promo': 'partner', 'referral': 'partner', 'cashback': 'partner',
-	
-	# Разное
-	'standard': 'other', 'text': 'other'
+    # Соцсети
+    'instagram': 'social', 'youtube': 'social',
+    'tiktok': 'social', 'vk': 'social', 'ok': 'social', 'facebook': 'social',
+    'twitter': 'social', 'discord': 'social', 'twitch': 'social', 'rutube': 'social',
+    'dzen': 'social', 'tenchat': 'social', 'snapchat': 'social', 'likee': 'social',
+    'threads': 'social',
+    
+    # Мессенджеры
+    'telegram': 'messengers', 'whatsapp': 'messengers', 'viber': 'messengers', 'signal': 'messengers',
+    'zalo': 'messengers', 'facetime': 'messengers',
+    'max': 'messengers',
+    
+    # Переводы
+    'revolut': 'transfers', 'wise': 'transfers', 'paypal': 'transfers',
+    'yoomoney': 'transfers', 'vkpay': 'transfers', 'monobank': 'transfers',
+    'kaspi': 'transfers', 'payme': 'transfers', 'click': 'transfers',
+    'tbcpay': 'transfers', 'idram': 'transfers',
+    'cryptobot': 'transfers', 'sber': 'transfers',
+    'tinkoff': 'transfers', 'bidv': 'transfers', 'korona': 'transfers',
+    'westernunion': 'transfers', 'unistream': 'transfers', 'contact': 'transfers',
+    'card': 'transfers', 'iban': 'transfers', 'arc': 'transfers', 'wire': 'transfers',
+    'phone': 'transfers', 'account': 'transfers', 'non_res_vietnam': 'transfers',
+    
+    # Донат
+    'patreon': 'donate', 'boosty': 'donate', 'donationalerts': 'donate',
+    'kofi': 'donate', 'buymeacoffee': 'donate', 'cloudtips': 'donate',
+    
+    # Крипта (теперь всё летит в categories.crypto)
+    'crypto': 'crypto',  # Наш новый универсальный тип для "Своей валюты"
+    'binance': 'crypto',
+    'bybit': 'crypto',
+    'okx': 'crypto',
+    'kucoin': 'crypto',
+    'gateio': 'crypto',
+    'huobi': 'crypto',
+    'metamask': 'crypto',
+    'trustwallet': 'crypto',
+    'coinbase': 'crypto',
+    'kraken': 'crypto',
+    'bitget': 'crypto',  # Добавил на будущее
+    'phantom': 'crypto',  # Добавил на будущее
+    'tronlink': 'crypto',  # Добавил на будущее
+    'exodus': 'crypto',  # Добавил на будущее
+    'tonkeeper': 'crypto',  # Важно для TON веток
+    
+    # Магазины
+    'ozon': 'shops', 'wildberries': 'shops', 'avito': 'shops', 'yandex_market': 'shops',
+    'aliexpress': 'shops', 'kazanexpress': 'shops', 'amazon': 'shops', 'ebay': 'shops',
+    'etsy': 'shops', 'shopify': 'shops',
+    
+    # Партнерки
+    'partner': 'partner', 'promo': 'partner', 'referral': 'partner', 'cashback': 'partner',
+    
+    # Разное
+    'standard': 'other', 'text': 'other'
 }
 
 STANDARD_ICONS = {
-	'link': 'fas fa-link',
-	'globe': 'fas fa-globe',
-	'music': 'fas fa-music',
-	'video': 'fas fa-video',
-	'image': 'fas fa-image',
-	'camera': 'fas fa-camera',
-	'book': 'fas fa-book',
-	'game': 'fas fa-gamepad',
-	'code': 'fas fa-code',
-	'chat': 'fas fa-comment',
-	'mail': 'fas fa-envelope',
-	'phone': 'fas fa-phone',
-	'map': 'fas fa-map-marker-alt',
-	'clock': 'fas fa-clock',
-	'calendar': 'fas fa-calendar',
-	'star': 'fas fa-star',
-	'heart': 'fas fa-heart',
-	'fire': 'fas fa-fire',
-	'bolt': 'fas fa-bolt',
-	'crown': 'fas fa-crown',
-	'rocket': 'fas fa-rocket',
-	'wallet': 'fas fa-wallet',
-	'money': 'fas fa-money-bill',
-	'bank': 'fas fa-university',
-	'coin': 'fas fa-coins',
-	'bitcoin': 'fab fa-bitcoin',
-	'ethereum': 'fab fa-ethereum',
-	'paypal': 'fab fa-paypal',
+    'link': 'fas fa-link',
+    'globe': 'fas fa-globe',
+    'music': 'fas fa-music',
+    'video': 'fas fa-video',
+    'image': 'fas fa-image',
+    'camera': 'fas fa-camera',
+    'book': 'fas fa-book',
+    'game': 'fas fa-gamepad',
+    'code': 'fas fa-code',
+    'chat': 'fas fa-comment',
+    'mail': 'fas fa-envelope',
+    'phone': 'fas fa-phone',
+    'map': 'fas fa-map-marker-alt',
+    'clock': 'fas fa-clock',
+    'calendar': 'fas fa-calendar',
+    'star': 'fas fa-star',
+    'heart': 'fas fa-heart',
+    'fire': 'fas fa-fire',
+    'bolt': 'fas fa-bolt',
+    'crown': 'fas fa-crown',
+    'rocket': 'fas fa-rocket',
+    'wallet': 'fas fa-wallet',
+    'money': 'fas fa-money-bill',
+    'bank': 'fas fa-university',
+    'coin': 'fas fa-coins',
+    'bitcoin': 'fab fa-bitcoin',
+    'ethereum': 'fab fa-ethereum',
+    'paypal': 'fab fa-paypal',
 }
 
 PAYMENT_KEYWORDS = {
-	'btc': {'class': 'fab fa-bitcoin', 'emoji': '₿', 'keywords': ['btc', 'bitcoin']},
-	'usdt': {'class': 'fas fa-dollar-sign', 'emoji': '💵', 'keywords': ['usdt', 'tether']},
-	'eth': {'class': 'fab fa-ethereum', 'emoji': 'Ξ', 'keywords': ['eth', 'ethereum']},
-	'card': {'class': 'fas fa-credit-card', 'emoji': '💳', 'keywords': ['card', 'карта', 'mastercard', 'visa']},
-	'webmoney': {'class': 'fas fa-money-bill', 'emoji': 'WM', 'keywords': ['webmoney', 'wm']},
-	'qiwi': {'class': 'fas fa-phone', 'emoji': '📱', 'keywords': ['qiwi', 'киви']},
-	'yoomoney': {'class': 'fas fa-ruble-sign', 'emoji': '₽', 'keywords': ['yoomoney', 'юmoney', 'юмани']},
+    'btc': {'class': 'fab fa-bitcoin', 'emoji': '₿', 'keywords': ['btc', 'bitcoin']},
+    'usdt': {'class': 'fas fa-dollar-sign', 'emoji': '💵', 'keywords': ['usdt', 'tether']},
+    'eth': {'class': 'fab fa-ethereum', 'emoji': 'Ξ', 'keywords': ['eth', 'ethereum']},
+    'card': {'class': 'fas fa-credit-card', 'emoji': '💳', 'keywords': ['card', 'карта', 'mastercard', 'visa']},
+    'webmoney': {'class': 'fas fa-money-bill', 'emoji': 'WM', 'keywords': ['webmoney', 'wm']},
+    'qiwi': {'class': 'fas fa-phone', 'emoji': '📱', 'keywords': ['qiwi', 'киви']},
+    'yoomoney': {'class': 'fas fa-ruble-sign', 'emoji': '₽', 'keywords': ['yoomoney', 'юmoney', 'юмани']},
 }
 
 
 def get_icon_class(icon_name, link_type, url, pay_details):
-	"""Определяет класс иконки на основе всех доступных данных"""
-	
-	# Для финансовых ссылок
-	if link_type == 'finance':
-		pay_text = (pay_details or '').lower()
-		
-		# Ищем по ключевым словам
-		for key, data in PAYMENT_KEYWORDS.items():
-			if any(keyword in pay_text for keyword in data['keywords']):
-				return {
-					'class': data['class'],  # Используем 'class' вместо 'icon_class'
-					'emoji': data['emoji'],
-					'is_payment': True
-				}
-		
-		# По умолчанию карта
-		return {
-			'class': 'fas fa-credit-card',
-			'emoji': '💳',
-			'is_payment': True
-		}
-	
-	# Для обычных ссылок
-	if icon_name and isinstance(icon_name, str):
-		icon_lower = icon_name.lower()
-		
-		# Проверяем брендовые иконки
-		if icon_lower in BRAND_ICONS:
-			return {'class': BRAND_ICONS[icon_lower]}
-		
-		# Проверяем стандартные иконки
-		if icon_lower in STANDARD_ICONS:
-			return {'class': STANDARD_ICONS[icon_lower]}
-	
-	# Если ничего не нашли, пробуем получить фавиконку
-	if url and url != '#' and url.startswith(('http://', 'https://')):
-		try:
-			domain = urlparse(url).netloc
-			return {
-				'class': 'fas fa-link',
-				'favicon': f"https://www.google.com/s2/favicons?domain={domain}&sz=32"
-			}
-		except:
-			pass
-	
-	# Абсолютный дефолт
-	return {'class': 'fas fa-link'}
+    """Определяет класс иконки на основе всех доступных данных"""
+    
+    # Для финансовых ссылок
+    if link_type == 'finance':
+        pay_text = (pay_details or '').lower()
+        
+        # Ищем по ключевым словам
+        for key, data in PAYMENT_KEYWORDS.items():
+            if any(keyword in pay_text for keyword in data['keywords']):
+                return {
+                    'class': data['class'],  # Используем 'class' вместо 'icon_class'
+                    'emoji': data['emoji'],
+                    'is_payment': True
+                }
+        
+        # По умолчанию карта
+        return {
+            'class': 'fas fa-credit-card',
+            'emoji': '💳',
+            'is_payment': True
+        }
+    
+    # Для обычных ссылок
+    if icon_name and isinstance(icon_name, str):
+        icon_lower = icon_name.lower()
+        
+        # Проверяем брендовые иконки
+        if icon_lower in BRAND_ICONS:
+            return {'class': BRAND_ICONS[icon_lower]}
+        
+        # Проверяем стандартные иконки
+        if icon_lower in STANDARD_ICONS:
+            return {'class': STANDARD_ICONS[icon_lower]}
+    
+    # Если ничего не нашли, пробуем получить фавиконку
+    if url and url != '#' and url.startswith(('http://', 'https://')):
+        try:
+            domain = urlparse(url).netloc
+            return {
+                'class': 'fas fa-link',
+                'favicon': f"https://www.google.com/s2/favicons?domain={domain}&sz=32"
+            }
+        except:
+            pass
+    
+    # Абсолютный дефолт
+    return {'class': 'fas fa-link'}
 
+# --- СПЕЦИАЛЬНЫЕ ССЫЛКИ (Вставлять СТРОГО перед @app.get("/{username}")) ---
 
-
-# Прямая ссылка на твоего бота через слэш
 @app.get("/easy")
 async def redirect_to_easy_bot():
-    # Замени 'easy_vietnam_bot' на реальный юзернейм твоего бота
+    """Редирект на бота"""
     return RedirectResponse(url="https://t.me/easy_vietnam_bot")
 
 
-# Ссылка на будущий лендинг гайда
 @app.get("/guide", response_class=HTMLResponse)
 async def vietnam_guide_landing(request: Request):
-    # Убедись, что в web/templates есть файл guide_landing.html
-    return templates.TemplateResponse(
-        "guide_landing.html",
-        {"request": request, "title": "Гайд по Вьетнаму 2026"}
-    )
+    """Страница гайда"""
+    try:
+        # Пытаемся отдать красивый шаблон
+        return templates.TemplateResponse(
+            "guide_landing.html",
+            {"request": request, "title": "Гайд по Вьетнаму 2026"}
+        )
+    except Exception:
+        # Если файла еще нет в папке templates, просто выведем текст
+        return HTMLResponse("<h1>Страница гайда скоро будет готова!</h1>")
 
- 
 
+# --- ТВОЯ ОСНОВНАЯ ФУНКЦИЯ (ОСТАВЛЯЙ КАК ЕСТЬ НИЖЕ) ---
 @app.get("/{username}", response_class=HTMLResponse)
 async def user_page(request: Request, username: str):
+
     # ВАЖНО: Добавляем statement_cache_size=0 для работы с пулером Supabase (PgBouncer)
     conn = await asyncpg.connect(DATABASE_URL, statement_cache_size=0)
     try:
