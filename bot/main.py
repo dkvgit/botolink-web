@@ -98,14 +98,12 @@ logger = logging.getLogger(__name__)
 
 async def post_init(application: Application):
     """Установка команд бота с разделением прав через .env"""
+    from telegram import BotCommand, BotCommandScopeChat
     
-    # 1. Общий список (для всех)
+    # 1. Общий список (для всех пользователей)
     base_commands = [
-        
         BotCommand("start", "🏠 Главное меню"),
-        
         BotCommand("bank", "🏦 Банки / Переводы (тест)"),
-        
         BotCommand("mysite", "📋 Моя страница"),
         BotCommand("qr", "🔳 QR-код"),
         BotCommand("links", "🔗 Управление ссылками"),
@@ -117,15 +115,14 @@ async def post_init(application: Application):
         BotCommand("help", "❓ Помощь"),
     ]
     
-    await application.bot.set_my_commands(base_commands)
-    print("✅ КОМАНДЫ УСТАНОВЛЕНЫ")
-    
+    # Устанавливаем базовые команды для всех
     await application.bot.set_my_commands(base_commands)
     
-    # 2. Персональное меню для админа
+    # 2. Персональное меню для админов (добавляем кнопки админки)
     if ADMIN_IDS:
         for admin_id in ADMIN_IDS:
             try:
+                # Админы видят базу + свои команды
                 admin_commands = base_commands + [
                     BotCommand("admin", "👑 Админ-панель"),
                     BotCommand("users", "👥 Список юзеров")
@@ -136,13 +133,9 @@ async def post_init(application: Application):
                 )
                 logger.info(f"✅ Персональное меню установлено для админа ID: {admin_id}")
             except Exception as e:
-                logger.error(f"❌ Не удалось установить меню для админа {admin_id}: {e}")
-    
-    print("--- КОМАНДЫ ОБНОВЛЕНЫ ---")
+                logger.warning(f"⚠️ Не удалось поставить меню админу {admin_id}: {e}")
 
-
-
-
+    logger.info("✅ [SYSTEM] Все команды бота успешно обновлены")
     
 application = Application.builder() \
     .token(BOT_TOKEN) \
@@ -196,7 +189,7 @@ from bot.bankworld import toggle_method, show_country_methods
 ALL_METHODS = "paypal|revolut|wise|swift|yoomoney|vkpay|kaspi|payme|click_uz|idram|monobank|tbcpay"
 
 # // bot/handlers.py
-
+ 
 constructor_conv = ConversationHandler(
     entry_points=[
         CallbackQueryHandler(start_constructor, pattern="^add_link$"),
@@ -524,6 +517,7 @@ application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, debug_al
 
 
 async def run_local():
+    """Запуск бота в режиме Polling для локальной разработки"""
     # 1. Используем уже созданный в этом файле объект application
     # 2. Инициализируем и запускаем Polling
     async with application:
@@ -542,8 +536,10 @@ async def run_local():
             while True:
                 await asyncio.sleep(3600)
         except (KeyboardInterrupt, asyncio.CancelledError):
-            logger.info("👋 Остановка...")
-            if application.updater.running:
+            logger.info("👋 Завершение работы...")
+        finally:
+            # Корректно останавливаем все процессы
+            if application.updater and application.updater.running:
                 await application.updater.stop()
             if application.running:
                 await application.stop()
@@ -555,4 +551,4 @@ if __name__ == "__main__":
         # Запускаем локальную функцию
         asyncio.run(run_local())
     except (KeyboardInterrupt, SystemExit):
-        print("👋 Бот полностью остановлен.")
+        pass

@@ -27,43 +27,50 @@ class SmartConnectionManager:
     и 'async with get_db_connection()'.
     """
     def __init__(self):
-        self.config = {
-            "user": "postgres.jqvynmpkdjtalsrhvvov",
-            "password": "baragoz07DEN05",
-            "host": "aws-1-ap-southeast-2.pooler.supabase.com",
-            "port": 6543,
-            "database": "postgres",
-            "ssl": "require",
-            "statement_cache_size": 0,
-            "timeout": 30
-        }
+        # Импортируем URL из конфига
+        from core.config import DATABASE_URL
+        self.db_url = DATABASE_URL
         self.conn = None
 
-    # Позволяет писать: conn = await get_db_connection()
+    def _get_clean_url(self):
+        """Очищает URL от префикса SQLAlchemy для работы с чистым asyncpg"""
+        if self.db_url and "postgresql+asyncpg://" in self.db_url:
+            # asyncpg не понимает префикс postgresql+asyncpg
+            return self.db_url.replace("postgresql+asyncpg://", "postgresql://")
+        return self.db_url
+
     def __await__(self):
-        return asyncpg.connect(**self.config).__await__()
+        """Позволяет писать: conn = await get_db_connection()"""
+        clean_url = self._get_clean_url()
+        # Добавляем timeout=10, чтобы база не 'вешала' бота на Hugging Face
+        return asyncpg.connect(clean_url, statement_cache_size=0, timeout=10).__await__()
 
-    # Позволяет писать: async with get_db_connection() as conn:
     async def __aenter__(self):
-        self.conn = await asyncpg.connect(**self.config)
-        return self.conn
+        """Позволяет писать: async with get_db_connection() as conn:"""
+        clean_url = self._get_clean_url()
+        try:
+            # Обязательно statement_cache_size=0 для работы через PgBouncer (Supabase)
+            self.conn = await asyncpg.connect(clean_url, statement_cache_size=0, timeout=10)
+            return self.conn
+        except Exception as e:
+            logger.error(f"❌ [DB ERROR] Ошибка подключения к Supabase: {e}")
+            raise e
 
-    # Закрывает соединение после async with
     async def __aexit__(self, exc_type, exc_val, exc_tb):
+        """Закрывает соединение после выхода из блока"""
         if self.conn:
-            await self.conn.close()
+            try:
+                await self.conn.close()
+            except Exception as e:
+                logger.warning(f"⚠️ Ошибка при закрытии соединения БД: {e}")
 
 def get_db_connection():
     """Универсальная функция подключения к БД"""
     return SmartConnectionManager()
 
-# # bot/utils.py
-
 async def get_or_create_user(conn, tg_id, username, first_name, last_name=None):
-    # # last_name=None делает аргумент необязательным.
-    # # Теперь можно вызывать и с 4, и с 5 аргументами!
-
-    # # 1. Пытаемся обновить юзера (используем COALESCE для last_name, чтобы не затереть старое пустотой)
+    # 1. Пытаемся обновить юзера.
+    # Если юзер уже есть, UPDATE вернет его данные.
     user = await conn.fetchrow("""
         UPDATE users
         SET username = $2,
@@ -75,30 +82,31 @@ async def get_or_create_user(conn, tg_id, username, first_name, last_name=None):
     """, tg_id, username, first_name, last_name)
     
     if not user:
-        # # 2. Если не нашли — создаем нового
-        user = await conn.fetchrow("""
-            INSERT INTO users (telegram_id, username, first_name, last_name, created_at)
-            VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP)
-            RETURNING *
-        """, tg_id, username, first_name, last_name)
-        
-        # # 3. Создаем страницу для новичка
-        await conn.execute("""
-            INSERT INTO pages (user_id, username, title, template_id)
-            VALUES ($1, $2, $3, 1) ON CONFLICT (user_id) DO NOTHING
-        """, user['id'], username or f"user_{tg_id}", f"Страница {first_name}")
+        # 2. Если не нашли — создаем нового юзера
+        # Оборачиваем в try/except, чтобы избежать проблем при гонке запросов
+        try:
+            user = await conn.fetchrow("""
+                INSERT INTO users (telegram_id, username, first_name, last_name, created_at)
+                VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP)
+                RETURNING *
+            """, tg_id, username, first_name, last_name)
+            
+            # 3. Создаем страницу только для нового юзера
+            # ВАЖНО: username для страницы не может быть None (если в БД NOT NULL)
+            page_slug = username or f"id{tg_id}"
+            
+            await conn.execute("""
+                INSERT INTO pages (user_id, slug, title, template_id)
+                VALUES ($1, $2, $3, 1)
+                ON CONFLICT (user_id) DO NOTHING
+            """, user['id'], page_slug, f"Страница {first_name}")
+            
+        except Exception as e:
+            # Если юзер нажал /start дважды очень быстро, может возникнуть ошибка уникальности
+            # В таком случае просто пробуем достать его еще раз
+            user = await conn.fetchrow("SELECT * FROM users WHERE telegram_id = $1", tg_id)
 
-    # # 4. Страховка: проверяем наличие страницы
-    page_exists = await conn.fetchval("SELECT 1 FROM pages WHERE user_id = $1", user['id'])
-    if not page_exists:
-        await conn.execute("""
-            INSERT INTO pages (user_id, username, title, template_id)
-            VALUES ($1, $2, $3, 1)
-        """, user['id'], username or f"user_{tg_id}", f"Страница {first_name}")
-    
     return user
-
-
 
 
 async def check_subscription(conn, user_id: int):

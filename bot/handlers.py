@@ -1,5 +1,6 @@
 # bot/handlers.py
-
+# 1. Добавь это в самое начало файла (просто для проверки импорта)
+print("✅ ФАЙЛ HANDLERS.PY ЗАГРУЖЕН")
 
 import asyncio
 import logging
@@ -272,6 +273,11 @@ logger = logging.getLogger(__name__)
 # // bot/handlers.py
 
 async def start_handler(update, context):
+    
+    # 2. Добавь этот принт ПЕРВЫМ делом в функции
+    print(f"🔥 ПРИШЛО СООБЩЕНИЕ: {update.message.text if update.message else 'callback'}")
+    
+    
     """Главное меню бота (команда /start)"""
     # # Используем # для Python комментариев
     from bot.utils import get_or_create_user, get_db_connection, check_subscription

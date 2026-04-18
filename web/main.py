@@ -1,28 +1,30 @@
 #D:\aRabota\TelegaBoom\030_mylinkspace\web\main.py
 
 import logging
-from fastapi import FastAPI, Request, Response
-from telegram import Update
-import sys
-import os
 import mimetypes  # ← ДОБАВЬ ЭТОТ ИМПОРТ
-from bot.main import application as bot_app
-from urllib.parse import urlparse
-import asyncio
+import os
+import sys
 from contextlib import asynccontextmanager
+from urllib.parse import urlparse
+from telegram.request import HTTPXRequest
 import asyncpg
+import httpx
 import uvicorn
-from bot.bankworld import COUNTRY_NAMES
 from dotenv import load_dotenv
-
+from fastapi import FastAPI, Request, Response
+from fastapi import Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.responses import RedirectResponse
-from fastapi import Request
-# Добавляем путь к корневой папке проекта
+from telegram import Update
 
-import httpx
+from bot.bankworld import COUNTRY_NAMES
+
+
+
+
+# Добавляем путь к корневой папке проекта
 
 # Импортируем application из bot.main и сразу даем понятное имя
 try:
@@ -87,60 +89,82 @@ DATABASE_URL = DIRECT_DATABASE_URL
 
 
 
-# D:\aRabota\TelegaBoom\030_mylinkspace\web\main.py
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # --- STARTUP (Запуск) ---
-    # 1. Определяем, где мы находимся
-    is_railway = os.getenv("RAILWAY_ENVIRONMENT_NAME") is not None
-    # Принудительно берем режим, если задан вручную, иначе автоопределение
-    run_mode = os.getenv("RUN_MODE", "webhook" if is_railway else "polling").lower().strip()
+    import asyncio
+    import bot.main as bot_module
     
-    logger.info(f"🚀 [HYBRID] Запуск в режиме: {run_mode.upper()}")
+    telegram_application = getattr(bot_module, 'bot_app', None) or getattr(bot_module, 'application', None)
+    
+    if not telegram_application:
+        logger.error("❌ [CRITICAL] Не удалось найти объект бота (bot_app или application) в bot/main.py")
+        raise RuntimeError("Bot application object not found")
+
+    run_mode = os.getenv("RUN_MODE", "webhook").lower().strip()
+    logger.info(f"🚀 [SYSTEM] Старт сервера. Режим бота: {run_mode.upper()}")
 
     try:
-        if not bot_app.running:
-            await bot_app.initialize()
-            await bot_app.start()
+        # 1. Инициализация бота с 3 попытками (чтобы не падать по таймауту)
+        for attempt in range(3):
+            try:
+                if not telegram_application.running:
+                    await telegram_application.initialize()
+                    await telegram_application.start()
+                logger.info(f"✅ Бот успешно инициализирован (попытка {attempt + 1})")
+                break
+            except Exception as e:
+                if "Timed out" in str(e) and attempt < 2:
+                    logger.warning(f"⚠️ Попытка {attempt + 1} не удалась (таймаут), ждем 5 сек...")
+                    await asyncio.sleep(5)
+                    continue
+                raise e
 
+        # 2. Логика Webhook / Polling
         if run_mode == "polling":
-            # Режим для твоего компа
-            logger.info("📡 [LOCAL] Удаляем вебхук и запускаем POLLING...")
-            await bot_app.bot.delete_webhook(drop_pending_updates=True)
-            if bot_app.updater:
-                await bot_app.updater.start_polling()
-            logger.info("✅ Бот успешно запущен локально!")
+            logger.info("📡 [LOCAL] Чистим вебхуки и включаем Polling...")
+            await telegram_application.bot.delete_webhook(drop_pending_updates=True)
+            if telegram_application.updater:
+                await telegram_application.updater.start_polling(
+                    allowed_updates=["message", "callback_query", "edited_message"],
+                    drop_pending_updates=True
+                )
+            logger.info("✅ Бот на связи через Polling")
+        
         else:
-            # Режим для Railway
-            logger.info("🌐 [SERVER] Настройка WEBHOOK...")
-            webhook_url = f"{os.getenv('APP_URL')}/webhook"
-            if os.getenv('APP_URL'):
-                await bot_app.bot.set_webhook(url=webhook_url, drop_pending_updates=True)
+            app_url = os.getenv('APP_URL', '').strip().rstrip('/')
+            if app_url:
+                webhook_url = f"{app_url}/webhook"
+                await telegram_application.bot.set_webhook(
+                    url=webhook_url,
+                    drop_pending_updates=True,
+                    allowed_updates=["message", "callback_query", "edited_message"]
+                )
                 logger.info(f"✅ Webhook установлен на: {webhook_url}")
-            logger.info("✅ Бот готов принимать POST-запросы на /webhook")
+            else:
+                logger.error("❌ APP_URL не задан! Бот в режиме Webhook не оживет.")
 
     except Exception as e:
-        logger.error(f"❌ КРИТИЧЕСКАЯ ОШИБКА ПРИ СТАРТЕ: {e}", exc_info=True)
+        logger.error(f"❌ [CRITICAL] Ошибка старта: {e}", exc_info=True)
 
     yield
 
-    # --- SHUTDOWN (Выключение) ---
-    logger.info("🚦 [HYBRID] Завершение работы...")
+    # --- ЗДЕСЬ ВСЁ ВЫКЛЮЧАЕТСЯ ---
+    logger.info("🚦 [SYSTEM] Глушим двигатель...")
     try:
-        if bot_app.updater and bot_app.updater.running:
-            await bot_app.updater.stop()
-        if bot_app.running:
-            await bot_app.stop()
-            await bot_app.shutdown()
+        if run_mode == "polling" and telegram_application.updater and telegram_application.updater.running:
+            await telegram_application.updater.stop()
+            
+        if telegram_application.running:
+            await telegram_application.stop()
+            await telegram_application.shutdown()
+        logger.info("✅ [SYSTEM] Все процессы корректно завершены")
     except Exception as e:
-        logger.error(f"❌ Ошибка при выключении: {e}")
-
-# ОБЯЗАТЕЛЬНО: Привязываем lifespan к приложению
+        logger.error(f"❌ [ERROR] Ошибка при выключении: {e}")
+	    
+	    
+	    
 app = FastAPI(lifespan=lifespan)
 
-# Удаляй все @app.on_event("startup") и @app.on_event("shutdown"),
-# которые у тебя были ниже в коде! Они больше не нужны.
 
 
 # ========== СТАТИЧЕСКИЕ ФАЙЛЫ И ШАБЛОНЫ ==========
@@ -152,33 +176,46 @@ templates = Jinja2Templates(directory=os.path.join(current_dir, "templates"))
 # ========== WEBHOOK - ЭТО САМОЕ ГЛАВНОЕ! ==========
 @app.post("/webhook")
 async def telegram_webhook(request: Request):
-    """Обработка входящих обновлений от Telegram"""
+    """Прием и обработка обновлений от Telegram API"""
+    # Динамически достаем бота, чтобы не было проблем с импортами
+    import bot.main as bot_module
+    telegram_application = getattr(bot_module, 'bot_app', None) or getattr(bot_module, 'application', None)
+
     try:
-        # Получаем данные от Telegram
+        # 1. Читаем данные от Telegram
         data = await request.json()
-        logger.info(f"🔥 Получен webhook: update_id={data.get('update_id')}")
         
-        # Проверяем, что бот инициализирован
-        if not bot_app or not hasattr(bot_app, 'bot'):
-            logger.error("❌ Бот не инициализирован!")
-            return Response(status_code=500)
+        # ЛОГ: Увидим сообщение в консоли Hugging Face
+        logger.info(f"📥 [WEBHOOK] Новое сообщение: {data}")
+
+        if not data:
+            return Response(status_code=200)
+
+        # 2. Проверяем, готов ли бот к работе
+        if not telegram_application or not telegram_application.bot:
+            logger.error("❌ [CRITICAL] Объект бота не найден или не инициализирован!")
+            return Response(status_code=200)
+
+        # 3. Превращаем JSON в объект Update и запускаем обработку
+        update = Update.de_json(data, telegram_application.bot)
         
-        # Преобразуем в Update и передаем боту
-        update = Update.de_json(data, bot_app.bot)
-        await bot_app.process_update(update)
+        # Это отправит сообщение в твои хендлеры (start и прочие)
+        await telegram_application.process_update(update)
         
         return Response(status_code=200)
         
     except Exception as e:
-        logger.error(f"❌ Ошибка в webhook: {e}", exc_info=True)
-        return Response(status_code=500)
-
+        logger.error(f"❌ [WEBHOOK ERROR] Ошибка при обработке: {e}", exc_info=True)
+        # Всегда возвращаем 200, чтобы Telegram не пытался слать это бесконечно
+        return Response(status_code=200)
+    
+    
 # ========== ОСТАЛЬНЫЕ ЭНДПОИНТЫ ==========
 @app.get("/")
 async def root():
     return RedirectResponse(url="https://t.me/botolinkprobot")
 
-# D:\aRabota\TelegaBoom\030_mylinkspace\web\main.py
+
 
 @app.get("/set_webhook")
 async def set_webhook():
@@ -664,12 +701,17 @@ async def user_page(request: Request, username: str):
     
 
 
-
 if __name__ == "__main__":
     import uvicorn
+    import os
     from dotenv import load_dotenv
+    
+    # Загружаем переменные, если запускаем этот файл напрямую
     load_dotenv()
     
+    # Порт для локальных тестов или HF
     port = int(os.getenv("PORT", 8000))
-    # Uvicorn сам вызовет функцию startup(), которую мы написали выше
+    
+    # Запускаем сам объект app.
+    # В этом режиме бот включится через lifespan (через webhook)
     uvicorn.run(app, host="0.0.0.0", port=port)
