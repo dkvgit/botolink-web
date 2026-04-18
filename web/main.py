@@ -65,26 +65,7 @@ load_dotenv()
 app = FastAPI()
 
 
-# --- СПЕЦИАЛЬНЫЕ ССЫЛКИ (Вставлять СТРОГО перед @app.get("/{username}")) ---
 
-@app.get("/easy")
-async def redirect_to_easy_bot():
-    """Редирект на бота"""
-    return RedirectResponse(url="https://t.me/easy_vietnam_bot")
-
-
-@app.get("/guide", response_class=HTMLResponse)
-async def vietnam_guide_landing(request: Request):
-    """Страница гайда"""
-    try:
-        # Пытаемся отдать красивый шаблон
-        return templates.TemplateResponse(
-            "guide_landing.html",
-            {"request": request, "title": "Гайд по Вьетнаму 2026"}
-        )
-    except Exception:
-        # Если файла еще нет в папке templates, просто выведем текст
-        return HTMLResponse("<h1>Страница гайда скоро будет готова!</h1>")
     
     
 # Принудительно регистрируем MIME-типы - ДОБАВЬ ЭТО СРАЗУ ПОСЛЕ ИМПОРТОВ!
@@ -548,9 +529,32 @@ def get_icon_class(icon_name, link_type, url, pay_details):
 
 
 
+
+
+# --- СИСТЕМНЫЕ ПУТИ (Вставлять строго перед @app.get("/{username}")) ---
+
+@app.get("/easy", include_in_schema=False)
+async def redirect_to_easy_bot():
+    # Редирект на бота. Мы используем RedirectResponse напрямую.
+    return RedirectResponse(url="https://t.me/easy_vietnam_bot", status_code=307)
+
+
+@app.get("/guide", response_class=HTMLResponse, include_in_schema=False)
+async def vietnam_guide_landing(request: Request):
+    # Прямая проверка: если есть файл - отдаем, если нет - пишем текст
+    try:
+        return templates.TemplateResponse(
+            "guide_landing.html",
+            {"request": request, "title": "Гайд по Вьетнаму 2026"}
+        )
+    except Exception:
+        return HTMLResponse("<h1>Страница гайда скоро будет готова!</h1>")
+
+
 # --- ТВОЯ ОСНОВНАЯ ФУНКЦИЯ (ОСТАВЛЯЙ КАК ЕСТЬ НИЖЕ) ---
 @app.get("/{username}", response_class=HTMLResponse)
 async def user_page(request: Request, username: str):
+    # Если ты дошел до сюда, значит username НЕ равен 'easy' и НЕ равен 'guide'
 
     # ВАЖНО: Добавляем statement_cache_size=0 для работы с пулером Supabase (PgBouncer)
     conn = await asyncpg.connect(DATABASE_URL, statement_cache_size=0)
