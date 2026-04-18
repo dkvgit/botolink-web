@@ -65,7 +65,28 @@ load_dotenv()
 app = FastAPI()
 
 
+# --- СПЕЦИАЛЬНЫЕ ССЫЛКИ (Вставлять СТРОГО перед @app.get("/{username}")) ---
 
+@app.get("/easy")
+async def redirect_to_easy_bot():
+    """Редирект на бота"""
+    return RedirectResponse(url="https://t.me/easy_vietnam_bot")
+
+
+@app.get("/guide", response_class=HTMLResponse)
+async def vietnam_guide_landing(request: Request):
+    """Страница гайда"""
+    try:
+        # Пытаемся отдать красивый шаблон
+        return templates.TemplateResponse(
+            "guide_landing.html",
+            {"request": request, "title": "Гайд по Вьетнаму 2026"}
+        )
+    except Exception:
+        # Если файла еще нет в папке templates, просто выведем текст
+        return HTMLResponse("<h1>Страница гайда скоро будет готова!</h1>")
+    
+    
 # Принудительно регистрируем MIME-типы - ДОБАВЬ ЭТО СРАЗУ ПОСЛЕ ИМПОРТОВ!
 mimetypes.add_type('image/jpeg', '.jpg')
 mimetypes.add_type('image/jpeg', '.jpeg')
@@ -524,26 +545,7 @@ def get_icon_class(icon_name, link_type, url, pay_details):
     # Абсолютный дефолт
     return {'class': 'fas fa-link'}
 
-# --- СПЕЦИАЛЬНЫЕ ССЫЛКИ (Вставлять СТРОГО перед @app.get("/{username}")) ---
 
-@app.get("/easy")
-async def redirect_to_easy_bot():
-    """Редирект на бота"""
-    return RedirectResponse(url="https://t.me/easy_vietnam_bot")
-
-
-@app.get("/guide", response_class=HTMLResponse)
-async def vietnam_guide_landing(request: Request):
-    """Страница гайда"""
-    try:
-        # Пытаемся отдать красивый шаблон
-        return templates.TemplateResponse(
-            "guide_landing.html",
-            {"request": request, "title": "Гайд по Вьетнаму 2026"}
-        )
-    except Exception:
-        # Если файла еще нет в папке templates, просто выведем текст
-        return HTMLResponse("<h1>Страница гайда скоро будет готова!</h1>")
 
 
 # --- ТВОЯ ОСНОВНАЯ ФУНКЦИЯ (ОСТАВЛЯЙ КАК ЕСТЬ НИЖЕ) ---
