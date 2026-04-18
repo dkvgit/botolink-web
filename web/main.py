@@ -525,6 +525,25 @@ def get_icon_class(icon_name, link_type, url, pay_details):
 	return {'class': 'fas fa-link'}
 
 
+
+# Прямая ссылка на твоего бота через слэш
+@app.get("/easy")
+async def redirect_to_easy_bot():
+    # Замени 'easy_vietnam_bot' на реальный юзернейм твоего бота
+    return RedirectResponse(url="https://t.me/easy_vietnam_bot")
+
+
+# Ссылка на будущий лендинг гайда
+@app.get("/guide", response_class=HTMLResponse)
+async def vietnam_guide_landing(request: Request):
+    # Убедись, что в web/templates есть файл guide_landing.html
+    return templates.TemplateResponse(
+        "guide_landing.html",
+        {"request": request, "title": "Гайд по Вьетнаму 2026"}
+    )
+
+
+
 @app.get("/{username}", response_class=HTMLResponse)
 async def user_page(request: Request, username: str):
     # ВАЖНО: Добавляем statement_cache_size=0 для работы с пулером Supabase (PgBouncer)
