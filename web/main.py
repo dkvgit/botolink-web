@@ -61,9 +61,6 @@ load_dotenv()
 
 
 
-# Создаем FastAPI приложение
-app = FastAPI()
-
 
 
     
