@@ -542,7 +542,7 @@ async def vietnam_guide_landing(request: Request):
         {"request": request, "title": "Гайд по Вьетнаму 2026"}
     )
 
-
+ 
 
 @app.get("/{username}", response_class=HTMLResponse)
 async def user_page(request: Request, username: str):
