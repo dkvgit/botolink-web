@@ -533,7 +533,7 @@ def get_icon_class(icon_name, link_type, url, pay_details):
 @app.get("/easy", include_in_schema=False)
 async def redirect_to_easy_bot():
     # Редирект на бота. Мы используем RedirectResponse напрямую.
-    return RedirectResponse(url="https://t.me/easyVietnamBot", status_code=307)
+    return RedirectResponse(url="https://t.me/easyVietnamBot", status_code=307) 
 
 
 @app.get("/guide", response_class=HTMLResponse, include_in_schema=False)
