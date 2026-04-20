@@ -706,8 +706,8 @@ async def user_page(request: Request, username: str):
         try:
             # Вариант для НОВЫХ версий (как на Railway)
             return templates.TemplateResponse(
-                name=template_file,
-                context=context_data,
+                name="guide/guide_landing.html",
+                context={"request": request, "title": "Гайд по Вьетнаму 2026"},
                 request=request
             )
         except TypeError:
