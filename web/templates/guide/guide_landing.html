@@ -1,0 +1,1466 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Гайд по Нячангу и переезду во Вьетнам</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Onest:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sand: #F5EDD8;
+    --cream: #FAF6EC;
+    --ocean: #1A6B7C;
+    --ocean-light: #2A8FA5;
+    --ocean-dark: #0D4A58;
+    --coral: #E8654A;
+    --coral-light: #F07A61;
+    --text: #1C1C1C;
+    --text-muted: #6B6355;
+    --white: #FFFFFF;
+    --divider: rgba(26,107,124,0.15);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Onest', sans-serif;
+    background: var(--cream);
+    color: var(--text);
+    overflow-x: hidden;
+  }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    background: var(--ocean-dark);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 70% 50%, rgba(42,143,165,0.25) 0%, transparent 60%),
+                radial-gradient(ellipse at 10% 80%, rgba(232,101,74,0.12) 0%, transparent 50%);
+    pointer-events: none;
+  }
+
+  /* animated wave lines */
+  .hero-waves {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 180px;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .hero-waves svg { width: 200%; height: 100%; animation: wavemove 12s linear infinite; }
+  @keyframes wavemove { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+  .hero-left {
+    padding: 80px 60px 100px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    z-index: 2;
+    animation: fadeSlideUp 0.9s ease both;
+  }
+
+  @keyframes fadeSlideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .hero-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(42,143,165,0.2);
+    border: 1px solid rgba(42,143,165,0.4);
+    color: #7DD4E8;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 7px 16px;
+    border-radius: 100px;
+    margin-bottom: 32px;
+    width: fit-content;
+  }
+
+  .hero-tag::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: #7DD4E8;
+    border-radius: 50%;
+    animation: pulse 2s ease infinite;
+  }
+  @keyframes pulse {
+    0%,100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.7); }
+  }
+
+  .hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(42px, 5vw, 68px);
+    font-weight: 900;
+    line-height: 1.05;
+    color: var(--white);
+    margin-bottom: 8px;
+  }
+
+  .hero-title span {
+    color: #7DD4E8;
+    display: block;
+  }
+
+  .hero-subtitle-line {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(18px, 2vw, 26px);
+    font-weight: 400;
+    font-style: italic;
+    color: rgba(255,255,255,0.55);
+    margin-bottom: 36px;
+    margin-top: 12px;
+  }
+
+  .hero-desc {
+    font-size: 16px;
+    line-height: 1.7;
+    color: rgba(255,255,255,0.7);
+    max-width: 480px;
+    margin-bottom: 48px;
+  }
+
+  .hero-stats {
+    display: flex;
+    gap: 40px;
+    margin-bottom: 48px;
+    animation: fadeSlideUp 0.9s 0.2s ease both;
+  }
+
+  .stat {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--white);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 12px;
+    color: rgba(255,255,255,0.45);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .stat-divider {
+    width: 1px;
+    background: rgba(255,255,255,0.1);
+    align-self: stretch;
+  }
+
+  .hero-cta {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    animation: fadeSlideUp 0.9s 0.35s ease both;
+  }
+
+  .btn-primary {
+    background: var(--coral);
+    color: white;
+    padding: 16px 36px;
+    border-radius: 4px;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    letter-spacing: 0.03em;
+    transition: all 0.25s;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    border: 2px solid var(--coral);
+  }
+
+  .btn-primary:hover {
+    background: var(--coral-light);
+    border-color: var(--coral-light);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(232,101,74,0.35);
+  }
+
+  .btn-outline {
+    background: transparent;
+    color: white;
+    padding: 16px 36px;
+    border-radius: 4px;
+    font-size: 15px;
+    font-weight: 500;
+    text-decoration: none;
+    letter-spacing: 0.03em;
+    transition: all 0.25s;
+    border: 2px solid rgba(255,255,255,0.25);
+  }
+
+  .btn-outline:hover {
+    border-color: rgba(255,255,255,0.6);
+    background: rgba(255,255,255,0.07);
+  }
+
+  .hero-right {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 60px 100px 20px;
+    z-index: 2;
+  }
+
+  /* Mockup book */
+  .book-mockup {
+    position: relative;
+    width: 320px;
+    animation: floatBook 5s ease-in-out infinite, fadeSlideUp 0.9s 0.1s ease both;
+  }
+
+  @keyframes floatBook {
+    0%,100% { transform: translateY(0) rotate(-2deg); }
+    50% { transform: translateY(-18px) rotate(-2deg); }
+  }
+
+  .book-cover {
+    width: 100%;
+    background: linear-gradient(145deg, var(--ocean) 0%, var(--ocean-dark) 100%);
+    border-radius: 6px 16px 16px 6px;
+    padding: 40px 36px;
+    box-shadow:
+      -8px 8px 0 rgba(0,0,0,0.3),
+      0 40px 80px rgba(0,0,0,0.5),
+      inset 4px 0 8px rgba(255,255,255,0.05);
+    position: relative;
+    overflow: hidden;
+    min-height: 420px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .book-cover::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 22px;
+    background: linear-gradient(90deg, rgba(0,0,0,0.35) 0%, rgba(255,255,255,0.08) 100%);
+    border-radius: 6px 0 0 6px;
+  }
+
+  .book-cover::after {
+    content: '';
+    position: absolute;
+    top: -60px; right: -40px;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(125,212,232,0.12) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+
+  .book-cover-top {
+    position: relative;
+    z-index: 1;
+  }
+
+  .book-location {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(125,212,232,0.7);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .book-location::before {
+    content: '📍';
+    font-size: 12px;
+  }
+
+  .book-cover-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    font-weight: 900;
+    color: white;
+    line-height: 1.2;
+    margin-bottom: 6px;
+  }
+
+  .book-cover-sub {
+    font-size: 12px;
+    color: rgba(255,255,255,0.45);
+    font-weight: 400;
+    line-height: 1.5;
+  }
+
+  .book-cover-divider {
+    width: 40px;
+    height: 2px;
+    background: var(--coral);
+    margin: 20px 0;
+  }
+
+  .book-chapters {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .book-ch {
+    font-size: 10px;
+    color: rgba(255,255,255,0.35);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .book-ch::before {
+    content: '';
+    width: 16px;
+    height: 1px;
+    background: rgba(255,255,255,0.2);
+    flex-shrink: 0;
+  }
+
+  .book-cover-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    position: relative;
+    z-index: 1;
+    margin-top: 24px;
+  }
+
+  .book-author {
+    font-size: 11px;
+    color: rgba(255,255,255,0.5);
+  }
+
+  .book-author strong {
+    display: block;
+    color: rgba(255,255,255,0.8);
+    font-size: 12px;
+    margin-bottom: 2px;
+  }
+
+  .book-badge {
+    background: var(--coral);
+    color: white;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 5px 10px;
+    border-radius: 2px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* shadow under book */
+  .book-shadow {
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 260px;
+    height: 30px;
+    background: rgba(0,0,0,0.4);
+    filter: blur(20px);
+    border-radius: 50%;
+  }
+
+  /* STRIP */
+  .strip {
+    background: var(--ocean);
+    color: white;
+    padding: 18px 0;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .strip-inner {
+    display: flex;
+    gap: 60px;
+    white-space: nowrap;
+    animation: marquee 25s linear infinite;
+    width: max-content;
+  }
+
+  .strip-item {
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.85;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+
+  .strip-dot {
+    width: 5px; height: 5px;
+    background: rgba(255,255,255,0.4);
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  /* SECTION base */
+  section { padding: 100px 0; }
+
+  .container {
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: 0 40px;
+  }
+
+  .section-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ocean);
+    margin-bottom: 16px;
+  }
+
+  .section-tag::before {
+    content: '';
+    width: 24px; height: 2px;
+    background: var(--ocean);
+  }
+
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(32px, 4vw, 52px);
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--text);
+    margin-bottom: 20px;
+  }
+
+  .section-lead {
+    font-size: 17px;
+    line-height: 1.7;
+    color: var(--text-muted);
+    max-width: 580px;
+    margin-bottom: 60px;
+  }
+
+  /* PROBLEM SECTION */
+  .problem-section {
+    background: var(--sand);
+    padding: 90px 0;
+  }
+
+  .problem-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+  }
+
+  .suitcase-visual {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .suitcase-emoji-wrap {
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(26,107,124,0.1) 0%, rgba(26,107,124,0.04) 100%);
+    border: 2px dashed rgba(26,107,124,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 90px;
+    position: relative;
+    animation: floatBook 6s ease-in-out infinite;
+  }
+
+  .questions-float {
+    position: absolute;
+    inset: -40px;
+  }
+
+  .q-bubble {
+    position: absolute;
+    background: white;
+    border: 1px solid rgba(26,107,124,0.15);
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+    white-space: nowrap;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+    animation: bobble 4s ease-in-out infinite;
+  }
+
+  .q-bubble:nth-child(1) { top: 10px; left: -20px; animation-delay: 0s; }
+  .q-bubble:nth-child(2) { top: 30%; right: -30px; animation-delay: 0.7s; }
+  .q-bubble:nth-child(3) { bottom: 20%; left: -35px; animation-delay: 1.4s; }
+  .q-bubble:nth-child(4) { bottom: 5px; right: -10px; animation-delay: 2.1s; }
+
+  @keyframes bobble {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+
+  .problem-text h2 { margin-bottom: 24px; }
+
+  .problem-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 32px;
+  }
+
+  .problem-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--text-muted);
+  }
+
+  .problem-list li::before {
+    content: '→';
+    color: var(--coral);
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .problem-highlight {
+    background: var(--ocean-dark);
+    color: white;
+    border-radius: 6px;
+    padding: 20px 24px;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  .problem-highlight strong { color: #7DD4E8; }
+
+  /* CONTENTS SECTION */
+  .contents-section { background: var(--cream); }
+
+  .contents-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1px;
+    background: var(--divider);
+    border: 1px solid var(--divider);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-top: 60px;
+  }
+
+  .content-item {
+    background: var(--cream);
+    padding: 32px 36px;
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    transition: background 0.2s;
+    position: relative;
+  }
+
+  .content-item:hover { background: white; }
+
+  .content-icon {
+    width: 48px; height: 48px;
+    background: rgba(26,107,124,0.08);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+    border: 1px solid rgba(26,107,124,0.1);
+  }
+
+  .content-info h4 {
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 6px;
+    line-height: 1.3;
+  }
+
+  .content-info p {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.55;
+  }
+
+  /* PROS CONS */
+  .prcons-section {
+    background: var(--sand);
+  }
+
+  .prcons-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    margin-top: 60px;
+  }
+
+  .prcons-col h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .prcons-col.pros h3 { color: var(--ocean); }
+  .prcons-col.cons h3 { color: var(--coral); }
+
+  .prcons-col h3 span {
+    font-size: 28px;
+  }
+
+  .prcons-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .prcons-list li {
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    gap: 16px;
+    padding: 14px 0;
+    border-bottom: 1px solid rgba(0,0,0,0.07);
+    font-size: 14px;
+    line-height: 1.5;
+    align-items: baseline;
+  }
+
+  .prcons-list li:last-child { border-bottom: none; }
+
+  .prcons-list .cat {
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    padding-top: 2px;
+  }
+
+  .prcons-list .val { color: var(--text); }
+
+  /* WHO SECTION */
+  .who-section { background: var(--cream); }
+
+  .who-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-top: 60px;
+  }
+
+  .who-card {
+    background: var(--sand);
+    border-radius: 8px;
+    padding: 36px 30px;
+    border: 1px solid rgba(0,0,0,0.06);
+    transition: transform 0.25s, box-shadow 0.25s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .who-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--ocean);
+    transform: scaleX(0);
+    transition: transform 0.3s;
+    transform-origin: left;
+  }
+
+  .who-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 40px rgba(0,0,0,0.1);
+  }
+
+  .who-card:hover::after { transform: scaleX(1); }
+
+  .who-icon { font-size: 38px; margin-bottom: 20px; }
+
+  .who-card h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 19px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: var(--text);
+  }
+
+  .who-card p {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+  }
+
+  .who-chapters {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .who-chapters li {
+    font-size: 12px;
+    color: var(--ocean);
+    display: flex;
+    gap: 7px;
+    align-items: baseline;
+  }
+
+  .who-chapters li::before {
+    content: '✓';
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  /* AUTHOR */
+  .author-section {
+    background: var(--ocean-dark);
+    color: white;
+    padding: 90px 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .author-section::before {
+    content: '';
+    position: absolute;
+    top: -100px; right: -100px;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(42,143,165,0.2) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  .author-grid {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 60px;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+  }
+
+  .author-avatar {
+    width: 160px; height: 160px;
+    border-radius: 50%;
+    background: rgba(42,143,165,0.25);
+    border: 3px solid rgba(125,212,232,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 64px;
+    flex-shrink: 0;
+  }
+
+  .author-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 32px;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 8px;
+  }
+
+  .author-role {
+    font-size: 13px;
+    color: #7DD4E8;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .author-bio {
+    font-size: 16px;
+    line-height: 1.75;
+    color: rgba(255,255,255,0.7);
+    max-width: 560px;
+    margin-bottom: 28px;
+  }
+
+  .author-facts {
+    display: flex;
+    gap: 32px;
+    flex-wrap: wrap;
+  }
+
+  .author-fact {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: rgba(255,255,255,0.55);
+  }
+
+  .author-fact span:first-child { font-size: 16px; }
+
+  /* PRICE SECTION */
+  .price-section { background: var(--cream); }
+
+  .price-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    margin-top: 60px;
+    max-width: 760px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .price-card {
+    background: white;
+    border-radius: 10px;
+    padding: 40px 36px;
+    border: 2px solid rgba(0,0,0,0.07);
+    text-align: center;
+    position: relative;
+    transition: border-color 0.25s, box-shadow 0.25s;
+  }
+
+  .price-card:hover {
+    border-color: var(--ocean-light);
+    box-shadow: 0 20px 50px rgba(26,107,124,0.12);
+  }
+
+  .price-card.featured {
+    border-color: var(--ocean);
+    box-shadow: 0 20px 60px rgba(26,107,124,0.2);
+  }
+
+  .price-badge {
+    position: absolute;
+    top: -14px; left: 50%; transform: translateX(-50%);
+    background: var(--coral);
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 5px 18px;
+    border-radius: 100px;
+    white-space: nowrap;
+  }
+
+  .price-icon { font-size: 48px; margin-bottom: 20px; display: block; }
+
+  .price-name {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+  }
+
+  .price-amount {
+    font-family: 'Playfair Display', serif;
+    font-size: 48px;
+    font-weight: 900;
+    color: var(--ocean-dark);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .price-currency {
+    font-size: 20px;
+    vertical-align: super;
+    font-family: 'Onest', sans-serif;
+    font-weight: 500;
+  }
+
+  .price-period {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 28px;
+  }
+
+  .price-features {
+    list-style: none;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 32px;
+  }
+
+  .price-features li {
+    display: flex;
+    gap: 10px;
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.45;
+  }
+
+  .price-features li::before {
+    content: '✓';
+    color: var(--ocean);
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .btn-buy {
+    display: block;
+    background: var(--ocean);
+    color: white;
+    padding: 15px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: all 0.25s;
+    border: 2px solid var(--ocean);
+  }
+
+  .btn-buy:hover {
+    background: var(--ocean-light);
+    border-color: var(--ocean-light);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(26,107,124,0.3);
+  }
+
+  .price-card.featured .btn-buy {
+    background: var(--coral);
+    border-color: var(--coral);
+  }
+
+  .price-card.featured .btn-buy:hover {
+    background: var(--coral-light);
+    border-color: var(--coral-light);
+    box-shadow: 0 8px 24px rgba(232,101,74,0.3);
+  }
+
+  /* FOOTER */
+  footer {
+    background: var(--ocean-dark);
+    color: rgba(255,255,255,0.5);
+    padding: 40px 0;
+    text-align: center;
+    font-size: 13px;
+  }
+
+  footer p + p { margin-top: 6px; }
+
+  footer a { color: #7DD4E8; text-decoration: none; }
+
+  /* Scroll fade-in */
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .hero { grid-template-columns: 1fr; min-height: auto; }
+    .hero-right { display: none; }
+    .hero-left { padding: 60px 32px 80px; }
+    .problem-grid, .prcons-grid, .who-cards, .price-grid { grid-template-columns: 1fr; }
+    .author-grid { grid-template-columns: 1fr; text-align: center; }
+    .author-facts { justify-content: center; }
+    .contents-grid { grid-template-columns: 1fr; }
+    .hero-stats { gap: 24px; }
+    section { padding: 60px 0; }
+    .container { padding: 0 24px; }
+    .hero-cta { flex-direction: column; }
+    .btn-primary, .btn-outline { text-align: center; justify-content: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-left">
+    <div class="hero-tag">Актуально · Май 2026</div>
+    <h1 class="hero-title">
+      Гайд по<br>
+      <span>Нячангу</span>
+    </h1>
+    <p class="hero-subtitle-line">и переезду во Вьетнам</p>
+    <p class="hero-desc">
+      Полный алгоритм действий от первого дня до долгосрочного проживания. Для туристов, экспатов и тех, кто думает о ПМЖ.
+    </p>
+
+    <div class="hero-stats">
+      <div class="stat">
+        <span class="stat-num">15</span>
+        <span class="stat-label">разделов</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat">
+        <span class="stat-num">200+</span>
+        <span class="stat-label">страниц</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat">
+        <span class="stat-num">2026</span>
+        <span class="stat-label">актуально</span>
+      </div>
+    </div>
+
+    <div class="hero-cta">
+      <a href="#price" class="btn-primary">
+        Узнать стоимость
+        <span>→</span>
+      </a>
+      <a href="#contents" class="btn-outline">Что внутри</a>
+    </div>
+  </div>
+
+  <div class="hero-right">
+    <div class="book-mockup">
+      <div class="book-cover">
+        <div class="book-cover-top">
+          <div class="book-location">Нячанг, Вьетнам</div>
+          <div class="book-cover-title">Гайд по<br>Нячангу</div>
+          <div class="book-cover-sub">Переезд · Жизнь · ПМЖ<br>для граждан СНГ</div>
+          <div class="book-cover-divider"></div>
+          <div class="book-chapters">
+            <div class="book-ch">Визы и документы</div>
+            <div class="book-ch">Жильё и районы</div>
+            <div class="book-ch">Бюджет и цены</div>
+            <div class="book-ch">Транспорт и байки</div>
+            <div class="book-ch">Еда и безопасность</div>
+            <div class="book-ch">Психология адаптации</div>
+          </div>
+        </div>
+        <div class="book-cover-footer">
+          <div class="book-author">
+            <strong>Денис Кабаков</strong>
+            Тревел-эксперт
+          </div>
+          <div class="book-badge">PDF</div>
+        </div>
+      </div>
+      <div class="book-shadow"></div>
+    </div>
+  </div>
+
+  <div class="hero-waves">
+    <svg viewBox="0 0 1440 120" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0,60 C180,100 360,20 540,60 C720,100 900,20 1080,60 C1260,100 1440,20 1440,60 L1440,120 L0,120Z" fill="rgba(255,255,255,0.04)"/>
+      <path d="M0,80 C200,40 400,100 600,70 C800,40 1000,90 1200,60 C1300,46 1380,70 1440,75 L1440,120 L0,120Z" fill="rgba(255,255,255,0.03)"/>
+    </svg>
+  </div>
+</section>
+
+<!-- MARQUEE STRIP -->
+<div class="strip">
+  <div class="strip-inner">
+    <div class="strip-item"><span class="strip-dot"></span>Актуальные цены 2026</div>
+    <div class="strip-item"><span class="strip-dot"></span>Визы и продление</div>
+    <div class="strip-item"><span class="strip-dot"></span>Аренда жилья</div>
+    <div class="strip-item"><span class="strip-dot"></span>Байки и транспорт</div>
+    <div class="strip-item"><span class="strip-dot"></span>Русскоязычное комьюнити</div>
+    <div class="strip-item"><span class="strip-dot"></span>Переводы денег</div>
+    <div class="strip-item"><span class="strip-dot"></span>Медицина и страховка</div>
+    <div class="strip-item"><span class="strip-dot"></span>Сезон дождей и тайфуны</div>
+    <div class="strip-item"><span class="strip-dot"></span>Психология адаптации</div>
+    <div class="strip-item"><span class="strip-dot"></span>Актуальные цены 2026</div>
+    <div class="strip-item"><span class="strip-dot"></span>Визы и продление</div>
+    <div class="strip-item"><span class="strip-dot"></span>Аренда жилья</div>
+    <div class="strip-item"><span class="strip-dot"></span>Байки и транспорт</div>
+    <div class="strip-item"><span class="strip-dot"></span>Русскоязычное комьюнити</div>
+    <div class="strip-item"><span class="strip-dot"></span>Переводы денег</div>
+    <div class="strip-item"><span class="strip-dot"></span>Медицина и страховка</div>
+    <div class="strip-item"><span class="strip-dot"></span>Сезон дождей и тайфуны</div>
+    <div class="strip-item"><span class="strip-dot"></span>Психология адаптации</div>
+  </div>
+</div>
+
+<!-- PROBLEM SECTION -->
+<section class="problem-section">
+  <div class="container">
+    <div class="problem-grid">
+      <div class="suitcase-visual">
+        <div class="suitcase-emoji-wrap">🧳</div>
+        <div class="questions-float">
+          <div class="q-bubble">Какая виза нужна?</div>
+          <div class="q-bubble">Где снять жильё?</div>
+          <div class="q-bubble">Как перевести деньги?</div>
+          <div class="q-bubble">Права на байк?</div>
+        </div>
+      </div>
+
+      <div class="problem-text reveal">
+        <div class="section-tag">Проблема</div>
+        <h2 class="section-title">Нячанг выглядит<br>проще, чем есть</h2>
+        <ul class="problem-list">
+          <li>Какую визу выбрать и как её продлевать</li>
+          <li>Где искать жильё и как не попасть на развод</li>
+          <li>Как переводить деньги из России, Казахстана, Украины</li>
+          <li>Можно ли водить байк без вьетнамских прав</li>
+          <li>Что делать при ДТП — страховка не работает без прав</li>
+          <li>Как устроена медицина и где нормально лечиться</li>
+          <li>Как пережить культурный шок и одиночество</li>
+        </ul>
+        <div class="problem-highlight">
+          Большинство людей собирают эту информацию по кусочкам месяцами. И часто совершают ошибки, <strong>которые стоят денег</strong>.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTENTS SECTION -->
+<section class="contents-section" id="contents">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-tag">Содержание</div>
+      <h2 class="section-title">Что внутри гайда?</h2>
+      <p class="section-lead">15 разделов — от визы и первых 3 дней до психологии адаптации и жизни насовсем. Каждый раздел — алгоритм действий, а не общие слова.</p>
+    </div>
+
+    <div class="contents-grid reveal">
+      <div class="content-item">
+        <div class="content-icon">🛂</div>
+        <div class="content-info">
+          <h4>Визы и документы</h4>
+          <p>Типы виз, e-visa, правила въезда, продление каждые 1–3 месяца, регистрация</p>
+        </div>
+      </div>
+      <div class="content-item">
+        <div class="content-icon">📱</div>
+        <div class="content-info">
+          <h4>Первые 3 дня в Нячанге</h4>
+          <p>Обмен денег, SIM-карта, Grab, навигация — что делать сразу по прилёту</p>
+        </div>
+      </div>
+      <div class="content-item">
+        <div class="content-icon">🏠</div>
+        <div class="content-info">
+          <h4>Жильё и районы</h4>
+          <p>Где жить, цены от $200/мес, как арендовать безопасно, отличия районов</p>
+        </div>
+      </div>
+      <div class="content-item">
+        <div class="content-icon">💰</div>
+        <div class="content-info">
+          <h4>Бюджет и цены</h4>
+          <p>Реальные расходы на жизнь, курс донга, обмен валют, переводы из СНГ</p>
+        </div>
+      </div>
+      <div class="content-item">
+        <div class="content-icon">🏍️</div>
+        <div class="content-info">
+          <h4>Транспорт и байки</h4>
+          <p>Grab, аренда байка, вьетнамские права, штрафы 2,5–5,5 млн ₫, ДТП</p>
+        </div>
+      </div>
+      <div class="content-item">
+        <div class="content-icon">🍜</div>
+        <div class="content-info">
+          <h4>Еда и рестораны</h4>
+          <p>Уличная еда от 40 000 ₫, морепродукты, где есть без риска отравления</p>
+        </div>
+      </div>
+      <div class="content-item">
+        <div class="content-icon">🏖️</div>
+        <div class="content-info">
+          <h4>Пляжи и активности</h4>
+          <p>6+ км центрального пляжа, острова, экскурсии, водные активности</p>
+        </div>
+      </div>
+      <div class="content-item">
+        <div class="content-icon">⚠️</div>
+        <div class="content-info">
+          <h4>Разводы и безопасность</h4>
+          <p>Типичные схемы: байки со скрытыми поломками, подмена купюр, фейковые туры</p>
+        </div>
+      </div>
+      <div class="content-item">
+        <div class="content-icon">🌦️</div>
+        <div class="content-info">
+          <h4>Сезонные нюансы</h4>
+          <p>Тет, сезон дождей (окт–дек), тайфуны, смог фев–апрель, комары</p>
+        </div>
+      </div>
+      <div class="content-item">
+        <div class="content-icon">💬</div>
+        <div class="content-info">
+          <h4>Языковой барьер</h4>
+          <p>Базовые вьетнамские фразы, как общаться с местными, приложения</p>
+        </div>
+      </div>
+      <div class="content-item">
+        <div class="content-icon">🏦</div>
+        <div class="content-info">
+          <h4>Связь с домом</h4>
+          <p>Переводы для RU/UA/KZ/BY, блокировка карт, работающие схемы 2026</p>
+        </div>
+      </div>
+      <div class="content-item">
+        <div class="content-icon">🤝</div>
+        <div class="content-info">
+          <h4>Жизнь в Нячанге насовсем</h4>
+          <p>Русскоязычное комьюнити, что бесит после 3 месяцев, реальная жизнь экспата</p>
+        </div>
+      </div>
+      <div class="content-item">
+        <div class="content-icon">🧠</div>
+        <div class="content-info">
+          <h4>Психология и адаптация</h4>
+          <p>Культурный шок, одиночество, как не сломаться в первые месяцы</p>
+        </div>
+      </div>
+      <div class="content-item">
+        <div class="content-icon">🏥</div>
+        <div class="content-info">
+          <h4>Медицина и страховка</h4>
+          <p>Vinmec — единственная международная клиника. Уровень скорой, аптеки, страховки</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROS/CONS -->
+<section class="prcons-section">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-tag">Честно о Нячанге</div>
+      <h2 class="section-title">Плюсы и минусы</h2>
+      <p class="section-lead">Без прикрас — только то, что реально важно знать до переезда.</p>
+    </div>
+
+    <div class="prcons-grid reveal">
+      <div class="prcons-col pros">
+        <h3><span>✅</span> Плюсы</h3>
+        <ul class="prcons-list">
+          <li><span class="cat">Климат</span><span class="val">Тёплое море 8–9 мес, 26–32°C в сухой сезон</span></li>
+          <li><span class="cat">Цены</span><span class="val">Еда от 40 000 ₫, аренда квартиры от $200–350/мес</span></li>
+          <li><span class="cat">Пляж</span><span class="val">6+ км, бесплатный, лежаки 100–150 тыс ₫/день</span></li>
+          <li><span class="cat">Комьюнити</span><span class="val">Крупное русскоязычное сообщество, вывески на русском</span></li>
+          <li><span class="cat">Транспорт</span><span class="val">Grab дёшево, байк в аренду от 120–180 тыс ₫/день</span></li>
+          <li><span class="cat">Еда</span><span class="val">Свежие морепродукты, уличная еда, фрукты круглый год</span></li>
+        </ul>
+      </div>
+      <div class="prcons-col cons">
+        <h3><span>❌</span> Минусы</h3>
+        <ul class="prcons-list">
+          <li><span class="cat">Жара</span><span class="val">30–35°C 8 месяцев. Сезон дождей октябрь–декабрь</span></li>
+          <li><span class="cat">Хаос</span><span class="val">Шум байков, стройки, переходить дорогу — стресс</span></li>
+          <li><span class="cat">Бюрократия</span><span class="val">Регистрация, виза каждые 1–3 мес, штрафы за права</span></li>
+          <li><span class="cat">Воздух</span><span class="val">Смог фев–апрель от сжигания рисовых полей</span></li>
+          <li><span class="cat">Продукты</span><span class="val">Нет кефира, творога, нормального хлеба. Импортное — дорого</span></li>
+          <li><span class="cat">Медицина</span><span class="val">Одна международная клиника. Скорая не западного уровня</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHO IS IT FOR -->
+<section class="who-section">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-tag">Для кого</div>
+      <h2 class="section-title">Как читать гайд</h2>
+      <p class="section-lead">Гайд построен как алгоритм. Читайте нужные разделы в зависимости от ваших планов.</p>
+    </div>
+
+    <div class="who-cards">
+      <div class="who-card reveal">
+        <div class="who-icon">✈️</div>
+        <h3>Краткосрочный тур</h3>
+        <p>1–2 недели. Отдых, знакомство с городом, минимум бюрократии.</p>
+        <ul class="who-chapters">
+          <li>Визы и документы</li>
+          <li>Первые 3 дня</li>
+          <li>Жильё и районы</li>
+          <li>Бюджет и цены</li>
+          <li>Еда и пляжи</li>
+          <li>Разводы и безопасность</li>
+        </ul>
+      </div>
+      <div class="who-card reveal">
+        <div class="who-icon">🏡</div>
+        <h3>Долгосрочно 1+ мес</h3>
+        <p>Жизнь и работа на месяц и более. Нужны все практические детали.</p>
+        <ul class="who-chapters">
+          <li>Всё из тура +</li>
+          <li>Транспорт и байки</li>
+          <li>Сезонные нюансы</li>
+          <li>Языковой барьер</li>
+          <li>Связь с домом</li>
+          <li>Психология адаптации</li>
+        </ul>
+      </div>
+      <div class="who-card reveal">
+        <div class="who-icon">🌏</div>
+        <h3>Переезд / ПМЖ</h3>
+        <p>Решили переезжать. Читайте все 15 разделов от начала до конца.</p>
+        <ul class="who-chapters">
+          <li>Все 15 разделов</li>
+          <li>Жизнь насовсем</li>
+          <li>Медицина и страховки</li>
+          <li>Психология и адаптация</li>
+          <li>Комьюнити и контакты</li>
+          <li>Реальные цены ПМЖ</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- AUTHOR -->
+<section class="author-section">
+  <div class="container">
+    <div class="author-grid reveal">
+      <div class="author-avatar">👤</div>
+      <div>
+        <div class="author-role">Автор гайда</div>
+        <h2 class="author-name">Денис Кабаков</h2>
+        <p class="author-bio">
+          Тревел-эксперт, специализирующийся на подготовке структурированных, фактологических материалов для русскоязычных путешественников из стран СНГ. Информация собрана из открытых источников, официальных данных и проверенных отчётов за 2025–2026 годы.
+        </p>
+        <p class="author-bio" style="margin-bottom: 0;">
+          Гайд не содержит личных историй и эмоциональных оценок. Каждый раздел построен как <strong style="color: #7DD4E8;">алгоритм действий</strong> — от первого дня до долгосрочного проживания.
+        </p>
+        <div class="author-facts" style="margin-top: 28px;">
+          <div class="author-fact"><span>📅</span><span>Актуально на май 2026</span></div>
+          <div class="author-fact"><span>🌍</span><span>Для граждан RU / UA / KZ / BY / UZ</span></div>
+          <div class="author-fact"><span>📄</span><span>Формат PDF</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICE -->
+<section class="price-section" id="price">
+  <div class="container" style="text-align: center;">
+    <div class="reveal">
+      <div class="section-tag" style="justify-content: center;">Оформить</div>
+      <h2 class="section-title">Купить гайд</h2>
+      <p class="section-lead" style="margin: 0 auto 0;">Мгновенная доставка на e-mail после оплаты. Один раз — используете бесконечно.</p>
+    </div>
+
+    <div class="price-grid reveal">
+      <div class="price-card">
+        <span class="price-icon">📄</span>
+        <div class="price-name">Базовый</div>
+        <div class="price-amount">
+          <span class="price-currency">$</span>19
+        </div>
+        <div class="price-period">Полная версия гайда · PDF</div>
+        <ul class="price-features">
+          <li>Все 15 разделов гайда</li>
+          <li>Актуальные цены на май 2026</li>
+          <li>Таблицы, чеклисты, контакты</li>
+          <li>Мгновенная доставка на e-mail</li>
+        </ul>
+        <a href="#" class="btn-buy">Купить PDF</a>
+      </div>
+
+      <div class="price-card featured">
+        <div class="price-badge">Популярный</div>
+        <span class="price-icon">💬</span>
+        <div class="price-name">С поддержкой</div>
+        <div class="price-amount">
+          <span class="price-currency">$</span>39
+        </div>
+        <div class="price-period">Гайд + закрытый Telegram-чат</div>
+        <ul class="price-features">
+          <li>Всё из базового тарифа</li>
+          <li>Доступ в закрытый Telegram-чат</li>
+          <li>Задать вопрос по своей ситуации</li>
+          <li>Советы по переезду от автора</li>
+        </ul>
+        <a href="#" class="btn-buy">Купить с чатом</a>
+      </div>
+    </div>
+
+    <p style="margin-top: 32px; font-size: 13px; color: var(--text-muted);">
+      Оплата картой · Мгновенная доставка · Все цены в USD
+    </p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <p>© 2026 Гайд по Нячангу · Денис Кабаков</p>
+    <p>Информация актуальна на май 2026. <a href="#">Политика конфиденциальности</a></p>
+  </div>
+</footer>
+
+<script>
+  // Scroll reveal
+  const revealEls = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+  revealEls.forEach(el => observer.observe(el));
+
+  // Stagger children in who-cards and contents-grid
+  document.querySelectorAll('.who-card.reveal, .content-item').forEach((el, i) => {
+    el.style.transitionDelay = `${(i % 3) * 0.1}s`;
+  });
+</script>
+</body>
+</html>
