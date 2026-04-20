@@ -538,15 +538,13 @@ async def redirect_to_easy_bot():
 
 @app.get("/guide", response_class=HTMLResponse, include_in_schema=False)
 async def vietnam_guide_landing(request: Request):
-    # Прямая проверка: если есть файл - отдаем, если нет - пишем текст
     try:
-        return templates.TemplateResponse(
-            "guide/guide_landing.html",
-            {"request": request, "title": "Гайд по Вьетнаму 2026"}
-        )
+        file_path = os.path.join(current_dir, "templates", "guide", "guide_landing.html")
+        with open(file_path, "r", encoding="utf-8") as f:
+            content = f.read()
+        return HTMLResponse(content=content)
     except Exception as e:
         return HTMLResponse(f"<h1>Ошибка: {e}</h1>")
-
 
 # --- ТВОЯ ОСНОВНАЯ ФУНКЦИЯ (ОСТАВЛЯЙ КАК ЕСТЬ НИЖЕ) ---
 @app.get("/{username}", response_class=HTMLResponse)
