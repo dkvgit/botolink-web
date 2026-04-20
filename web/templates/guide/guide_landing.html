@@ -10,6 +10,15 @@
 <!-- ПОДКЛЮЧЕНИЕ CSS -->
 <link rel="stylesheet" href="/static/style.css">
 
+
+  <script>
+    // Отключаем перехват ссылок
+    document.addEventListener('click', function(e) {
+      if (e.target.closest('a') || e.target.closest('form')) {
+        e.stopPropagation();
+      }
+    });
+  </script>
 </head>
 <body>
 <!-- Ваш контент -->
@@ -17,7 +26,7 @@
 <!-- HERO -->
 <section class="hero">
   <div class="hero-left">
-    <div class="hero-tag">Актуально · Май 2026</div>
+    <div class="hero-tag">Актуально · 2026 год</div>
     <h1 class="hero-title">
       Гайд по<br>
       <span>Нячангу</span>
@@ -59,7 +68,8 @@
         <div class="book-cover-top">
           <div class="book-location">Нячанг, Вьетнам</div>
           <div class="book-cover-title">Гайд по<br>Нячангу</div>
-          <div class="book-cover-sub">Переезд · Жизнь · ПМЖ<br>для граждан СНГ</div>
+          <div class="book-cover-sub">Отдых · Зимовка · Переезд · ПМЖ</div>
+          <div style="font-size: 10px; color: rgba(255,255,255,0.4); margin-top: 8px;">Как переехать и не пожалеть</div>
           <div class="book-cover-divider"></div>
           <div class="book-chapters">
             <div class="book-ch">Визы и документы</div>
@@ -136,7 +146,7 @@
           <li>Где искать жильё и как не попасть на развод</li>
           <li>Как переводить деньги из России, Казахстана, Украины</li>
           <li>Можно ли водить байк без вьетнамских прав</li>
-          <li>Что делать при ДТП — страховка не работает без прав</li>
+          <li>Что делать при ДТП - страховка не работает без прав</li>
           <li>Как устроена медицина и где нормально лечиться</li>
           <li>Как пережить культурный шок и одиночество</li>
         </ul>
@@ -154,7 +164,7 @@
     <div class="reveal">
       <div class="section-tag">Содержание</div>
       <h2 class="section-title">Что внутри гайда?</h2>
-      <p class="section-lead">15 разделов — от визы и первых 3 дней до психологии адаптации и жизни насовсем. Каждый раздел — алгоритм действий, а не общие слова.</p>
+      <p class="section-lead">15 разделов - от визы и первых 3 дней до психологии адаптации и жизни насовсем. Каждый раздел - алгоритм действий, а не общие слова.</p>
     </div>
 
     <div class="contents-grid reveal">
@@ -169,7 +179,7 @@
         <div class="content-icon">📱</div>
         <div class="content-info">
           <h4>Первые 3 дня в Нячанге</h4>
-          <p>Обмен денег, SIM-карта, Grab, навигация — что делать сразу по прилёту</p>
+          <p>Обмен денег, SIM-карта, Grab, навигация - что делать сразу по прилёту</p>
         </div>
       </div>
       <div class="content-item">
@@ -253,7 +263,7 @@
         <div class="content-icon">🏥</div>
         <div class="content-info">
           <h4>Медицина и страховка</h4>
-          <p>Vinmec — единственная международная клиника. Уровень скорой, аптеки, страховки</p>
+          <p>Vinmec - единственная международная клиника. Уровень скорой, аптеки, страховки</p>
         </div>
       </div>
     </div>
@@ -266,7 +276,7 @@
     <div class="reveal">
       <div class="section-tag">Честно о Нячанге</div>
       <h2 class="section-title">Плюсы и минусы</h2>
-      <p class="section-lead">Без прикрас — только то, что реально важно знать до переезда.</p>
+      <p class="section-lead">Без прикрас - только то, что реально важно знать до переезда.</p>
     </div>
 
     <div class="prcons-grid reveal">
@@ -285,10 +295,10 @@
         <h3><span>❌</span> Минусы</h3>
         <ul class="prcons-list">
           <li><span class="cat">Жара</span><span class="val">30–35°C 8 месяцев. Сезон дождей октябрь–декабрь</span></li>
-          <li><span class="cat">Хаос</span><span class="val">Шум байков, стройки, переходить дорогу — стресс</span></li>
+          <li><span class="cat">Хаос</span><span class="val">Шум байков, стройки, переходить дорогу - стресс</span></li>
           <li><span class="cat">Бюрократия</span><span class="val">Регистрация, виза каждые 1–3 мес, штрафы за права</span></li>
           <li><span class="cat">Воздух</span><span class="val">Смог фев–апрель от сжигания рисовых полей</span></li>
-          <li><span class="cat">Продукты</span><span class="val">Нет кефира, творога, нормального хлеба. Импортное — дорого</span></li>
+          <li><span class="cat">Продукты</span><span class="val">Нет кефира, творога, нормального хлеба. Импортное - дорого</span></li>
           <li><span class="cat">Медицина</span><span class="val">Одна международная клиника. Скорая не западного уровня</span></li>
         </ul>
       </div>
@@ -300,49 +310,50 @@
 <section class="who-section">
   <div class="container">
     <div class="reveal">
-      <div class="section-tag">Для кого</div>
-      <h2 class="section-title">Как читать гайд</h2>
-      <p class="section-lead">Гайд построен как алгоритм. Читайте нужные разделы в зависимости от ваших планов.</p>
+      <div class="section-tag">Как читать</div>
+      <h2 class="section-title">Структура гайда</h2>
+      <p class="section-lead">Гайд состоит из 15 разделов. Читайте нужные разделы в зависимости от ваших планов.</p>
     </div>
 
     <div class="who-cards">
       <div class="who-card reveal">
         <div class="who-icon">✈️</div>
-        <h3>Краткосрочный тур</h3>
-        <p>1–2 недели. Отдых, знакомство с городом, минимум бюрократии.</p>
+        <h3>Краткосрочный тур (1-2 недели)</h3>
+        <p>Для отдыха и знакомства с городом</p>
         <ul class="who-chapters">
-          <li>Визы и документы</li>
-          <li>Первые 3 дня</li>
-          <li>Жильё и районы</li>
-          <li>Бюджет и цены</li>
-          <li>Еда и пляжи</li>
-          <li>Разводы и безопасность</li>
+          <li>2. Визы и документы</li>
+          <li>3. Первые 3 дня в Нячанге</li>
+          <li>4. Жильё и районы</li>
+          <li>5. Бюджет и цены</li>
+          <li>7. Еда и рестораны</li>
+          <li>8. Пляжи и активности</li>
+          <li>10. Разводы и безопасность</li>
         </ul>
       </div>
+
       <div class="who-card reveal">
         <div class="who-icon">🏡</div>
-        <h3>Долгосрочно 1+ мес</h3>
-        <p>Жизнь и работа на месяц и более. Нужны все практические детали.</p>
+        <h3>Долгосрочно (от 1 месяца до года)</h3>
+        <p>Для жизни и работы</p>
         <ul class="who-chapters">
-          <li>Всё из тура +</li>
-          <li>Транспорт и байки</li>
-          <li>Сезонные нюансы</li>
-          <li>Языковой барьер</li>
-          <li>Связь с домом</li>
-          <li>Психология адаптации</li>
+          <li>➕ Добавить к прочитанному:</li>
+          <li>6. Транспорт и байки</li>
+          <li>9. Сезонные нюансы</li>
+          <li>11. Языковой барьер</li>
+          <li>12. Связь с домом</li>
+          <li>13. Жизнь в Нячанге</li>
+          <li>14. Психология и адаптация</li>
+          <li>15. Контакты и апгрейд</li>
         </ul>
       </div>
+
       <div class="who-card reveal">
         <div class="who-icon">🌏</div>
         <h3>Переезд / ПМЖ</h3>
-        <p>Решили переезжать. Читайте все 15 разделов от начала до конца.</p>
+        <p>Полный переезд насовсем</p>
         <ul class="who-chapters">
-          <li>Все 15 разделов</li>
-          <li>Жизнь насовсем</li>
-          <li>Медицина и страховки</li>
-          <li>Психология и адаптация</li>
-          <li>Комьюнити и контакты</li>
-          <li>Реальные цены ПМЖ</li>
+          <li>📖 Читать все 15 разделов</li>
+          <li>от начала до конца</li>
         </ul>
       </div>
     </div>
@@ -353,7 +364,9 @@
 <section class="author-section">
   <div class="container">
     <div class="author-grid reveal">
-      <div class="author-avatar">👤</div>
+      <div class="author-avatar">
+        <img src="/static/avatars/den.png" alt="Денис Кабаков" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+      </div>
       <div>
         <div class="author-role">Автор гайда</div>
         <h2 class="author-name">Денис Кабаков</h2>
@@ -361,10 +374,10 @@
           Тревел-эксперт, специализирующийся на подготовке структурированных, фактологических материалов для русскоязычных путешественников из стран СНГ. Информация собрана из открытых источников, официальных данных и проверенных отчётов за 2025–2026 годы.
         </p>
         <p class="author-bio" style="margin-bottom: 0;">
-          Гайд не содержит личных историй и эмоциональных оценок. Каждый раздел построен как <strong style="color: #7DD4E8;">алгоритм действий</strong> — от первого дня до долгосрочного проживания.
+          Гайд не содержит личных историй и эмоциональных оценок. Каждый раздел построен как <strong style="color: #7DD4E8;">алгоритм действий</strong> - от первого дня до долгосрочного проживания.
         </p>
         <div class="author-facts" style="margin-top: 28px;">
-          <div class="author-fact"><span>📅</span><span>Актуально на май 2026</span></div>
+          <div class="author-fact"><span>📅</span><span>Актуально на 2026 год</span></div>
           <div class="author-fact"><span>🌍</span><span>Для граждан RU / UA / KZ / BY / UZ</span></div>
           <div class="author-fact"><span>📄</span><span>Формат PDF</span></div>
         </div>
@@ -379,7 +392,7 @@
     <div class="reveal">
       <div class="section-tag" style="justify-content: center;">Оформить</div>
       <h2 class="section-title">Купить гайд</h2>
-      <p class="section-lead" style="margin: 0 auto 0;">Мгновенная доставка на e-mail после оплаты. Один раз — используете бесконечно.</p>
+      <p class="section-lead" style="margin: 0 auto 0;">Мгновенная доставка на e-mail после оплаты. Один раз - используете бесконечно.</p>
     </div>
 
     <div class="price-grid reveal">
@@ -387,38 +400,59 @@
         <span class="price-icon">📄</span>
         <div class="price-name">Базовый</div>
         <div class="price-amount">
-          <span class="price-currency">$</span>19
+          <span class="price-currency">$</span>9
         </div>
-        <div class="price-period">Полная версия гайда · PDF</div>
+        <div class="price-period">Полная версия гайда</div>
         <ul class="price-features">
           <li>Все 15 разделов гайда</li>
-          <li>Актуальные цены на май 2026</li>
+          <li>Актуальные цены на 2026 год</li>
           <li>Таблицы, чеклисты, контакты</li>
-          <li>Мгновенная доставка на e-mail</li>
+          <li>Доступ в браузере и PDF</li>
         </ul>
-        <a href="#" class="btn-buy">Купить PDF</a>
+        <a href="#" class="btn-buy">Купить гайд</a>
       </div>
 
       <div class="price-card featured">
-        <div class="price-badge">Популярный</div>
-        <span class="price-icon">💬</span>
+        <div class="price-badge">⭐ Популярный</div>
+        <span class="price-icon">👨‍🏫</span>
         <div class="price-name">С поддержкой</div>
         <div class="price-amount">
-          <span class="price-currency">$</span>39
+          <span class="price-currency">$</span>19
         </div>
-        <div class="price-period">Гайд + закрытый Telegram-чат</div>
+        <div class="price-period">Полная версия гайда + Личное сопровождение</div>
         <ul class="price-features">
-          <li>Всё из базового тарифа</li>
-          <li>Доступ в закрытый Telegram-чат</li>
-          <li>Задать вопрос по своей ситуации</li>
-          <li>Советы по переезду от автора</li>
+          <li>📖 Всё из базового тарифа</li>
+          <li>💬 Личное общение с автором</li>
+          <li>📋 Консультация по вашей ситуации</li>
+          <li>🎯 Пошаговый разбор вашего кейса</li>
         </ul>
-        <a href="#" class="btn-buy">Купить с чатом</a>
+        <a href="#" class="btn-buy">Купить с поддержкой</a>
+      </div>
+
+      <div class="price-card">
+        <div class="price-badge">👑 VIP</div>
+        <span class="price-icon">🤝</span>
+        <div class="price-name">Личная встреча</div>
+        <div class="price-amount">
+          <span class="price-currency">$</span>Договорная
+        </div>
+        <div class="price-period">Индивидуальный подход</div>
+        <ul class="price-features">
+          <li>✨ Всё из тарифа "С поддержкой"</li>
+          <li>✈️ Встреча в аэропорту Камрань</li>
+          <li>🏨 Размещение в отеле</li>
+          <li>🏠 Поиск долгосрочного жилья</li>
+          <li>📱 Оформление SIM-карты</li>
+          <li>🏦 Открытие счёта в банке</li>
+          <li>🛵 Аренда транспорта</li>
+        </ul>
+        <button onclick="window.open('https://t.me/dekavetel', '_blank')" class="btn-buy" style="margin-bottom: 10px;">💬 Telegram</button>
+        <button onclick="window.location.href='mailto:dkvkabakov@gmail.com'" class="btn-buy">📧 Email</button>
       </div>
     </div>
 
     <p style="margin-top: 32px; font-size: 13px; color: var(--text-muted);">
-      Оплата картой · Мгновенная доставка · Все цены в USD
+      💳 Оплата картой · ⚡ Мгновенная доставка · 💬 Личное сопровождение · 🤝 VIP встреча
     </p>
   </div>
 </section>
@@ -427,7 +461,7 @@
 <footer>
   <div class="container">
     <p>© 2026 Гайд по Нячангу · Денис Кабаков</p>
-    <p>Информация актуальна на май 2026. <a href="#">Политика конфиденциальности</a></p>
+    <p>Информация актуальна на 2026 год. <a href="#">Политика конфиденциальности</a></p>
   </div>
 </footer>
 
@@ -450,5 +484,34 @@
     el.style.transitionDelay = `${(i % 3) * 0.1}s`;
   });
 </script>
+
+
+<button onclick="scrollToTop()" id="scrollTopBtn" title="Наверх">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 19V5M5 12l7-7 7 7"/>
+    </svg>
+</button>
+
+
+<script>
+    // Показываем/скрываем кнопку при прокрутке
+    window.addEventListener('scroll', function() {
+        var scrollBtn = document.getElementById('scrollTopBtn');
+        if (window.scrollY > 300) {
+            scrollBtn.classList.add('show');
+        } else {
+            scrollBtn.classList.remove('show');
+        }
+    });
+
+    // Функция прокрутки наверх
+    function scrollToTop() {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    }
+</script>
+
 </body>
 </html>
