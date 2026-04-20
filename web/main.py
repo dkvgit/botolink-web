@@ -545,7 +545,7 @@ async def vietnam_guide_landing(request: Request):
             {"request": request, "title": "Гайд по Вьетнаму 2026"}
         )
     except Exception as e:
-        return HTMLResponse(f"<h1>Ошибка: {e}</h1>")
+        return HTMLResponse(f"<h1>Ошибка: {e}</h1>") 
 
 
 # --- ТВОЯ ОСНОВНАЯ ФУНКЦИЯ (ОСТАВЛЯЙ КАК ЕСТЬ НИЖЕ) ---
