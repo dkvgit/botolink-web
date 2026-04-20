@@ -541,7 +541,7 @@ async def vietnam_guide_landing(request: Request):
     # Прямая проверка: если есть файл - отдаем, если нет - пишем текст
     try:
         return templates.TemplateResponse(
-            "guide_landing.html",
+            "guide/guide_landing.html",
             {"request": request, "title": "Гайд по Вьетнаму 2026"}
         )
     except Exception:
