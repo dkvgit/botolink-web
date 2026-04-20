@@ -544,8 +544,8 @@ async def vietnam_guide_landing(request: Request):
             "guide/guide_landing.html",
             {"request": request, "title": "Гайд по Вьетнаму 2026"}
         )
-    except Exception:
-        return HTMLResponse("<h1>Страница гайда скоро будет готова!</h1>")
+    except Exception as e:
+        return HTMLResponse(f"<h1>Ошибка: {e}</h1>")
 
 
 # --- ТВОЯ ОСНОВНАЯ ФУНКЦИЯ (ОСТАВЛЯЙ КАК ЕСТЬ НИЖЕ) ---
@@ -740,4 +740,4 @@ if __name__ == "__main__":
     
     # Запускаем сам объект app.
     # В этом режиме бот включится через lifespan (через webhook)
-    uvicorn.run(app, host="0.0.0.0", port=port)
+    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=True)
