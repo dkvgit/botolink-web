@@ -18,7 +18,8 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.responses import RedirectResponse
 from telegram import Update
-
+from fastapi import HTTPException
+from fastapi.responses import FileResponse
 from bot.bankworld import COUNTRY_NAMES
 
 
@@ -214,7 +215,36 @@ async def telegram_webhook(request: Request):
 async def root():
     return RedirectResponse(url="https://t.me/botolinkprobot")
 
+# Путь к файлу внутри проекта (относительно корня)
+# Убедись, что папка app_data находится в той же директории, откуда запускается main.py
+GUIDE_PATH = "app_data/Гайд_Нячанг_Вьетнам_2026_ДенисКабаков.pdf"
 
+# Этот ключ мы будем добавлять к ссылке после оплаты
+# Можешь изменить его на любой другой
+DOWNLOAD_SECRET = "vn2026_top_secret_access"
+
+@app.get("/get-my-guide-2026")
+async def get_guide(key: str = None):
+    # Проверка ключа
+    if key != DOWNLOAD_SECRET:
+        raise HTTPException(
+            status_code=403,
+            detail="У вас нет доступа к этому файлу или ссылка устарела."
+        )
+
+    # Проверка физического наличия файла на диске
+    if not os.path.exists(GUIDE_PATH):
+        raise HTTPException(
+            status_code=404,
+            detail="Файл временно недоступен. Свяжитесь с поддержкой @dekavetel"
+        )
+
+    # Отдаем файл. Параметр filename укажет браузеру, как назвать файл при сохранении
+    return FileResponse(
+        path=GUIDE_PATH,
+        filename="Guide_NhaTrang_2026.pdf",
+        media_type="application/pdf"
+    )
 
 @app.get("/set_webhook")
 async def set_webhook():
