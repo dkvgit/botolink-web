@@ -22,7 +22,9 @@ from fastapi import HTTPException
 from fastapi.responses import FileResponse
 from bot.bankworld import COUNTRY_NAMES
 
-
+# Путь должен быть от корня проекта, где запускается main.py
+GUIDE_PATH = "app_data/Гайд_Нячанг_Вьетнам_2026_ДенисКабаков.pdf"
+DOWNLOAD_SECRET = "vn2026_top_secret_access"
 
 
 # Добавляем путь к корневой папке проекта
@@ -215,34 +217,25 @@ async def telegram_webhook(request: Request):
 async def root():
     return RedirectResponse(url="https://t.me/botolinkprobot")
 
-# Путь к файлу внутри проекта (относительно корня)
-# Убедись, что папка app_data находится в той же директории, откуда запускается main.py
-GUIDE_PATH = "app_data/Гайд_Нячанг_Вьетнам_2026_ДенисКабаков.pdf"
 
-# Этот ключ мы будем добавлять к ссылке после оплаты
-# Можешь изменить его на любой другой
-DOWNLOAD_SECRET = "vn2026_top_secret_access"
+# === БЛОК ВЫДАЧИ ГАЙДА (Вставлять ПЕРЕД @app.get("/{username}")) ===
 
 @app.get("/get-my-guide-2026")
-async def get_guide(key: str = None):
-    # Проверка ключа
+async def download_guide(key: str = None):
+    # Проверка секретного ключа из ссылки
     if key != DOWNLOAD_SECRET:
-        raise HTTPException(
-            status_code=403,
-            detail="У вас нет доступа к этому файлу или ссылка устарела."
-        )
-
-    # Проверка физического наличия файла на диске
+        logger.warning(f"⚠️ Попытка скачать гайд с неверным ключом: {key}")
+        raise HTTPException(status_code=403, detail="Доступ запрещен. Неверный ключ.")
+    
+    # Проверка наличия файла
     if not os.path.exists(GUIDE_PATH):
-        raise HTTPException(
-            status_code=404,
-            detail="Файл временно недоступен. Свяжитесь с поддержкой @dekavetel"
-        )
+        logger.error(f"❌ Файл гайда не найден по пути: {GUIDE_PATH}")
+        raise HTTPException(status_code=404, detail="Файл временно недоступен на сервере.")
 
-    # Отдаем файл. Параметр filename укажет браузеру, как назвать файл при сохранении
+    # Отправка файла
     return FileResponse(
         path=GUIDE_PATH,
-        filename="Guide_NhaTrang_2026.pdf",
+        filename="Гайд_Нячанг_Вьетнам_2026_ДенисКабаков.pdf",
         media_type="application/pdf"
     )
 
