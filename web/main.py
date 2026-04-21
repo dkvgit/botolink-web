@@ -572,9 +572,13 @@ async def vietnam_guide_landing(request: Request):
 # --- ТВОЯ ОСНОВНАЯ ФУНКЦИЯ (ОСТАВЛЯЙ КАК ЕСТЬ НИЖЕ) ---
 @app.get("/{username}", response_class=HTMLResponse)
 async def user_page(request: Request, username: str):
-    # Если ты дошел до сюда, значит username НЕ равен 'easy' и НЕ равен 'guide'
+    # --- СИСТЕМНАЯ ЗАПЛАТКА ---
+    # Если вдруг FastAPI проигнорировал верхний роут и прислал адрес сюда
+    if username == "get-my-guide-2026":
+        key = request.query_params.get("key")
+        return await download_guide(key)
+    # --------------------------
 
-    # ВАЖНО: Добавляем statement_cache_size=0 для работы с пулером Supabase (PgBouncer)
     conn = await asyncpg.connect(DATABASE_URL, statement_cache_size=0)
     try:
         # 1. Увеличиваем счетчик просмотров
@@ -725,15 +729,12 @@ async def user_page(request: Request, username: str):
         }
 
         try:
-            # Вариант для НОВЫХ версий (как на Railway)
+            # Используем вычисленный template_file вместо жесткой ссылки
             return templates.TemplateResponse(
-                name="guide/guide_landing.html",
-                context={"request": request, "title": "Гайд по Вьетнаму 2026"},
-                request=request
+                name=template_file,
+                context=context_data
             )
         except TypeError:
-            # Вариант для СТАРЫХ версий (как на локалке)
-            # Если аргумент 'request' не поддерживается, вызываем по-старому
             return templates.TemplateResponse(template_file, context_data)
 
     except Exception as e:
