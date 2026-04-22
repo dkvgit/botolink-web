@@ -386,9 +386,10 @@
           <li>Таблицы, чеклисты, контакты</li>
           <li>Доступ в PDF</li>
         </ul>
+
         <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 20px;">
           <a href="https://buy.stripe.com/eVq5kFenBcaW1QA2kA1B601" target="_blank" class="btn-buy" style="background: #635bff; color: white; text-decoration: none; padding: 12px; border-radius: 8px; font-weight: 600; display: block; text-align: center;">💳 Оплатить картой</a>
-          <button type="button" onclick="openCryptoModal('Базовый', '9$')" class="btn-buy" style="background: #f7931a; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%; display: block;">₿ Оплатить криптой</button>
+          <button type="button" onclick="openCryptoModal('Базовый', '9$')" class="btn-buy" style="background: #f7931a; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%; display: block; font-family: inherit; font-size: 16px;">₿ Оплатить криптой</button>
         </div>
       </div>
 
@@ -398,16 +399,17 @@
         <div class="price-name">С поддержкой</div>
         <div class="price-amount"><span class="price-currency">$</span>19</div>
         <div class="price-local">≈ 1 630 ₽ | 780 ₴ | 9 300 ₸</div>
-        <div class="price-period" style="margin-top: 12px;">Полная версия + Личное сопровождение</div>
+        <div class="price-period" style="margin-top: 12px;">Полная версия гайда + Личное сопровождение</div>
         <ul class="price-features">
           <li>📖 Всё из базового тарифа</li>
           <li>💬 Личное общение с автором</li>
           <li>📋 Консультация по вашей ситуации</li>
           <li>🎯 Пошаговый разбор вашего кейса</li>
         </ul>
+
         <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 20px;">
           <a href="https://buy.stripe.com/3cIdRb4N1df03YI5wM1B602" target="_blank" class="btn-buy" style="background: #635bff; color: white; text-decoration: none; padding: 12px; border-radius: 8px; font-weight: 600; display: block; text-align: center;">💳 Оплатить картой</a>
-          <button type="button" onclick="openCryptoModal('С поддержкой', '19$')" class="btn-buy" style="background: #f7931a; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%; display: block;">₿ Оплатить криптой</button>
+          <button type="button" onclick="openCryptoModal('С поддержкой', '19$')" class="btn-buy" style="background: #f7931a; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%; display: block; font-family: inherit; font-size: 16px;">₿ Оплатить криптой</button>
         </div>
       </div>
 
@@ -419,7 +421,10 @@
         <div class="price-period">Индивидуальный подход</div>
         <ul class="price-features">
           <li>✨ Всё из тарифа "С поддержкой"</li>
-          <li>🏨 Поиск жилья и релокация</li>
+          <li>✈️ Встреча в аэропорту</li>
+          <li>🏨 Размещение в отеле</li>
+          <li>🏠 Поиск долгосрочного жилья</li>
+          <li>📱 Оформление SIM-карты</li>
           <li>🏦 Открытие счёта в банке</li>
           <li>🛵 Аренда транспорта</li>
         </ul>
@@ -433,16 +438,21 @@
     <p style="margin-top: 32px; font-size: 13px; color: var(--text-muted);">
       💳 Оплата картой · ⚡ Мгновенная доставка · 💬 Личное сопровождение · 🤝 VIP встреча
     </p>
+    <p style="margin-top: 8px; font-size: 11px; color: var(--text-muted); opacity: 0.7;">
+      *Цены в рублях, гривнах и тенге указаны примерно, по курсу ~86 ₽, 41 ₴, 490 ₸ за 1 USD
+    </p>
   </div>
 
   <div id="cryptoModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10000; justify-content: center; align-items: center; padding: 20px;">
-    <div style="background: #1a1a1a; border: 1px solid #333; padding: 30px; border-radius: 20px; max-width: 450px; width: 100%; position: relative; color: white; text-align: center;">
+    <div style="background: #1a1a1a; border: 1px solid #333; padding: 30px; border-radius: 20px; max-width: 450px; width: 100%; position: relative; color: white; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.4);">
       <span onclick="closeCryptoModal()" style="position: absolute; top: 15px; right: 20px; cursor: pointer; font-size: 28px; opacity: 0.5;">&times;</span>
+
       <h3 id="modalTitle" style="margin-bottom: 15px; font-size: 22px;">Оплата криптовалютой</h3>
 
       <div style="text-align: left; background: #252525; padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #444;">
         <p style="font-size: 13px; margin-bottom: 8px; color: #aaa;">Сеть: <b style="color: #fff;">USDT (TRC20)</b></p>
         <p style="font-size: 13px; margin-bottom: 5px; color: #aaa;">Адрес кошелька:</p>
+
         <div style="display: flex; gap: 8px; align-items: center;">
           <input type="text" id="walletAddress" value="TDhXztJWQxvbTdX7QP8BNZsT3kWqtV9hxt" readonly aria-label="Wallet Address" style="background: #000; color: #f7931a; border: 1px dashed #f7931a; padding: 12px; border-radius: 8px; font-family: monospace; font-size: 12px; flex-grow: 1; outline: none;">
           <button type="button" onclick="copyAddress()" style="background: #f7931a; color: #000; border: none; padding: 12px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 12px;">Copy</button>
@@ -450,12 +460,52 @@
         <span id="copyStatus" style="font-size: 11px; color: #4caf50; display: none; margin-top: 5px;">Скопировано в буфер!</span>
       </div>
 
-      <p style="font-size: 15px; margin-bottom: 20px;">К оплате: <b id="modalAmount" style="color: #f7931a; font-size: 18px;"></b></p>
+      <p style="font-size: 15px; margin-bottom: 15px;">К оплате: <b id="modalAmount" style="color: #f7931a; font-size: 18px;"></b></p>
+
+      <p style="font-size: 13px; opacity: 0.7; margin-bottom: 20px; line-height: 1.4;">
+        После перевода нажмите кнопку ниже и пришлите скриншот. Я сразу отправлю вам доступ к гайду.
+      </p>
+
       <a id="tgConfirmBtn" href="#" target="_blank" style="background: #24A1DE; color: white; text-decoration: none; padding: 15px; border-radius: 10px; font-weight: 600; display: block; text-align: center;">✅ Я оплатил, отправить чек</a>
     </div>
   </div>
 </section>
 
+
+<script>
+function openCryptoModal(tariff, price) {
+  document.getElementById('modalTitle').innerText = 'Тариф: ' + tariff;
+  document.getElementById('modalAmount').innerText = price;
+
+  // Ссылка в ТГ
+  const msg = 'Привет! Я оплатил тариф "' + tariff + '" через крипту. Вот подтверждение:';
+  document.getElementById('tgConfirmBtn').href = 'https://t.me/dekavetel?text=' + encodeURIComponent(msg);
+
+  document.getElementById('cryptoModal').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeCryptoModal() {
+  document.getElementById('cryptoModal').style.display = 'none';
+  document.body.style.overflow = 'auto';
+}
+
+function copyAddress() {
+  const address = document.getElementById("walletAddress");
+  address.select();
+  address.setSelectionRange(0, 99999);
+  navigator.clipboard.writeText(address.value);
+
+  const status = document.getElementById('copyStatus');
+  status.style.display = 'block';
+  setTimeout(() => { status.style.display = 'none'; }, 2000);
+}
+
+window.onclick = function(event) {
+  const modal = document.getElementById('cryptoModal');
+  if (event.target == modal) { closeCryptoModal(); }
+}
+</script>
 <script>
 function openCryptoModal(tariff, price) {
   // Заполняем данные в модалке
