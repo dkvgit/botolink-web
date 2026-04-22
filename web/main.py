@@ -166,7 +166,13 @@ async def lifespan(app: FastAPI):
         
 app = FastAPI(lifespan=lifespan)
 
-
+# Эндпоинт для favicon
+@app.get('/favicon.ico', include_in_schema=False)
+async def favicon():
+    # Укажите правильный путь к вашему файлу
+    favicon_path = os.path.join("static", "favicon", "favicon_guide.ico")
+    # Если файл лежит в корне папки 'static', используйте 'static/favicon_guide.ico'
+    return FileResponse(favicon_path, media_type="image/x-icon")
 
 # ========== СТАТИЧЕСКИЕ ФАЙЛЫ И ШАБЛОНЫ ==========
 current_dir = os.path.dirname(os.path.realpath(__file__))  # Это /opt/render/project/src/web/
