@@ -169,26 +169,21 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 # ========== СТАТИЧЕСКИЕ ФАЙЛЫ И ШАБЛОНЫ ==========
-current_dir = os.path.dirname(os.path.realpath(__file__))  # Это D:/.../web/
+current_dir = os.path.dirname(os.path.realpath(__file__))
 
-# 1. Монтируем стандартную статику (логотипы, фавиконы)
+# Монтируем статику и шаблоны как статику для CSS/JS
 app.mount("/static", StaticFiles(directory=os.path.join(current_dir, "static")), name="static")
-
-# 2. РАЗРЕШАЕМ ДОСТУП К ФАЙЛАМ ВНУТРИ ТЕМ (исправляет 404 ошибки для CSS/JS)
-# Это делает файлы внутри /templates/ доступными по прямым ссылкам
 app.mount("/templates", StaticFiles(directory=os.path.join(current_dir, "templates")), name="templates_static")
 
-# 3. Подключаем шаблоны для генерации HTML (через Jinja2)
 templates = Jinja2Templates(directory=os.path.join(current_dir, "templates"))
 
-
-# Фавикон (исправленный роут)
 @app.get("/favicon.ico", include_in_schema=False)
 async def get_favicon():
+    # Путь к твоей иконке
     favicon_path = os.path.join(current_dir, "static", "favicon", "favicon_guide.png")
     if os.path.exists(favicon_path):
         return FileResponse(favicon_path, media_type="image/png")
-    return Response(status_code=204)  # Просто пустой ответ, чтобы не спамить 404
+    return Response(status_code=204)
 
 
 
@@ -748,23 +743,22 @@ async def user_page(request: Request, username: str):
             template_file = str(template_file)
             print(f"DEBUG после преобразования: {template_file} (type: {type(template_file)})")
 
-        # 8. Универсальный возврат
-        context_data = {
-            "request": request,
-            "user": user_data,
-            "page": page_data,
-            "links": processed_links,
-            "categories": categories,
-            "COUNTRY_NAMES": COUNTRY_NAMES,
-            "template_path": folder # добавляем путь для CSS, если нужно
-        }
-
-        # Исправленный вызов TemplateResponse
-        # Исправленный вызов TemplateResponse
-        return templates.TemplateResponse(
-            template_file,
-            context_data
-        )
+        # 8. Универсальный возврат контекста
+            context = {
+                "request": request,
+                "user": user_data,
+                "page": page_data,
+                "links": processed_links,
+                "categories": categories,
+                "COUNTRY_NAMES": COUNTRY_NAMES,
+                "template_path": folder
+            }
+    
+            # Исправленный вызов: передаем только два аргумента
+            return templates.TemplateResponse(
+                name=str(template_file),
+                context=context
+            )
 
     except Exception as e:
         print(f"🔥 КРИТИЧЕСКАЯ ОШИБКА В user_page: {e}")
