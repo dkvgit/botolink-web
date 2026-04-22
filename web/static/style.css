@@ -109,7 +109,7 @@ margin-bottom: 8px;
 }
 
 .hero-title span {
-    color: #7de8ca;
+    color: #40ffe5;
     display: block;
 }
 
@@ -433,21 +433,22 @@ padding: 0 40px;
 }
 
 .section-tag {
-display: inline-flex;
-align-items: center;
-gap: 8px;
-font-size: 11px;
-font-weight: 700;
-letter-spacing: 0.18em;
-text-transform: uppercase;
-color: var(--ocean);
-margin-bottom: 16px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #eda3a3;
+    margin-bottom: 16px;
 }
 
 .section-tag::before {
-content: '';
-width: 24px; height: 2px;
-background: var(--ocean);
+    content: '';
+    width: 24px;
+    height: 2px;
+    background: #eda3a3;
 }
 
 .section-title {
@@ -460,11 +461,11 @@ margin-bottom: 20px;
 }
 
 .section-lead {
-font-size: 17px;
-line-height: 1.7;
-color: var(--text-muted);
-max-width: 580px;
-margin-bottom: 60px;
+    font-size: 17px;
+    line-height: 1.7;
+    color: #ab8eff;
+    max-width: 580px;
+    margin-bottom: 60px;
 }
 
 /* PROBLEM SECTION */
@@ -847,7 +848,9 @@ color: rgba(255,255,255,0.55);
 .author-fact span:first-child { font-size: 16px; }
 
 /* PRICE SECTION */
-.price-section { background: var(--cream); }
+.price-section {
+    background: #1f62a7;
+}
 
 .price-grid {
 display: grid;
@@ -936,10 +939,10 @@ font-weight: 500;
 }
 
 .price-period {
-font-size: 13px;
-color: var(--text-muted);
-margin-bottom: 28px;
-min-height: 40px;
+    font-size: 13px;
+    color: #0d4a58;
+    margin-bottom: 28px;
+    min-height: 40px;
 }
 
 .price-features {
@@ -1154,3 +1157,72 @@ section { padding: 60px 0; }
 }
 
 
+
+
+
+/* Специальные правки для мобилок и планшетов */
+@media (max-width: 768px) {
+    /* 1. Делаем заголовки чуть меньше, чтобы не разрывали слова */
+    .hero-title {
+        font-size: 38px;
+        line-height: 1.1;
+    }
+
+    /* 2. Чиним таблицу цен и сравнения */
+    .prcons-list li {
+        grid-template-columns: 1fr;
+        gap: 4px;
+        padding: 12px 0;
+    }
+
+    .prcons-list .cat {
+        font-size: 10px;
+        opacity: 0.7;
+    }
+
+    /* 3. Убираем фиксированную ширину карточек, если она где-то осталась */
+    .price-grid {
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 0 10px;
+    }
+
+    /* 4. Центрируем автора */
+    .author-grid {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .author-avatar {
+        width: 120px;
+        height: 120px;
+        font-size: 48px;
+    }
+
+    /* 5. Делаем отступы в секциях меньше, чтобы не крутить бесконечно */
+    section {
+        padding: 40px 0;
+    }
+
+    /* 6. Исправляем отображение карточек "Для кого" */
+    .who-cards {
+        gap: 16px;
+    }
+
+    .who-card {
+        padding: 24px;
+    }
+}
+
+/* Для совсем маленьких экранов (iPhone 5/SE) */
+@media (max-width: 380px) {
+    .hero-cta {
+        gap: 10px;
+    }
+    .btn-primary, .btn-outline {
+        padding: 14px 20px;
+        font-size: 14px;
+    }
+}
