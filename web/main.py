@@ -172,7 +172,7 @@ app = FastAPI(lifespan=lifespan)
 current_dir = os.path.dirname(os.path.realpath(__file__))  # Это /opt/render/project/src/web/
 
 # Правильное монтирование статики — убираем лишний 'web' из пути
-app.mount("/static", StaticFiles(directory=os.path.join(current_dir, "static")), name="static")
+app.mount("/static", StaticFiles(directory="static", html=False), name="static")
 
 templates = Jinja2Templates(directory=os.path.join(current_dir, "templates"))
 
