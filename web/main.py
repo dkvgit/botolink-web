@@ -718,24 +718,22 @@ async def user_page(request: Request, username: str):
             template_file = str(template_file)
             print(f"DEBUG после преобразования: {template_file} (type: {type(template_file)})")
 
-        # 8. Универсальный возврат (Для локалки и Railway одновременно)
+        # 8. Универсальный возврат
         context_data = {
             "request": request,
             "user": user_data,
             "page": page_data,
             "links": processed_links,
             "categories": categories,
-            "COUNTRY_NAMES": COUNTRY_NAMES
+            "COUNTRY_NAMES": COUNTRY_NAMES,
+            "template_path": folder # добавляем путь для CSS, если нужно
         }
 
-        try:
-            # Используем вычисленный template_file вместо жесткой ссылки
-            return templates.TemplateResponse(
-                name=template_file,
-                context=context_data
-            )
-        except TypeError:
-            return templates.TemplateResponse(template_file, context_data)
+        # Исправленный вызов TemplateResponse
+        return templates.TemplateResponse(
+            name=template_file,
+            context=context_data
+        )
 
     except Exception as e:
         print(f"🔥 КРИТИЧЕСКАЯ ОШИБКА В user_page: {e}")
