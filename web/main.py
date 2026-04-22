@@ -166,12 +166,14 @@ async def lifespan(app: FastAPI):
         logger.error(f"❌ [ERROR] Ошибка при выключении: {e}")
         
 
+# D:\aRabota\TelegaBoom\030_mylinkspace\web\main.py
+
 app = FastAPI(lifespan=lifespan)
 
-# ========== СТАТИЧЕСКИЕ ФАЙЛЫ И ШАБЛОНЫ ==========
+# ПУТИ К СТАТИКЕ
 current_dir = os.path.dirname(os.path.realpath(__file__))
 
-# Монтируем статику и шаблоны как статику для CSS/JS
+# Монтируем /static для картинок и /templates для CSS/JS внутри папок тем
 app.mount("/static", StaticFiles(directory=os.path.join(current_dir, "static")), name="static")
 app.mount("/templates", StaticFiles(directory=os.path.join(current_dir, "templates")), name="templates_static")
 
@@ -179,9 +181,9 @@ templates = Jinja2Templates(directory=os.path.join(current_dir, "templates"))
 
 @app.get("/favicon.ico", include_in_schema=False)
 async def get_favicon():
-    # Путь к твоей иконке
     favicon_path = os.path.join(current_dir, "static", "favicon", "favicon_guide.png")
     if os.path.exists(favicon_path):
+        # Форсируем отдачу иконки
         return FileResponse(favicon_path, media_type="image/png")
     return Response(status_code=204)
 
@@ -679,7 +681,7 @@ async def user_page(request: Request, username: str):
             
             # Обработка URL
             original_url = l_dict.get('url')
-            link_type = l_dict.get('link_type', 'standard')
+            link_type = str(l_dict.get('link_type', 'standard'))
             
             if original_url and original_url != "#":
                 original_url = str(original_url).strip()
@@ -735,30 +737,21 @@ async def user_page(request: Request, username: str):
             else:
                 categories['other'].append(link)
 
-        # ДЕБАГ ПЕРЕД ОТПРАВКОЙ
-        print(f"✅ Rendering template: {template_file} for user: {username}")
-        print(f"DEBUG template_file: {template_file} (type: {type(template_file)})")
-        
-        if not isinstance(template_file, str):
-            template_file = str(template_file)
-            print(f"DEBUG после преобразования: {template_file} (type: {type(template_file)})")
+        # 8. Формирование контекста и возврат
+        context = {
+            "request": request,
+            "user": user_data,
+            "page": page_data,
+            "links": processed_links,
+            "categories": categories,
+            "COUNTRY_NAMES": COUNTRY_NAMES,
+            "template_path": folder
+        }
 
-        # 8. Универсальный возврат контекста
-            context = {
-                "request": request,
-                "user": user_data,
-                "page": page_data,
-                "links": processed_links,
-                "categories": categories,
-                "COUNTRY_NAMES": COUNTRY_NAMES,
-                "template_path": folder
-            }
-    
-            # Исправленный вызов: передаем только два аргумента
-            return templates.TemplateResponse(
-                name=str(template_file),
-                context=context
-            )
+        return templates.TemplateResponse(
+            name=str(template_file),
+            context=context
+        )
 
     except Exception as e:
         print(f"🔥 КРИТИЧЕСКАЯ ОШИБКА В user_page: {e}")
@@ -767,7 +760,6 @@ async def user_page(request: Request, username: str):
         return HTMLResponse(f"Ошибка сервера: {e}", status_code=500)
     finally:
         await conn.close()
-
 
     
 
