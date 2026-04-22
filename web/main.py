@@ -743,9 +743,9 @@ async def user_page(request: Request, username: str):
             else:
                 categories['other'].append(link)
 
-        # 8. Формирование контекста и возврат
+        # 8. Универсальный возврат контекста
         context = {
-            "request": request,
+            "request": request,  # ПЕРЕДАЕМ ТУТ (внутри словаря)
             "user": user_data,
             "page": page_data,
             "links": processed_links,
@@ -754,21 +754,28 @@ async def user_page(request: Request, username: str):
             "template_path": folder
         }
 
-        # В новых версиях FastAPI первым аргументом идет request, вторым имя шаблона,
-        # а контекст передается третьим (или именованным)
+        # Вызываем БЕЗ именованного аргумента request=
+        # Передаем только имя шаблона и словарь с данными
         return templates.TemplateResponse(
-            request=request,
-            name=str(template_file),
-            context=context
+            str(template_file),
+            context
         )
 
+     
+    
     except Exception as e:
-        print(f"🔥 КРИТИЧЕСКАЯ ОШИБКА В user_page: {e}")
         import traceback
-        traceback.print_exc()
-        return HTMLResponse(f"Ошибка сервера: {e}", status_code=500)
+        error_details = traceback.format_exc()
+        print(f"🔥 КРИТИЧЕСКАЯ ОШИБКА В user_page:\n{error_details}")
+        
+        # Выводим подробный traceback прямо в браузер для отладки
+        return HTMLResponse(
+            content=f"<h1>Ошибка сервера (500)</h1><pre>{error_details}</pre>",
+            status_code=500
+        )
     finally:
-        await conn.close()
+        if 'conn' in locals():
+            await conn.close()
 
     
 
