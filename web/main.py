@@ -181,12 +181,18 @@ templates = Jinja2Templates(directory=os.path.join(current_dir, "templates"))
 
 @app.get("/favicon.ico", include_in_schema=False)
 async def get_favicon():
-    favicon_path = os.path.join(current_dir, "static", "favicon", "favicon_guide.png")
-    if os.path.exists(favicon_path):
-        # Форсируем отдачу иконки
-        return FileResponse(favicon_path, media_type="image/png")
+    # Путь к ОСНОВНОЙ иконке (логотип BotoLinkPro)
+    main_favicon = os.path.join(current_dir, "static", "favicon", "favicon.ico")
+    
+    if os.path.exists(main_favicon):
+        return FileResponse(main_favicon, media_type="image/x-icon")
+    
+    # Если основного .ico нет, пробуем отдать png гайда как запасной, чтобы не было 404
+    guide_favicon = os.path.join(current_dir, "static", "favicon", "favicon_guide.png")
+    if os.path.exists(guide_favicon):
+        return FileResponse(guide_favicon, media_type="image/png")
+        
     return Response(status_code=204)
-
 
 
 
