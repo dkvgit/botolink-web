@@ -396,7 +396,6 @@
           <li>💬 Личное общение с автором</li>
           <li>🎯 Пошаговый разбор вашего кейса</li>
         </ul>
-        </ul>
         <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 20px;">
           <a href="https://buy.stripe.com/3cIdRb4N1df03YI5wM1B602" target="_blank" class="btn-buy" style="background: #635bff; color: white; text-decoration: none; padding: 12px; border-radius: 8px; font-weight: 600; display: block; text-align: center;">💳 Оплатить картой</a>
           <button type="button" onclick="openCryptoModal('С поддержкой', '19$')" class="btn-buy" style="background: #f7931a; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%; display: block;">₿ Оплатить криптой</button>
@@ -424,7 +423,7 @@
         <p style="font-size: 13px; margin-bottom: 5px; color: #aaa;">Адрес кошелька:</p>
 
         <div style="display: flex; gap: 8px; align-items: center;">
-          <input type="text" id="walletAddress" value="TDhXztJWQxvbTdX7QP8BNZsT3kWqtV9hxt" readonly style="background: #000; color: #f7931a; border: 1px dashed #f7931a; padding: 12px; border-radius: 8px; font-family: monospace; font-size: 12px; flex-grow: 1; outline: none;">
+          <input type="text" id="walletAddress" value="TDhXztJWQxvbTdX7QP8BNZsT3kWqtV9hxt" readonly aria-label="Адрес кошелька" style="background: #000; color: #f7931a; border: 1px dashed #f7931a; padding: 12px; border-radius: 8px; font-family: monospace; font-size: 12px; flex-grow: 1; outline: none;">
           <button type="button" onclick="copyAddress()" style="background: #f7931a; color: #000; border: none; padding: 12px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 12px;">Copy</button>
         </div>
         <span id="copyStatus" style="font-size: 11px; color: #4caf50; display: none; margin-top: 5px;">Скопировано в буфер!</span>
@@ -436,7 +435,6 @@
     </div>
   </div>
 </section>
-
 <script>
 function openCryptoModal(tariff, price) {
   // Заполняем данные в модалке
