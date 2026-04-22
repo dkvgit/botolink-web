@@ -1,19 +1,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ page.username }} | BotoLinkPro</title>
+    <title>{{ page.title or user.username }} | BotoLinkPro</title>
 
-    <link rel="icon" type="image/x-icon" href="/static/favicon/favicon.ico">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', path='favicon/favicon.ico') }}">
 
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <script src="https://cdn.jsdelivr.net/gh/ushelp/EasyQRCodeJS@master/dist/easy.qrcode.min.js"></script>
 
-    {# ДОБАВЛЯЕМ ВЕРСИЮ ?v=1.1 ЧТОБЫ СБРОСИТЬ КЕШ #}
+    {# Базовые стили, общие для всех #}
     <link rel="stylesheet" href="/templates/base/base.css?v=1.1">
 
-    {% if template_path %}
-    <link rel="stylesheet" href="/templates/{{ template_path }}?v=1.1">
+    {# Стили конкретного шаблона (директория берется из page.folder_name) #}
+    {% if page.folder_name %}
+        <link rel="stylesheet" href="/templates/{{ page.folder_name }}/{{ page.folder_name }}_style.css?v=1.1">
     {% endif %}
 </head>

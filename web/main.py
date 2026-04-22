@@ -1,5 +1,8 @@
 #D:\aRabota\TelegaBoom\030_mylinkspace\web\main.py
 
+
+
+
 import logging
 import mimetypes  # ← ДОБАВЬ ЭТОТ ИМПОРТ
 import os
@@ -162,24 +165,37 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.error(f"❌ [ERROR] Ошибка при выключении: {e}")
         
-        
 
 app = FastAPI(lifespan=lifespan)
 
 # ========== СТАТИЧЕСКИЕ ФАЙЛЫ И ШАБЛОНЫ ==========
-current_dir = os.path.dirname(os.path.realpath(__file__))  # Это /opt/render/project/src/web/
+current_dir = os.path.dirname(os.path.realpath(__file__))  # Это D:/.../web/
 
-# ФИКС: используем абсолютный путь
-static_dir = os.path.join(current_dir, "static")
-app.mount("/static", StaticFiles(directory=static_dir, html=False), name="static")
+# 1. Монтируем стандартную статику (логотипы, фавиконы)
+app.mount("/static", StaticFiles(directory=os.path.join(current_dir, "static")), name="static")
 
+# 2. РАЗРЕШАЕМ ДОСТУП К ФАЙЛАМ ВНУТРИ ТЕМ (исправляет 404 ошибки для CSS/JS)
+# Это делает файлы внутри /templates/ доступными по прямым ссылкам
+app.mount("/templates", StaticFiles(directory=os.path.join(current_dir, "templates")), name="templates_static")
+
+# 3. Подключаем шаблоны для генерации HTML (через Jinja2)
 templates = Jinja2Templates(directory=os.path.join(current_dir, "templates"))
 
-# Фавикон — после монтирования статики (или до — не важно)
+
+# Фавикон (исправленный роут)
 @app.get("/favicon.ico", include_in_schema=False)
 async def get_favicon():
-    favicon_path = os.path.join(current_dir, "static", "favicon", "favicon_guide.ico")
-    return FileResponse(favicon_path, media_type="image/x-icon")
+    favicon_path = os.path.join(current_dir, "static", "favicon", "favicon_guide.png")
+    if os.path.exists(favicon_path):
+        return FileResponse(favicon_path, media_type="image/png")
+    return Response(status_code=204)  # Просто пустой ответ, чтобы не спамить 404
+
+
+
+
+
+
+
 
 
 # ========== WEBHOOK - ЭТО САМОЕ ГЛАВНОЕ! ==========
@@ -220,12 +236,13 @@ async def telegram_webhook(request: Request):
     
     
 # ========== ОСТАЛЬНЫЕ ЭНДПОИНТЫ ==========
+# ========== СИСТЕМНЫЕ РОУТЫ И ГАЙД ==========
+
 @app.get("/")
 async def root():
+    # Редирект на главного бота при заходе на корень домена
     return RedirectResponse(url="https://t.me/botolinkprobot")
 
-
-# === БЛОК ВЫДАЧИ ГАЙДА (Вставлять ПЕРЕД @app.get("/{username}")) ===
 
 @app.get("/get-my-guide-2026")
 async def download_guide(key: str = None):
@@ -234,17 +251,26 @@ async def download_guide(key: str = None):
         logger.warning(f"⚠️ Попытка скачать гайд с неверным ключом: {key}")
         raise HTTPException(status_code=403, detail="Доступ запрещен. Неверный ключ.")
     
-    # Проверка наличия файла
+    # Проверка наличия файла на диске
     if not os.path.exists(GUIDE_PATH):
         logger.error(f"❌ Файл гайда не найден по пути: {GUIDE_PATH}")
         raise HTTPException(status_code=404, detail="Файл временно недоступен на сервере.")
 
-    # Отправка файла
+    # Отправка PDF файла пользователю
     return FileResponse(
         path=GUIDE_PATH,
         filename="Гайд_Нячанг_Вьетнам_2026_ДенисКабаков.pdf",
         media_type="application/pdf"
     )
+
+
+@app.get("/easy", include_in_schema=False)
+async def redirect_to_easy_bot():
+    # Быстрый переход на вспомогательного бота
+    return RedirectResponse(url="https://t.me/easyVietnamBot", status_code=307)
+
+
+
 
 @app.get("/set_webhook")
 async def set_webhook():
@@ -560,10 +586,7 @@ def get_icon_class(icon_name, link_type, url, pay_details):
 
 # --- СИСТЕМНЫЕ ПУТИ (Вставлять строго перед @app.get("/{username}")) ---
 
-@app.get("/easy", include_in_schema=False)
-async def redirect_to_easy_bot():
-    # Редирект на бота. Мы используем RedirectResponse напрямую.
-    return RedirectResponse(url="https://t.me/easyVietnamBot", status_code=307)
+
 
 
 @app.get("/guide", response_class=HTMLResponse, include_in_schema=False)
@@ -737,10 +760,10 @@ async def user_page(request: Request, username: str):
         }
 
         # Исправленный вызов TemplateResponse
+        # Исправленный вызов TemplateResponse
         return templates.TemplateResponse(
-            request=request,
-            name=template_file,
-            context=context_data
+            template_file,
+            context_data
         )
 
     except Exception as e:
