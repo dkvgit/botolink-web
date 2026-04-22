@@ -745,7 +745,7 @@ async def user_page(request: Request, username: str):
 
         # 8. Универсальный возврат контекста
         context = {
-            "request": request, # Оставляем здесь для Jinja2
+            "request": request,
             "user": user_data,
             "page": page_data,
             "links": processed_links,
@@ -754,12 +754,20 @@ async def user_page(request: Request, username: str):
             "template_path": folder
         }
 
-        # Самый полный вариант вызова для последних версий FastAPI
-        return templates.TemplateResponse(
-            request=request,
-            name=str(template_file),
-            context=context
-        )
+        # Этот блок проверяет версию "на лету" и не дает серверу упасть
+        try:
+            # Пытаемся вызвать по-новому (как хочет Render)
+            return templates.TemplateResponse(
+                request=request,
+                name=str(template_file),
+                context=context
+            )
+        except TypeError:
+            # Если падает (как на твоем localhost), вызываем по-старому
+            return templates.TemplateResponse(
+                str(template_file),
+                context
+            )
 
      
     
