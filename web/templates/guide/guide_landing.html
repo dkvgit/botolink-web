@@ -379,9 +379,11 @@
         <div class="price-name">Базовый</div>
         <div class="price-amount"><span class="price-currency">$</span>9</div>
         <div class="price-local">≈ 770 ₽ | 370 ₴ | 4 400 ₸</div>
+        <div class="price-period" style="margin-top: 12px;">Полная версия гайда</div>
         <ul class="price-features">
           <li>Все 14 разделов гайда</li>
           <li>Актуальные цены на 2026 год</li>
+          <li>Таблицы, чеклисты, контакты</li>
           <li>Доступ в PDF</li>
         </ul>
         <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 20px;">
@@ -396,9 +398,11 @@
         <div class="price-name">С поддержкой</div>
         <div class="price-amount"><span class="price-currency">$</span>19</div>
         <div class="price-local">≈ 1 630 ₽ | 780 ₴ | 9 300 ₸</div>
+        <div class="price-period" style="margin-top: 12px;">Полная версия + Личное сопровождение</div>
         <ul class="price-features">
           <li>📖 Всё из базового тарифа</li>
           <li>💬 Личное общение с автором</li>
+          <li>📋 Консультация по вашей ситуации</li>
           <li>🎯 Пошаговый разбор вашего кейса</li>
         </ul>
         <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 20px;">
@@ -412,34 +416,46 @@
         <span class="price-icon">🤝</span>
         <div class="price-name">Личная встреча</div>
         <div class="price-amount"><span class="price-currency">$</span>Договорная</div>
-        <button type="button" onclick="window.open('https://t.me/dekavetel', '_blank')" class="btn-buy" style="margin-top: 20px; width: 100%; cursor: pointer;">💬 Telegram</button>
+        <div class="price-period">Индивидуальный подход</div>
+        <ul class="price-features">
+          <li>✨ Всё из тарифа "С поддержкой"</li>
+          <li>🏨 Поиск жилья и релокация</li>
+          <li>🏦 Открытие счёта в банке</li>
+          <li>🛵 Аренда транспорта</li>
+        </ul>
+        <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 20px;">
+          <button type="button" onclick="window.open('https://t.me/dekavetel', '_blank')" class="btn-buy" style="width: 100%; cursor: pointer;">💬 Telegram</button>
+          <button type="button" onclick="window.location.href='mailto:dkvkabakov@gmail.com'" class="btn-buy" style="width: 100%; cursor: pointer;">📧 Email</button>
+        </div>
       </div>
     </div>
+
+    <p style="margin-top: 32px; font-size: 13px; color: var(--text-muted);">
+      💳 Оплата картой · ⚡ Мгновенная доставка · 💬 Личное сопровождение · 🤝 VIP встреча
+    </p>
   </div>
 
   <div id="cryptoModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10000; justify-content: center; align-items: center; padding: 20px;">
     <div style="background: #1a1a1a; border: 1px solid #333; padding: 30px; border-radius: 20px; max-width: 450px; width: 100%; position: relative; color: white; text-align: center;">
       <span onclick="closeCryptoModal()" style="position: absolute; top: 15px; right: 20px; cursor: pointer; font-size: 28px; opacity: 0.5;">&times;</span>
-
       <h3 id="modalTitle" style="margin-bottom: 15px; font-size: 22px;">Оплата криптовалютой</h3>
 
       <div style="text-align: left; background: #252525; padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #444;">
         <p style="font-size: 13px; margin-bottom: 8px; color: #aaa;">Сеть: <b style="color: #fff;">USDT (TRC20)</b></p>
         <p style="font-size: 13px; margin-bottom: 5px; color: #aaa;">Адрес кошелька:</p>
-
         <div style="display: flex; gap: 8px; align-items: center;">
-          <input type="text" id="walletAddress" value="TDhXztJWQxvbTdX7QP8BNZsT3kWqtV9hxt" readonly aria-label="Адрес кошелька" style="background: #000; color: #f7931a; border: 1px dashed #f7931a; padding: 12px; border-radius: 8px; font-family: monospace; font-size: 12px; flex-grow: 1; outline: none;">
+          <input type="text" id="walletAddress" value="TDhXztJWQxvbTdX7QP8BNZsT3kWqtV9hxt" readonly aria-label="Wallet Address" style="background: #000; color: #f7931a; border: 1px dashed #f7931a; padding: 12px; border-radius: 8px; font-family: monospace; font-size: 12px; flex-grow: 1; outline: none;">
           <button type="button" onclick="copyAddress()" style="background: #f7931a; color: #000; border: none; padding: 12px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 12px;">Copy</button>
         </div>
         <span id="copyStatus" style="font-size: 11px; color: #4caf50; display: none; margin-top: 5px;">Скопировано в буфер!</span>
       </div>
 
       <p style="font-size: 15px; margin-bottom: 20px;">К оплате: <b id="modalAmount" style="color: #f7931a; font-size: 18px;"></b></p>
-
       <a id="tgConfirmBtn" href="#" target="_blank" style="background: #24A1DE; color: white; text-decoration: none; padding: 15px; border-radius: 10px; font-weight: 600; display: block; text-align: center;">✅ Я оплатил, отправить чек</a>
     </div>
   </div>
 </section>
+
 <script>
 function openCryptoModal(tariff, price) {
   // Заполняем данные в модалке
