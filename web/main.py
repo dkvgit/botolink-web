@@ -745,7 +745,7 @@ async def user_page(request: Request, username: str):
 
         # 8. Универсальный возврат контекста
         context = {
-            "request": request,  # ПЕРЕДАЕМ ТУТ (внутри словаря)
+            "request": request,
             "user": user_data,
             "page": page_data,
             "links": processed_links,
@@ -754,11 +754,11 @@ async def user_page(request: Request, username: str):
             "template_path": folder
         }
 
-        # Вызываем БЕЗ именованного аргумента request=
-        # Передаем только имя шаблона и словарь с данными
+        # Явно пишем name= и context=
+        # Это исключит ошибку "TypeError: cannot use 'tuple' as a dict key"
         return templates.TemplateResponse(
-            str(template_file),
-            context
+            name=str(template_file),
+            context=context
         )
 
      
