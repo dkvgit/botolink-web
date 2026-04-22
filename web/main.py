@@ -75,8 +75,7 @@ mimetypes.add_type('image/png', '.png')
 mimetypes.add_type('image/gif', '.gif')
 mimetypes.add_type('image/webp', '.webp')
 
-# Подготавливаем URL для разных библиотек
-RAW_DB_URL = os.getenv("DATABASE_URL", "")
+
 
 # ========== НАСТРОЙКА БАЗЫ ДАННЫХ ==========
 RAW_DB_URL = os.getenv("DATABASE_URL", "")
@@ -171,9 +170,15 @@ app = FastAPI(lifespan=lifespan)
 
 # ========== СТАТИЧЕСКИЕ ФАЙЛЫ И ШАБЛОНЫ ==========
 current_dir = os.path.dirname(os.path.realpath(__file__))
-app.mount("/templates", StaticFiles(directory=os.path.join(current_dir, "templates")), name="templates_static")
+
+# Подключаем web/static
+app.mount("/web/static", StaticFiles(directory=os.path.join(current_dir, "web", "static")), name="web_static")
+
+# Подключаем favicon и прочее из static
 app.mount("/static", StaticFiles(directory=os.path.join(current_dir, "static")), name="static")
+
 templates = Jinja2Templates(directory=os.path.join(current_dir, "templates"))
+
 
 # ========== WEBHOOK - ЭТО САМОЕ ГЛАВНОЕ! ==========
 @app.post("/webhook")
