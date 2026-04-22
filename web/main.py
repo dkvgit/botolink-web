@@ -163,20 +163,23 @@ async def lifespan(app: FastAPI):
         logger.error(f"❌ [ERROR] Ошибка при выключении: {e}")
         
         
-        
-app = FastAPI(lifespan=lifespan)
 
-@app.get("/favicon.ico", include_in_schema=False)
-async def get_favicon():
-    return FileResponse("static/favicon/favicon_guide.ico", media_type="image/x-icon")
+app = FastAPI(lifespan=lifespan)
 
 # ========== СТАТИЧЕСКИЕ ФАЙЛЫ И ШАБЛОНЫ ==========
 current_dir = os.path.dirname(os.path.realpath(__file__))  # Это /opt/render/project/src/web/
 
-# Правильное монтирование статики — убираем лишний 'web' из пути
-app.mount("/static", StaticFiles(directory="static", html=False), name="static")
+# ФИКС: используем абсолютный путь
+static_dir = os.path.join(current_dir, "static")
+app.mount("/static", StaticFiles(directory=static_dir, html=False), name="static")
 
 templates = Jinja2Templates(directory=os.path.join(current_dir, "templates"))
+
+# Фавикон — после монтирования статики (или до — не важно)
+@app.get("/favicon.ico", include_in_schema=False)
+async def get_favicon():
+    favicon_path = os.path.join(current_dir, "static", "favicon", "favicon_guide.ico")
+    return FileResponse(favicon_path, media_type="image/x-icon")
 
 
 # ========== WEBHOOK - ЭТО САМОЕ ГЛАВНОЕ! ==========
