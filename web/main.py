@@ -731,6 +731,7 @@ async def user_page(request: Request, username: str):
 
         # Исправленный вызов TemplateResponse
         return templates.TemplateResponse(
+            request=request,
             name=template_file,
             context=context_data
         )
