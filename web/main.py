@@ -748,7 +748,10 @@ async def user_page(request: Request, username: str):
             "template_path": folder
         }
 
+        # В новых версиях FastAPI первым аргументом идет request, вторым имя шаблона,
+        # а контекст передается третьим (или именованным)
         return templates.TemplateResponse(
+            request=request,
             name=str(template_file),
             context=context
         )
