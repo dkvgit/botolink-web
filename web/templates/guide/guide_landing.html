@@ -594,7 +594,8 @@ window.onclick = function(event) {
     // Показываем/скрываем кнопку при прокрутке
     window.addEventListener('scroll', function() {
         var scrollBtn = document.getElementById('scrollTopBtn');
-        if (window.scrollY > 300) {
+        // Замени это условие в своем скрипте для максимальной совместимости:
+        if ((window.pageYOffset || document.documentElement.scrollTop) > 300) {
             scrollBtn.classList.add('show');
         } else {
             scrollBtn.classList.remove('show');
