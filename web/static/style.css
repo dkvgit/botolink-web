@@ -1079,22 +1079,152 @@ opacity: 1;
 transform: translateY(0);
 }
 
+/*#D:\aRabota\TelegaBoom\030_mylinkspace\web\static\style.css*/
+
 /* Responsive */
+
+/* 1. Планшеты и мобилки (до 900px) */
 @media (max-width: 900px) {
-.hero { grid-template-columns: 1fr; min-height: auto; }
-.hero-right { display: none; }
-.hero-left { padding: 60px 32px 80px; }
-.problem-grid, .prcons-grid, .who-cards, .price-grid { grid-template-columns: 1fr; }
-.author-grid { grid-template-columns: 1fr; text-align: center; }
-.author-facts { justify-content: center; }
-.contents-grid { grid-template-columns: 1fr; }
-.hero-stats { gap: 24px; }
-section { padding: 60px 0; }
-.container { padding: 0 24px; }
-.hero-cta { flex-direction: column; }
-.btn-primary, .btn-outline { text-align: center; justify-content: center; }
+    .hero {
+        display: flex;
+        flex-direction: column;
+        min-height: auto;
+    }
+
+    /* Возвращаем книгу и ставим её под текст */
+    .hero-right {
+        display: flex !important;
+        padding: 20px 20px 60px;
+        justify-content: center;
+        order: 2;
+    }
+
+    .hero-left {
+        padding: 40px 24px 20px;
+        text-align: center;
+        align-items: center;
+        order: 1;
+    }
+
+    .hero-title {
+        font-size: clamp(30px, 8vw, 42px);
+        margin-bottom: 15px;
+    }
+
+    .hero-desc {
+        margin: 0 auto 30px;
+        font-size: 15px;
+    }
+
+    .hero-stats {
+        gap: 20px;
+        justify-content: center;
+        margin-bottom: 30px;
+        width: 100%;
+    }
+
+    /* Все сетки перестраиваем в одну колонку */
+    .problem-grid,
+    .prcons-grid,
+    .who-cards,
+    .price-grid,
+    .contents-grid,
+    .author-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .hero-cta {
+        flex-direction: column;
+        width: 100%;
+        gap: 12px;
+    }
+
+    .btn-primary, .btn-outline {
+        width: 100%;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .book-mockup {
+        width: 100%;
+        max-width: 280px;
+        margin: 0 auto;
+    }
 }
 
+/* 2. Смартфоны (до 600px) — Тонкая настройка */
+@media (max-width: 600px) {
+    section {
+        padding: 40px 0;
+    }
+
+    .hero-title {
+        font-size: 32px;
+    }
+
+    /* Таблица сравнения: текст под категорию */
+    .prcons-list li {
+        grid-template-columns: 1fr;
+        gap: 4px;
+        padding: 12px 0;
+    }
+
+    .prcons-list .cat {
+        font-size: 10px;
+        opacity: 0.7;
+    }
+
+    /* Содержимое: иконка сверху по центру */
+    .content-item {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 24px 15px;
+    }
+
+    /* Карточки "Для кого" */
+    .who-cards {
+        gap: 16px;
+    }
+
+    .who-card {
+        padding: 24px;
+    }
+
+    /* Автор */
+    .author-grid {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .author-avatar {
+        width: 120px;
+        height: 120px;
+        font-size: 48px;
+    }
+}
+
+/* 3. Крошечные экраны (до 380px) */
+@media (max-width: 380px) {
+    .hero-title {
+        font-size: 28px;
+    }
+
+    .hero-cta {
+        gap: 10px;
+    }
+
+    .btn-primary, .btn-outline {
+        padding: 14px 20px;
+        font-size: 14px;
+    }
+
+    .book-mockup {
+        max-width: 240px;
+    }
+}
 
 
 /* КНОПКА НАВЕРХ */
@@ -1113,41 +1243,13 @@ section { padding: 60px 0; }
     cursor: pointer;
     opacity: 0;
     visibility: hidden;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     z-index: 999;
     display: flex;
     align-items: center;
     justify-content: center;
-}
-
-#scrollTopBtn:hover {
-    background: var(--coral-light);
-    transform: translateY(-3px);
-    box-shadow: 0 6px 20px rgba(232, 101, 74, 0.4);
-}
-
-#scrollTopBtn.show {
-    opacity: 1;
-    visibility: visible;
-}
-
-/* Адаптив для мобильных */
-@media (max-width: 768px) {
-    #scrollTopBtn {
-        bottom: 20px;
-        right: 20px;
-        width: 44px;
-        height: 44px;
-        font-size: 20px;
-    }
-}
-
-
-#scrollTopBtn {
-    /* ... остальные стили ... */
     transform: scale(0.8);
     transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 #scrollTopBtn.show {
@@ -1156,73 +1258,17 @@ section { padding: 60px 0; }
     transform: scale(1);
 }
 
+#scrollTopBtn:hover {
+    background: var(--coral-light);
+    transform: translateY(-3px) scale(1.05);
+}
 
-
-
-
-/* Специальные правки для мобилок и планшетов */
 @media (max-width: 768px) {
-    /* 1. Делаем заголовки чуть меньше, чтобы не разрывали слова */
-    .hero-title {
-        font-size: 38px;
-        line-height: 1.1;
+    #scrollTopBtn {
+        bottom: 20px;
+        right: 20px;
+        width: 44px;
+        height: 44px;
+        font-size: 20px;
     }
-
-    /* 2. Чиним таблицу цен и сравнения */
-    .prcons-list li {
-        grid-template-columns: 1fr;
-        gap: 4px;
-        padding: 12px 0;
-    }
-
-    .prcons-list .cat {
-        font-size: 10px;
-        opacity: 0.7;
-    }
-
-    /* 3. Убираем фиксированную ширину карточек, если она где-то осталась */
-    .price-grid {
-        width: 100% !important;
-        max-width: 100% !important;
-        padding: 0 10px;
-    }
-
-    /* 4. Центрируем автора */
-    .author-grid {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-    }
-
-    .author-avatar {
-        width: 120px;
-        height: 120px;
-        font-size: 48px;
-    }
-
-    /* 5. Делаем отступы в секциях меньше, чтобы не крутить бесконечно */
-    section {
-        padding: 40px 0;
-    }
-
-    /* 6. Исправляем отображение карточек "Для кого" */
-    .who-cards {
-        gap: 16px;
-    }
-
-    .who-card {
-        padding: 24px;
-    }
-}
-
-/* Для совсем маленьких экранов (iPhone 5/SE) */
-@media (max-width: 380px) {
-    .hero-cta {
-        gap: 10px;
-    }
-    .btn-primary, .btn-outline {
-        padding: 14px 20px;
-        font-size: 14px;
-    }
-}
+}}
