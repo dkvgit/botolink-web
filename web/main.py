@@ -304,23 +304,37 @@ async def root():
 
 
 @app.get("/get-my-guide-2026")
-async def download_guide(key: str = None):
-    # Проверка секретного ключа из ссылки (из твоего core/config.py)
+async def download_guide(key: str = None, session_id: str = None):
+    # 1. Проверка секретного ключа
     if key != DOWNLOAD_SECRET:
         logger.warning(f"⚠️ Попытка скачать гайд с неверным ключом: {key}")
         raise HTTPException(status_code=403, detail="Доступ запрещен. Неверный ключ.")
     
-    # Проверка наличия файла на диске (путь берется из core/config.py: "app_data/guide_vnt_2026.pdf")
+    # 2. Проверка сессии в базе (чтобы не качали просто по ссылке)
+    if not session_id:
+        raise HTTPException(status_code=403, detail="ID сессии обязателен.")
+
+    conn = await asyncpg.connect(DATABASE_URL)
+    try:
+        row = await conn.fetchrow("SELECT session_id FROM paid_sessions WHERE session_id = $1", session_id)
+        if not row:
+            logger.warning(f"⚠️ Попытка скачать без оплаты или записи в БД: {session_id}")
+            raise HTTPException(status_code=403, detail="Оплата не подтверждена.")
+    finally:
+        await conn.close()
+    
+    # 3. Проверка наличия файла
     if not os.path.exists(GUIDE_PATH):
         logger.error(f"❌ Файл гайда не найден по пути: {GUIDE_PATH}")
         raise HTTPException(status_code=404, detail="Файл временно недоступен на сервере.")
 
-    # Отправка PDF файла пользователю с четким названием из конфига
+    # 4. Отправка PDF
     return FileResponse(
         path=GUIDE_PATH,
         filename="guide_vnt_2026.pdf",
         media_type="application/pdf"
     )
+
 
 @app.get("/easy", include_in_schema=False)
 async def redirect_to_easy_bot():
@@ -690,35 +704,38 @@ async def payment_success_page(request: Request, session_id: str = None):
                     count = row['download_count']
                     # Лимит — 5 скачиваний (на случай сбоев интернета у клиента)
                     if count >= 5:
-                        return HTMLResponse("<h1>Доступ закрыт: Превышено количество скачиваний.</h1>")
+                        return HTMLResponse("<h1>Доступ закрыт: Превышено количество скачиваний страницы.</h1>")
                     
-                    # Прибавляем единицу к счетчику
+                    # Прибавляем единицу к счетчику заходов на страницу успеха
                     await conn.execute("UPDATE paid_sessions SET download_count = download_count + 1 WHERE session_id = $1", session_id)
                 else:
                     # Если записи еще нет (первый заход после оплаты) — создаем её
+                    client_id = session.client_reference_id
+                    email = session.customer_details.email if session.customer_details else None
+                    
                     await conn.execute("""
                         INSERT INTO paid_sessions (session_id, user_id, customer_email, download_count)
                         VALUES ($1, $2, $3, 1)
                     """,
                     session_id,
-                    int(session.client_reference_id) if session.client_reference_id else None,
-                    session.customer_details.email if session.customer_details else None
+                    int(client_id) if client_id and client_id.isdigit() else None,
+                    email
                     )
                     count = 0
 
-                # 3. Выдача ссылки на скачивание
-                download_url = f"https://botolink.pro/get-my-guide-2026?key={DOWNLOAD_SECRET}"
+                # 3. Выдача ссылки на скачивание (добавляем session_id для проверки при самом скачивании)
+                download_url = f"https://botolink.pro/get-my-guide-2026?key={DOWNLOAD_SECRET}&session_id={session_id}"
                 
                 return HTMLResponse(content=f"""
                     <div style="text-align: center; margin-top: 50px; font-family: sans-serif; background: #f4f7f6; padding: 40px; border-radius: 15px;">
                         <h1 style="color: #28a745;">Оплата прошла успешно! 🎉</h1>
                         <p>Ваш личный доступ к гайду подтвержден.</p>
-                        <p style="color: #666;">(Осталось попыток просмотра страницы: {4 - count})</p>
+                        <p style="color: #666;">(Осталось попыток просмотра этой страницы: {4 - count})</p>
                         <br>
                         <a href="{download_url}" style="display: inline-block; padding: 18px 30px; background: #007bff; color: white; text-decoration: none; border-radius: 10px; font-weight: bold; font-size: 1.2em; box-shadow: 0 4px 15px rgba(0,123,255,0.3);">
                             📥 СКАЧАТЬ ГАЙД (PDF)
                         </a>
-                        <p style="margin-top: 30px; font-size: 0.9em; color: #999;">Email покупки: {session.customer_details.email}</p>
+                        <p style="margin-top: 30px; font-size: 0.9em; color: #999;">Email покупки: {session.customer_details.email if session.customer_details else 'не указан'}</p>
                     </div>
                 """)
             finally:
@@ -729,20 +746,24 @@ async def payment_success_page(request: Request, session_id: str = None):
     except Exception as e:
         logger.error(f"❌ Ошибка в роуте success: {e}")
         return HTMLResponse("<h1>Произошла техническая ошибка. Пожалуйста, обновите страницу.</h1>", status_code=500)
-    
-    
-    
 
 
 @app.get("/guide", response_class=HTMLResponse, include_in_schema=False)
 async def vietnam_guide_landing(request: Request):
     try:
+        # Путь к лендингу гайда
         file_path = os.path.join(current_dir, "templates", "guide", "guide_landing.html")
         with open(file_path, "r", encoding="utf-8") as f:
             content = f.read()
         return HTMLResponse(content=content)
     except Exception as e:
+        logger.error(f"❌ Ошибка загрузки лендинга: {e}")
         return HTMLResponse(f"<h1>Ошибка: {e}</h1>")
+    
+    
+    
+    
+    
 
 # --- ТВОЯ ОСНОВНАЯ ФУНКЦИЯ (ОСТАВЛЯЙ КАК ЕСТЬ НИЖЕ) ---
 @app.get("/{username}", response_class=HTMLResponse)
