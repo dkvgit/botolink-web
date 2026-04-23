@@ -28,16 +28,22 @@ SECRET_KEY = get_env("SECRET_KEY", "dev-secret-key-change-me")
 
 # --- STRIPE LOGIC ---
 if DEBUG:
-    # ТЕСТОВЫЙ РЕЖИМ (для локалки)
+    # ТЕСТОВЫЙ РЕЖИМ: Здесь TEST ключи обязательны
     STRIPE_SECRET_KEY = get_env("STRIPE_TEST_SK", required=True)
     GUIDE_PRICE_ID = get_env("STRIPE_TEST_PRICE", required=True)
     STRIPE_WEBHOOK_SECRET = get_env("STRIPE_TEST_WEBHOOK_SECRET", "")
     print("🛠 Stripe: Работаем в TEST режиме (используем ключи sk_test_...)")
 else:
-    # БОЕВОЙ РЕЖИМ (для сервера)
+    # БОЕВОЙ РЕЖИМ: Здесь БОЕВЫЕ ключи обязательны, а ТЕСТОВЫЕ — нет
     STRIPE_SECRET_KEY = get_env("STRIPE_SECRET_KEY", required=True)
     GUIDE_PRICE_ID = get_env("STRIPE_GUIDE_PRICE_ID", required=True)
     STRIPE_WEBHOOK_SECRET = get_env("STRIPE_WEBHOOK_SECRET", required=True)
+    
+    # Чтобы код не ругался на отсутствие переменных в других местах,
+    # просто инициализируем их как None или пустые строки
+    STRIPE_TEST_SK = get_env("STRIPE_TEST_SK", "")
+    STRIPE_TEST_PRICE = get_env("STRIPE_TEST_PRICE", "")
+    
     print("🚀 Stripe: Работаем в LIVE режиме (используем ключи sk_live_...)")
 
 STRIPE_PUBLIC_KEY = get_env("STRIPE_PUBLIC_KEY", "")

@@ -7,32 +7,23 @@ import logging
 import mimetypes  # ← ДОБАВЬ ЭТОТ ИМПОРТ
 import os
 import sys
-import traceback
 from contextlib import asynccontextmanager
 from urllib.parse import urlparse
-from telegram.request import HTTPXRequest
+
 import asyncpg
 import httpx
-import uvicorn
 from dotenv import load_dotenv
-from fastapi import FastAPI, Request, Response
+from fastapi import FastAPI, Response
+from fastapi import HTTPException
 from fastapi import Request
+from fastapi.responses import FileResponse
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.responses import RedirectResponse
 from telegram import Update
-from fastapi import HTTPException
-from fastapi.responses import FileResponse
+
 from bot.bankworld import COUNTRY_NAMES
-import stripe
-import asyncpg
-
-from core.config import STRIPE_WEBHOOK_SECRET, GUIDE_PRICE_ID, DOWNLOAD_SECRET, GUIDE_PATH
-
-
-
-
 
 # Импортируем application из bot.main и сразу даем понятное имя
 try:
