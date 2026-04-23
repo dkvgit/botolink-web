@@ -1,6 +1,3 @@
-
-# core/config.py
-
 import os
 from dotenv import load_dotenv
 import urllib.parse
@@ -13,16 +10,15 @@ def get_env(key: str, default=None, required=False):
         raise ValueError(f"❌ Ошибка: Переменная окружения {key} не задана!")
     return value
 
-# Режим отладки
+# Режим отладки (влияет на выбор ключей Stripe)
 DEBUG = get_env("DEBUG", "false").lower() == "true"
 
 
-# База данных - берем из переменных окружения
+# База данных
 DATABASE_URL = get_env("DATABASE_URL", required=True)
-
 REDIS_URL = get_env("REDIS_URL", "redis://localhost:6379/0")
 
-# Telegram (Токен обязателен!)
+# Telegram
 BOT_TOKEN = get_env("BOT_TOKEN", required=True)
 BOT_USERNAME = get_env("BOT_USERNAME", "botolinkpro")
 
@@ -30,20 +26,28 @@ BOT_USERNAME = get_env("BOT_USERNAME", "botolinkpro")
 APP_URL = get_env("APP_URL", "http://localhost:8000")
 SECRET_KEY = get_env("SECRET_KEY", "dev-secret-key-change-me")
 
-# Stripe
-# Stripe
+# --- STRIPE LOGIC ---
+if DEBUG:
+    # ТЕСТОВЫЙ РЕЖИМ (для локалки)
+    STRIPE_SECRET_KEY = get_env("STRIPE_TEST_SK", required=True)
+    GUIDE_PRICE_ID = get_env("STRIPE_TEST_PRICE", required=True)
+    STRIPE_WEBHOOK_SECRET = get_env("STRIPE_TEST_WEBHOOK_SECRET", "")
+    print("🛠 Stripe: Работаем в TEST режиме (используем ключи sk_test_...)")
+else:
+    # БОЕВОЙ РЕЖИМ (для сервера)
+    STRIPE_SECRET_KEY = get_env("STRIPE_SECRET_KEY", required=True)
+    GUIDE_PRICE_ID = get_env("STRIPE_GUIDE_PRICE_ID", required=True)
+    STRIPE_WEBHOOK_SECRET = get_env("STRIPE_WEBHOOK_SECRET", required=True)
+    print("🚀 Stripe: Работаем в LIVE режиме (используем ключи sk_live_...)")
+
 STRIPE_PUBLIC_KEY = get_env("STRIPE_PUBLIC_KEY", "")
-STRIPE_SECRET_KEY = get_env("STRIPE_SECRET_KEY", required=True)
-STRIPE_WEBHOOK_SECRET = get_env("STRIPE_WEBHOOK_SECRET", required=True)
-GUIDE_PRICE_ID = get_env("STRIPE_GUIDE_PRICE_ID", required=True)
+# --------------------
 
 # Секретный ключ для прямой ссылки на скачивание
 DOWNLOAD_SECRET = get_env("DOWNLOAD_SECRET", "super-secret-key")
 
-
 # Путь к PDF файлу гайда
 GUIDE_PATH = get_env("GUIDE_PATH", "app_data/guide_vnt_2026.pdf")
-
 
 # Админы
 raw_admin_ids = get_env("ADMIN_IDS", "")

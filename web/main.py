@@ -7,6 +7,7 @@ import logging
 import mimetypes  # ← ДОБАВЬ ЭТОТ ИМПОРТ
 import os
 import sys
+import traceback
 from contextlib import asynccontextmanager
 from urllib.parse import urlparse
 from telegram.request import HTTPXRequest
@@ -244,15 +245,23 @@ async def telegram_webhook(request: Request):
 @app.post("/stripe-webhook")
 async def stripe_webhook(request: Request):
     """Обработка сигналов от Stripe об успешных оплатах"""
+    # Импортируем всё необходимое из нашего конфига
+    from core.config import STRIPE_WEBHOOK_SECRET, STRIPE_SECRET_KEY, DATABASE_URL
+    import stripe
+    import asyncpg
+
     payload = await request.body()
     sig_header = request.headers.get("stripe-signature")
+
+    # Устанавливаем ключ API, чтобы библиотека Stripe могла работать
+    stripe.api_key = STRIPE_SECRET_KEY
 
     if not sig_header:
         logger.error("❌ [STRIPE] Отсутствует заголовок stripe-signature")
         return Response(status_code=400)
 
     try:
-        # Проверяем, что это не фейковый запрос, а реально от Stripe
+        # Проверяем подпись, используя секрет из конфига (тест или лайв)
         event = stripe.Webhook.construct_event(
             payload, sig_header, STRIPE_WEBHOOK_SECRET
         )
@@ -265,15 +274,14 @@ async def stripe_webhook(request: Request):
         session = event["data"]["object"]
         
         customer_email = session.get("customer_details", {}).get("email")
-        # Этот ID ты будешь передавать в ссылке оплаты (client_reference_id)
         user_id_str = session.get("client_reference_id")
 
         logger.info(f"💰 [STRIPE SUCCESS] Куплено! Email: {customer_email}, UserID: {user_id_str}")
 
         # Сохраняем email в базу данных
         if user_id_str and user_id_str.isdigit():
-            conn = await asyncpg.connect(DATABASE_URL)
             try:
+                conn = await asyncpg.connect(DATABASE_URL)
                 # Записываем почту в таблицу пользователей
                 await conn.execute("""
                     UPDATE users
@@ -281,14 +289,12 @@ async def stripe_webhook(request: Request):
                     WHERE id = $2
                 """, customer_email, int(user_id_str))
                 logger.info(f"✅ [DB] Email {customer_email} успешно привязан к юзеру {user_id_str}")
+                await conn.close()
             except Exception as db_err:
                 logger.error(f"❌ [DB ERROR] Не удалось сохранить email: {db_err}")
-            finally:
-                await conn.close()
 
     # Всегда возвращаем 200, чтобы Stripe не слал повторов
     return Response(status_code=200)
-
 
 
 
@@ -305,12 +311,17 @@ async def root():
 
 @app.get("/get-my-guide-2026")
 async def download_guide(key: str = None, session_id: str = None):
-    # 1. Проверка секретного ключа
+    # Импортируем настроенные переменные из нашего конфига
+    from core.config import DOWNLOAD_SECRET, DATABASE_URL, GUIDE_PATH
+    import os
+    import asyncpg
+
+    # 1. Проверка секретного ключа (теперь DOWNLOAD_SECRET берется из config.py)
     if key != DOWNLOAD_SECRET:
         logger.warning(f"⚠️ Попытка скачать гайд с неверным ключом: {key}")
         raise HTTPException(status_code=403, detail="Доступ запрещен. Неверный ключ.")
     
-    # 2. Проверка сессии в базе (чтобы не качали просто по ссылке)
+    # 2. Проверка сессии в базе
     if not session_id:
         raise HTTPException(status_code=403, detail="ID сессии обязателен.")
 
@@ -334,7 +345,6 @@ async def download_guide(key: str = None, session_id: str = None):
         filename="guide_vnt_2026.pdf",
         media_type="application/pdf"
     )
-
 
 @app.get("/easy", include_in_schema=False)
 async def redirect_to_easy_bot():
@@ -656,60 +666,71 @@ def get_icon_class(icon_name, link_type, url, pay_details):
 
 @app.get("/create-checkout")
 async def create_checkout(user_id: str):
-    """Эндпоинт, который вызывает твою функцию и отправляет юзера на оплату"""
+    # Импортируем готовые ключи, которые config.py уже выбрал за нас (тест или лайв)
+    from core.config import STRIPE_SECRET_KEY, GUIDE_PRICE_ID
+    import stripe
+    
     try:
-        # Вызываем твою функцию (убедись, что stripe.api_key установлен!)
-        stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
+        # Устанавливаем ключ, который мы вытянули из нашего конфига
+        stripe.api_key = STRIPE_SECRET_KEY
         
         session = stripe.checkout.Session.create(
             payment_method_types=['card'],
             line_items=[{
-                'price': GUIDE_PRICE_ID,
+                'price': GUIDE_PRICE_ID, # Здесь теперь автоматически будет нужный ID
                 'quantity': 1,
             }],
             mode='payment',
-            client_reference_id=user_id, # Тот самый ID
+            client_reference_id=user_id,
             success_url='https://botolink.pro/success?session_id={CHECKOUT_SESSION_ID}',
             cancel_url='https://botolink.pro/guide',
         )
         
-        # Редиректим пользователя сразу в Stripe
         return RedirectResponse(url=session.url)
         
     except Exception as e:
         logger.error(f"❌ Ошибка создания сессии: {e}")
         return HTMLResponse(content=f"<h1>Ошибка оплаты: {e}</h1>", status_code=500)
-
+    
 
 
 # --- СИСТЕМНЫЕ ПУТИ (Вставлять строго перед @app.get("/{username}")) ---
 
 @app.get("/success", response_class=HTMLResponse)
 async def payment_success_page(request: Request, session_id: str = None):
+    # Импортируем наши умные переменные, которые сами знают, тест сейчас или лайв
+    from core.config import STRIPE_SECRET_KEY, DATABASE_URL, DOWNLOAD_SECRET
+    import stripe
+    import traceback
+
     # Если сессии нет в URL, ловить тут нечего
     if not session_id:
         return HTMLResponse("<h1>Ошибка: Ссылка не содержит ID сессии</h1>", status_code=400)
 
     try:
+        # Устанавливаем ключ, который config.py выбрал (sk_test_... или sk_live_...)
+        stripe.api_key = STRIPE_SECRET_KEY
+        
         # 1. Спрашиваем у Stripe статус этой сессии
         session = stripe.checkout.Session.retrieve(session_id)
         
         if session.payment_status == "paid":
+            # Используем DATABASE_URL из конфига
             conn = await asyncpg.connect(DATABASE_URL)
             try:
-                # 2. Проверяем в нашей новой таблице, сколько раз открывали
+                # 2. Проверяем в таблице, сколько раз открывали
                 row = await conn.fetchrow("SELECT download_count FROM paid_sessions WHERE session_id = $1", session_id)
                 
                 if row:
                     count = row['download_count']
-                    # Лимит — 5 скачиваний (на случай сбоев интернета у клиента)
+                    # Лимит — 5 скачиваний
                     if count >= 5:
                         return HTMLResponse("<h1>Доступ закрыт: Превышено количество скачиваний страницы.</h1>")
                     
-                    # Прибавляем единицу к счетчику заходов на страницу успеха
+                    # Прибавляем единицу
                     await conn.execute("UPDATE paid_sessions SET download_count = download_count + 1 WHERE session_id = $1", session_id)
                 else:
-                    # Если записи еще нет (первый заход после оплаты) — создаем её
+                    # Первый заход после оплаты — создаем запись
                     client_id = session.client_reference_id
                     email = session.customer_details.email if session.customer_details else None
                     
@@ -723,7 +744,7 @@ async def payment_success_page(request: Request, session_id: str = None):
                     )
                     count = 0
 
-                # 3. Выдача ссылки на скачивание (добавляем session_id для проверки при самом скачивании)
+                # 3. Выдача ссылки на скачивание
                 download_url = f"https://botolink.pro/get-my-guide-2026?key={DOWNLOAD_SECRET}&session_id={session_id}"
                 
                 return HTMLResponse(content=f"""
@@ -744,22 +765,29 @@ async def payment_success_page(request: Request, session_id: str = None):
             return HTMLResponse("<h1>Оплата в процессе или была отменена.</h1>", status_code=402)
             
     except Exception as e:
-        logger.error(f"❌ Ошибка в роуте success: {e}")
-        return HTMLResponse("<h1>Произошла техническая ошибка. Пожалуйста, обновите страницу.</h1>", status_code=500)
-
+        # Теперь в логах будет видно, если, например, база не подключилась
+        print(f"❌ Ошибка в роуте success: {traceback.format_exc()}")
+        return HTMLResponse(f"<h1>Произошла техническая ошибка.</h1><p style='color: gray; font-size: 0.8em;'>ID: {session_id}</p>", status_code=500)
+    
+    
+    
 
 @app.get("/guide", response_class=HTMLResponse, include_in_schema=False)
 async def vietnam_guide_landing(request: Request):
     try:
-        # Путь к лендингу гайда
-        file_path = os.path.join(current_dir, "templates", "guide", "guide_landing.html")
+        # Этот способ гарантирует, что мы найдем папку templates,
+        # даже если запустим бота из другой директории.
+        # __file__ — это путь к текущему файлу скрипта.
+        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        file_path = os.path.join(base_dir, "templates", "guide", "guide_landing.html")
+        
         with open(file_path, "r", encoding="utf-8") as f:
             content = f.read()
         return HTMLResponse(content=content)
     except Exception as e:
-        logger.error(f"❌ Ошибка загрузки лендинга: {e}")
-        return HTMLResponse(f"<h1>Ошибка: {e}</h1>")
-    
+        # Используем f-строку для вывода конкретного пути, чтобы видеть, где именно он ищет файл
+        print(f"❌ Ошибка загрузки лендинга. Искал тут: {file_path}. Ошибка: {e}")
+        return HTMLResponse(f"<h1>Ошибка загрузки страницы</h1>")
     
     
     
