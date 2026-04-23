@@ -775,19 +775,14 @@ async def payment_success_page(request: Request, session_id: str = None):
 @app.get("/guide", response_class=HTMLResponse, include_in_schema=False)
 async def vietnam_guide_landing(request: Request):
     try:
-        # Этот способ гарантирует, что мы найдем папку templates,
-        # даже если запустим бота из другой директории.
-        # __file__ — это путь к текущему файлу скрипта.
-        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        file_path = os.path.join(base_dir, "templates", "guide", "guide_landing.html")
-        
+        # Путь к лендингу гайда
+        file_path = os.path.join(current_dir, "templates", "guide", "guide_landing.html")
         with open(file_path, "r", encoding="utf-8") as f:
             content = f.read()
         return HTMLResponse(content=content)
     except Exception as e:
-        # Используем f-строку для вывода конкретного пути, чтобы видеть, где именно он ищет файл
-        print(f"❌ Ошибка загрузки лендинга. Искал тут: {file_path}. Ошибка: {e}")
-        return HTMLResponse(f"<h1>Ошибка загрузки страницы</h1>")
+        logger.error(f"❌ Ошибка загрузки лендинга: {e}")
+        return HTMLResponse(f"<h1>Ошибка: {e}</h1>")
     
     
     
