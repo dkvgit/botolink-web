@@ -24,13 +24,14 @@ from telegram import Update
 from fastapi import HTTPException
 from fastapi.responses import FileResponse
 from bot.bankworld import COUNTRY_NAMES
+import stripe
+import asyncpg
 
-# Путь должен быть от корня проекта, где запускается main.py
-GUIDE_PATH = "app_data/Гайд_Нячанг_Вьетнам_2026_ДенисКабаков.pdf"
-DOWNLOAD_SECRET = "vn2026_top_secret_access"
+from core.config import STRIPE_WEBHOOK_SECRET, GUIDE_PRICE_ID, DOWNLOAD_SECRET, GUIDE_PATH
 
 
-# Добавляем путь к корневой папке проекта
+
+
 
 # Импортируем application из bot.main и сразу даем понятное имя
 try:
@@ -236,7 +237,62 @@ async def telegram_webhook(request: Request):
         logger.error(f"❌ [WEBHOOK ERROR] Ошибка при обработке: {e}", exc_info=True)
         # Всегда возвращаем 200, чтобы Telegram не пытался слать это бесконечно
         return Response(status_code=200)
-    
+
+
+
+
+@app.post("/stripe-webhook")
+async def stripe_webhook(request: Request):
+    """Обработка сигналов от Stripe об успешных оплатах"""
+    payload = await request.body()
+    sig_header = request.headers.get("stripe-signature")
+
+    if not sig_header:
+        logger.error("❌ [STRIPE] Отсутствует заголовок stripe-signature")
+        return Response(status_code=400)
+
+    try:
+        # Проверяем, что это не фейковый запрос, а реально от Stripe
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, STRIPE_WEBHOOK_SECRET
+        )
+    except Exception as e:
+        logger.error(f"⚠️ [STRIPE] Ошибка проверки подписи: {e}")
+        return Response(content=str(e), status_code=400)
+
+    # Когда оплата прошла успешно
+    if event["type"] == "checkout.session.completed":
+        session = event["data"]["object"]
+        
+        customer_email = session.get("customer_details", {}).get("email")
+        # Этот ID ты будешь передавать в ссылке оплаты (client_reference_id)
+        user_id_str = session.get("client_reference_id")
+
+        logger.info(f"💰 [STRIPE SUCCESS] Куплено! Email: {customer_email}, UserID: {user_id_str}")
+
+        # Сохраняем email в базу данных
+        if user_id_str and user_id_str.isdigit():
+            conn = await asyncpg.connect(DATABASE_URL)
+            try:
+                # Записываем почту в таблицу пользователей
+                await conn.execute("""
+                    UPDATE users
+                    SET email = $1
+                    WHERE id = $2
+                """, customer_email, int(user_id_str))
+                logger.info(f"✅ [DB] Email {customer_email} успешно привязан к юзеру {user_id_str}")
+            except Exception as db_err:
+                logger.error(f"❌ [DB ERROR] Не удалось сохранить email: {db_err}")
+            finally:
+                await conn.close()
+
+    # Всегда возвращаем 200, чтобы Stripe не слал повторов
+    return Response(status_code=200)
+
+
+
+
+
     
 # ========== ОСТАЛЬНЫЕ ЭНДПОИНТЫ ==========
 # ========== СИСТЕМНЫЕ РОУТЫ И ГАЙД ==========
@@ -249,23 +305,22 @@ async def root():
 
 @app.get("/get-my-guide-2026")
 async def download_guide(key: str = None):
-    # Проверка секретного ключа из ссылки
+    # Проверка секретного ключа из ссылки (из твоего core/config.py)
     if key != DOWNLOAD_SECRET:
         logger.warning(f"⚠️ Попытка скачать гайд с неверным ключом: {key}")
         raise HTTPException(status_code=403, detail="Доступ запрещен. Неверный ключ.")
     
-    # Проверка наличия файла на диске
+    # Проверка наличия файла на диске (путь берется из core/config.py: "app_data/guide_vnt_2026.pdf")
     if not os.path.exists(GUIDE_PATH):
         logger.error(f"❌ Файл гайда не найден по пути: {GUIDE_PATH}")
         raise HTTPException(status_code=404, detail="Файл временно недоступен на сервере.")
 
-    # Отправка PDF файла пользователю
+    # Отправка PDF файла пользователю с четким названием из конфига
     return FileResponse(
         path=GUIDE_PATH,
-        filename="Гайд_Нячанг_Вьетнам_2026_ДенисКабаков.pdf",
+        filename="guide_vnt_2026.pdf",
         media_type="application/pdf"
     )
-
 
 @app.get("/easy", include_in_schema=False)
 async def redirect_to_easy_bot():
@@ -585,11 +640,98 @@ def get_icon_class(icon_name, link_type, url, pay_details):
 
 
 
+@app.get("/create-checkout")
+async def create_checkout(user_id: str):
+    """Эндпоинт, который вызывает твою функцию и отправляет юзера на оплату"""
+    try:
+        # Вызываем твою функцию (убедись, что stripe.api_key установлен!)
+        stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
+        
+        session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            line_items=[{
+                'price': GUIDE_PRICE_ID,
+                'quantity': 1,
+            }],
+            mode='payment',
+            client_reference_id=user_id, # Тот самый ID
+            success_url='https://botolink.pro/success?session_id={CHECKOUT_SESSION_ID}',
+            cancel_url='https://botolink.pro/guide',
+        )
+        
+        # Редиректим пользователя сразу в Stripe
+        return RedirectResponse(url=session.url)
+        
+    except Exception as e:
+        logger.error(f"❌ Ошибка создания сессии: {e}")
+        return HTMLResponse(content=f"<h1>Ошибка оплаты: {e}</h1>", status_code=500)
+
 
 
 # --- СИСТЕМНЫЕ ПУТИ (Вставлять строго перед @app.get("/{username}")) ---
 
+@app.get("/success", response_class=HTMLResponse)
+async def payment_success_page(request: Request, session_id: str = None):
+    # Если сессии нет в URL, ловить тут нечего
+    if not session_id:
+        return HTMLResponse("<h1>Ошибка: Ссылка не содержит ID сессии</h1>", status_code=400)
 
+    try:
+        # 1. Спрашиваем у Stripe статус этой сессии
+        session = stripe.checkout.Session.retrieve(session_id)
+        
+        if session.payment_status == "paid":
+            conn = await asyncpg.connect(DATABASE_URL)
+            try:
+                # 2. Проверяем в нашей новой таблице, сколько раз открывали
+                row = await conn.fetchrow("SELECT download_count FROM paid_sessions WHERE session_id = $1", session_id)
+                
+                if row:
+                    count = row['download_count']
+                    # Лимит — 5 скачиваний (на случай сбоев интернета у клиента)
+                    if count >= 5:
+                        return HTMLResponse("<h1>Доступ закрыт: Превышено количество скачиваний.</h1>")
+                    
+                    # Прибавляем единицу к счетчику
+                    await conn.execute("UPDATE paid_sessions SET download_count = download_count + 1 WHERE session_id = $1", session_id)
+                else:
+                    # Если записи еще нет (первый заход после оплаты) — создаем её
+                    await conn.execute("""
+                        INSERT INTO paid_sessions (session_id, user_id, customer_email, download_count)
+                        VALUES ($1, $2, $3, 1)
+                    """,
+                    session_id,
+                    int(session.client_reference_id) if session.client_reference_id else None,
+                    session.customer_details.email if session.customer_details else None
+                    )
+                    count = 0
+
+                # 3. Выдача ссылки на скачивание
+                download_url = f"https://botolink.pro/get-my-guide-2026?key={DOWNLOAD_SECRET}"
+                
+                return HTMLResponse(content=f"""
+                    <div style="text-align: center; margin-top: 50px; font-family: sans-serif; background: #f4f7f6; padding: 40px; border-radius: 15px;">
+                        <h1 style="color: #28a745;">Оплата прошла успешно! 🎉</h1>
+                        <p>Ваш личный доступ к гайду подтвержден.</p>
+                        <p style="color: #666;">(Осталось попыток просмотра страницы: {4 - count})</p>
+                        <br>
+                        <a href="{download_url}" style="display: inline-block; padding: 18px 30px; background: #007bff; color: white; text-decoration: none; border-radius: 10px; font-weight: bold; font-size: 1.2em; box-shadow: 0 4px 15px rgba(0,123,255,0.3);">
+                            📥 СКАЧАТЬ ГАЙД (PDF)
+                        </a>
+                        <p style="margin-top: 30px; font-size: 0.9em; color: #999;">Email покупки: {session.customer_details.email}</p>
+                    </div>
+                """)
+            finally:
+                await conn.close()
+        else:
+            return HTMLResponse("<h1>Оплата в процессе или была отменена.</h1>", status_code=402)
+            
+    except Exception as e:
+        logger.error(f"❌ Ошибка в роуте success: {e}")
+        return HTMLResponse("<h1>Произошла техническая ошибка. Пожалуйста, обновите страницу.</h1>", status_code=500)
+    
+    
+    
 
 
 @app.get("/guide", response_class=HTMLResponse, include_in_schema=False)

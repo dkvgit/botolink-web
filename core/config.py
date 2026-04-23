@@ -31,8 +31,19 @@ APP_URL = get_env("APP_URL", "http://localhost:8000")
 SECRET_KEY = get_env("SECRET_KEY", "dev-secret-key-change-me")
 
 # Stripe
+# Stripe
 STRIPE_PUBLIC_KEY = get_env("STRIPE_PUBLIC_KEY", "")
-STRIPE_SECRET_KEY = get_env("STRIPE_SECRET_KEY", "")
+STRIPE_SECRET_KEY = get_env("STRIPE_SECRET_KEY", required=True)
+STRIPE_WEBHOOK_SECRET = get_env("STRIPE_WEBHOOK_SECRET", required=True)
+GUIDE_PRICE_ID = get_env("STRIPE_GUIDE_PRICE_ID", required=True)
+
+# Секретный ключ для прямой ссылки на скачивание
+DOWNLOAD_SECRET = get_env("DOWNLOAD_SECRET", "super-secret-key")
+
+
+# Путь к PDF файлу гайда
+GUIDE_PATH = get_env("GUIDE_PATH", "app_data/guide_vnt_2026.pdf")
+
 
 # Админы
 raw_admin_ids = get_env("ADMIN_IDS", "")
