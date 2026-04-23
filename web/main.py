@@ -698,77 +698,65 @@ async def create_checkout(user_id: str):
 
 @app.get("/success", response_class=HTMLResponse)
 async def payment_success_page(request: Request, session_id: str = None):
-    # Импортируем наши умные переменные, которые сами знают, тест сейчас или лайв
     from core.config import STRIPE_SECRET_KEY, DATABASE_URL, DOWNLOAD_SECRET
     import stripe
+    import asyncpg
     import traceback
 
-    # Если сессии нет в URL, ловить тут нечего
     if not session_id:
-        return HTMLResponse("<h1>Ошибка: Ссылка не содержит ID сессии</h1>", status_code=400)
+        return HTMLResponse("<h1>Ошибка: Нет ID сессии</h1>", status_code=400)
 
     try:
-        # Устанавливаем ключ, который config.py выбрал (sk_test_... или sk_live_...)
+        # 1. Настройка Stripe
         stripe.api_key = STRIPE_SECRET_KEY
-        
-        # 1. Спрашиваем у Stripe статус этой сессии
         session = stripe.checkout.Session.retrieve(session_id)
         
         if session.payment_status == "paid":
-            # Используем DATABASE_URL из конфига
-            conn = await asyncpg.connect(DATABASE_URL)
+            # 2. Очищаем DATABASE_URL для Render/Supabase
+            # Убираем +asyncpg, так как библиотека asyncpg его не понимает
+            db_url = DATABASE_URL.replace("postgresql+asyncpg://", "postgresql://")
+            
+            # Подключаемся
+            conn = await asyncpg.connect(db_url)
             try:
-                # 2. Проверяем в таблице, сколько раз открывали
+                # Проверяем запись об оплате
                 row = await conn.fetchrow("SELECT download_count FROM paid_sessions WHERE session_id = $1", session_id)
                 
                 if row:
                     count = row['download_count']
-                    # Лимит — 5 скачиваний
                     if count >= 5:
-                        return HTMLResponse("<h1>Доступ закрыт: Превышено количество скачиваний страницы.</h1>")
-                    
-                    # Прибавляем единицу
+                        return HTMLResponse("<h1>Лимит скачиваний исчерпан.</h1>")
                     await conn.execute("UPDATE paid_sessions SET download_count = download_count + 1 WHERE session_id = $1", session_id)
                 else:
-                    # Первый заход после оплаты — создаем запись
                     client_id = session.client_reference_id
                     email = session.customer_details.email if session.customer_details else None
-                    
                     await conn.execute("""
                         INSERT INTO paid_sessions (session_id, user_id, customer_email, download_count)
                         VALUES ($1, $2, $3, 1)
-                    """,
-                    session_id,
-                    int(client_id) if client_id and client_id.isdigit() else None,
-                    email
-                    )
+                    """, session_id, int(client_id) if client_id and client_id.isdigit() else None, email)
                     count = 0
 
-                # 3. Выдача ссылки на скачивание
                 download_url = f"https://botolink.pro/get-my-guide-2026?key={DOWNLOAD_SECRET}&session_id={session_id}"
                 
                 return HTMLResponse(content=f"""
                     <div style="text-align: center; margin-top: 50px; font-family: sans-serif; background: #f4f7f6; padding: 40px; border-radius: 15px;">
                         <h1 style="color: #28a745;">Оплата прошла успешно! 🎉</h1>
-                        <p>Ваш личный доступ к гайду подтвержден.</p>
-                        <p style="color: #666;">(Осталось попыток просмотра этой страницы: {4 - count})</p>
+                        <p>Доступ подтвержден. Осталось просмотров: {4 - count}</p>
                         <br>
-                        <a href="{download_url}" style="display: inline-block; padding: 18px 30px; background: #007bff; color: white; text-decoration: none; border-radius: 10px; font-weight: bold; font-size: 1.2em; box-shadow: 0 4px 15px rgba(0,123,255,0.3);">
+                        <a href="{download_url}" style="display: inline-block; padding: 18px 30px; background: #007bff; color: white; text-decoration: none; border-radius: 10px; font-weight: bold;">
                             📥 СКАЧАТЬ ГАЙД (PDF)
                         </a>
-                        <p style="margin-top: 30px; font-size: 0.9em; color: #999;">Email покупки: {session.customer_details.email if session.customer_details else 'не указан'}</p>
                     </div>
                 """)
             finally:
                 await conn.close()
         else:
-            return HTMLResponse("<h1>Оплата в процессе или была отменена.</h1>", status_code=402)
+            return HTMLResponse("<h1>Оплата не подтверждена.</h1>", status_code=402)
             
     except Exception as e:
-        # Теперь в логах будет видно, если, например, база не подключилась
-        print(f"❌ Ошибка в роуте success: {traceback.format_exc()}")
-        return HTMLResponse(f"<h1>Произошла техническая ошибка.</h1><p style='color: gray; font-size: 0.8em;'>ID: {session_id}</p>", status_code=500)
-    
+        # Это выведется в логи Render!
+        print(f"❌ ОШИБКА НА RENDER: {traceback.format_exc()}")
+        return HTMLResponse(f"<h1>Техническая ошибка</h1><p>ID: {session_id}</p>")
     
     
 
