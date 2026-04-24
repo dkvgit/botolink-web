@@ -695,12 +695,19 @@ document.getElementById('magic-link-form').addEventListener('submit', async (e) 
 
 
 
+<script>
 document.getElementById('magic-link-form').addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    const email = document.getElementById('auth-email').value;
-    const inputGroup = document.querySelector('.auth-container'); // Твоя общая обертка
+    const emailInput = document.getElementById('auth-email');
+    const email = emailInput.value.trim();
+    const inputGroup = document.querySelector('.auth-container'); // Блок с инпутом и кнопкой
     const messageBox = document.getElementById('auth-message');
+    const submitBtn = document.getElementById('auth-submit-btn');
+
+    // 1. Сразу блокируем кнопку, чтобы не тыкали дважды
+    submitBtn.disabled = true;
+    submitBtn.innerText = '⏳';
 
     try {
         const response = await fetch('/auth/request-magic-link', {
@@ -710,26 +717,55 @@ document.getElementById('magic-link-form').addEventListener('submit', async (e) 
         });
 
         if (response.ok) {
-            // Скрываем всё содержимое контейнера
+            // УСПЕХ: Скрываем всю панель ввода
             inputGroup.style.display = 'none';
 
-            // Настраиваем и показываем сообщение
+            // Показываем сообщение
             messageBox.style.display = 'block';
-            messageBox.style.color = "#4ade80"; // Приятный зеленый
-            messageBox.innerHTML = `✅ Ссылка отправлена на почту!`;
+            messageBox.style.color = "#4ade80";
+            messageBox.innerHTML = `✅ Ссылка отправлена на почту <b>${email}</b>!`;
 
-            // Через 60 секунд возвращаем как было
+            // Через 60 секунд возвращаем форму обратно
             setTimeout(() => {
                 messageBox.style.display = 'none';
                 inputGroup.style.display = 'flex';
+                submitBtn.disabled = false;
+                submitBtn.innerText = 'Войти';
             }, 60000);
+
+        } else if (response.status === 404) {
+            // ОПЛАТА НЕ НАЙДЕНА
+            messageBox.style.display = 'block';
+            messageBox.style.color = '#ff5252';
+            messageBox.innerText = 'Оплата не найдена. Посмотрите тарифы ниже...';
+
+            submitBtn.disabled = false;
+            submitBtn.innerText = 'Войти';
+
+            // Скроллим к ценам через 2 секунды
+            setTimeout(() => {
+                const priceSection = document.getElementById('price');
+                if (priceSection) {
+                    priceSection.scrollIntoView({ behavior: 'smooth' });
+                }
+            }, 2000);
+
+        } else {
+            // ОШИБКА СЕРВЕРА (500 и прочие)
+            throw new Error('Server Error');
         }
+
     } catch (err) {
+        // ОБЩАЯ ОШИБКА (нет сети или сервер упал)
         messageBox.style.display = 'block';
-        messageBox.style.color = "#ff4d4d";
-        messageBox.innerText = "Ошибка. Попробуйте позже.";
+        messageBox.style.color = '#ffb700';
+        messageBox.innerText = 'Ошибка соединения. Попробуйте позже.';
+
+        submitBtn.disabled = false;
+        submitBtn.innerText = 'Войти';
     }
 });
+</script>
 
 
 

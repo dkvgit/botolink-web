@@ -173,96 +173,108 @@ app = FastAPI(lifespan=lifespan)
 @app.get("/my-guide", response_class=HTMLResponse)
 async def read_guide(request: Request):
     from core.config import DATABASE_URL
-    
+    import asyncpg
+    from fastapi.responses import HTMLResponse, RedirectResponse
+    import os
+
     # 1. Достаем нашу куку "абонемент"
     auth_token = request.cookies.get("guide_auth_token")
 
     if not auth_token:
-        # Нет куки? Иди на лендинг покупай
+        # Нет куки? Отправляем на лендинг
         return RedirectResponse(url="/guide")
 
-    conn = await asyncpg.connect(DATABASE_URL)
+    # Очищаем URL (стандарт для работы с asyncpg напрямую)
+    db_url = DATABASE_URL.replace("postgresql+asyncpg://", "postgresql://")
+    
+    conn = await asyncpg.connect(db_url)
     try:
-        # 2. Проверяем в базе, жива ли еще эта сессия (оплата)
-        # Мы используем session_id, который сохранили в куку на Шаге 4
+        # 2. Проверяем в базе, есть ли такая сессия
         user_check = await conn.fetchrow(
             "SELECT customer_email FROM public.paid_sessions WHERE session_id = $1 LIMIT 1",
             auth_token
         )
 
         if not user_check:
-            # Кука есть, но в базе такой сессии нет (например, удалил)
+            # Кука левая или сессия удалена
             response = RedirectResponse(url="/guide")
-            response.delete_cookie("guide_auth_token") # Стираем невалидную куку
+            response.delete_cookie("guide_auth_token")
             return response
 
         # 3. Всё ок! Отдаем страницу гайда
-        # В реале тут лучше использовать Jinja2 шаблоны, но для теста отдадим строкой или файлом
-        with open("templates/guide_content.html", "r", encoding="utf-8") as f:
+        # Указываем правильный путь с учетом подпапки guide
+        template_path = "web/templates/guide/guide_content.html"
+        
+        if not os.path.exists(template_path):
+            return HTMLResponse(content="<h1>Файл гайда не найден</h1>", status_code=404)
+
+        with open(template_path, "r", encoding="utf-8") as f:
             html_content = f.read()
         
         return HTMLResponse(content=html_content)
 
+    except Exception as e:
+        print(f"!!! Ошибка доступа к гайду: {e}")
+        return HTMLResponse(content="Ошибка сервера", status_code=500)
     finally:
         await conn.close()
         
-        
 
 @app.get("/auth/verify")
-async def verify_magic_link(token: str, response: Response):
+async def verify_magic_link(token: str):
     from core.config import DATABASE_URL
     from datetime import datetime
     import asyncpg
     from fastapi.responses import RedirectResponse
+    import logging
 
-    # Очищаем URL базы (убираем +asyncpg если есть, так как asyncpg.connect хочет чистый postgres://)
-    clean_db_url = DATABASE_URL.replace("postgresql+asyncpg://", "postgresql://")
+    logger = logging.getLogger("uvicorn")
+
+    # Очистка URL для asyncpg
+    db_url = DATABASE_URL.replace("postgresql+asyncpg://", "postgresql://")
     
-    conn = await asyncpg.connect(clean_db_url)
+    conn = await asyncpg.connect(db_url)
     try:
-        # 1. Ищем запись с токеном и проверяем время жизни (15 мин)
+        # Проверяем токен
         query = """
             SELECT session_id, customer_email
             FROM public.paid_sessions
             WHERE magic_link_token = $1 AND token_expires_at > $2
         """
-        # Используем datetime.utcnow() для сравнения с временем в базе
         user_record = await conn.fetchrow(query, token, datetime.utcnow())
 
         if not user_record:
-            logger.warning(f"⚠️ Невалидный или просроченный токен: {token}")
-            return RedirectResponse(url="/guide?error=invalid_token")
+            logger.warning(f"Invalid token attempt: {token}")
+            return RedirectResponse(url="/?error=expired")
 
-        # 2. Токен верный. Готовим переход на страницу гайда
-        # ВАЖНО: Убедись, что роут "/my-guide" у тебя существует
-        redirect_to_guide = RedirectResponse(url="/my-guide", status_code=303)
+        # Создаем редирект на страницу гайда
+        # ВАЖНО: Убедись, что путь /my-guide существует в твоем коде!
+        response = RedirectResponse(url="/my-guide", status_code=303)
 
-        # 3. Устанавливаем Cookie
-        # Мы записываем session_id в браузер, чтобы сайт "узнавал" пользователя
-        redirect_to_guide.set_cookie(
+        # Ставим куку
+        response.set_cookie(
             key="guide_auth_token",
             value=str(user_record['session_id']),
-            httponly=True,   # Защита от XSS атак
-            max_age=31536000, # 1 год
+            httponly=True,
+            max_age=31536000,
             samesite="lax",
-            secure=False      # Поставь True, когда будет HTTPS на домене
+            secure=False # Поставь True когда будет HTTPS
         )
 
-        # 4. Удаляем токен, чтобы его нельзя было использовать второй раз
+        # Удаляем токен, чтобы не использовали дважды
         await conn.execute(
             "UPDATE public.paid_sessions SET magic_link_token = NULL WHERE session_id = $1",
             user_record['session_id']
         )
 
-        logger.info(f"🔑 Успешный вход: {user_record['customer_email']}")
-        return redirect_to_guide
+        return response
 
     except Exception as e:
-        logger.error(f"❌ Ошибка при верификации: {str(e)}")
-        return RedirectResponse(url="/guide?error=server_error")
+        # Это выведет реальную ошибку в консоль PyCharm!
+        print(f"!!! ОШИБКА В VERIFY: {e}")
+        return RedirectResponse(url="/?error=server_error")
     finally:
         await conn.close()
-        
         
         
         
