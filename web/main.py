@@ -230,12 +230,13 @@ async def verify_magic_link(token: str):
 
     logger = logging.getLogger("uvicorn")
 
-    # Очистка URL для asyncpg (удаляем префикс драйвера, если он есть)
+    # Очистка URL для asyncpg
     db_url = DATABASE_URL.replace("postgresql+asyncpg://", "postgresql://")
     
     conn = await asyncpg.connect(db_url)
     try:
-        # 1. Проверяем токен и время его жизни
+        # 1. Проверяем токен.
+        # Если прошло более 15 минут с момента генерации, база ничего не вернет ($2 = текущее время)
         query = """
             SELECT session_id, customer_email
             FROM public.paid_sessions
@@ -243,41 +244,40 @@ async def verify_magic_link(token: str):
         """
         user_record = await conn.fetchrow(query, token, datetime.utcnow())
 
-        # 2. Если токен не найден (уже использован) или просрочен
+        # 2. Если токен не найден или время (15 мин) уже вышло
         if not user_record:
-            logger.warning(f"⚠️ Попытка входа по невалидному токену: {token}")
-            # Редирект на лендинг с параметром, что ссылка использована или неверна
+            logger.warning(f"⚠️ Токен невалиден или протух: {token}")
             return RedirectResponse(url="/guide?error=link_invalid_or_used")
 
-        # 3. Токен верный. Создаем редирект на страницу платного контента
+        # 3. Токен верный. Готовим переход в гайд
         response = RedirectResponse(url="/my-guide", status_code=303)
 
-        # 4. Устанавливаем Cookie (абонемент на вход)
+        # 4. Устанавливаем куку-абонемент
         response.set_cookie(
             key="guide_auth_token",
             value=str(user_record['session_id']),
-            httponly=True,    # Защита от кражи куки через JS
-            max_age=31536000, # 1 год в секундах
+            httponly=True,
+            max_age=31536000,
             samesite="lax",
-            secure=False      # Смени на True, когда будет работать HTTPS на домене
+            secure=False
         )
 
-        # 5. Одноразовость: зануляем токен в базе сразу после использования
-        await conn.execute(
-            "UPDATE public.paid_sessions SET magic_link_token = NULL WHERE session_id = $1",
-            user_record['session_id']
-        )
+        # 5. Одноразовость отключена
+        # Мы НЕ зануляем magic_link_token.
+        # Теперь ссылку можно нажать 2, 3 или 10 раз, пока не истечет время в колонке token_expires_at.
+        # await conn.execute(
+        #     "UPDATE public.paid_sessions SET magic_link_token = NULL WHERE session_id = $1",
+        #     user_record['session_id']
+        # )
 
-        logger.info(f"✅ Успешный вход по ссылке: {user_record['customer_email']}")
+        logger.info(f"✅ Вход выполнен (ссылка активна до истечения времени): {user_record['customer_email']}")
         return response
 
     except Exception as e:
-        # Вывод ошибки в консоль PyCharm для отладки
         print(f"!!! ОШИБКА В VERIFY: {e}")
         return RedirectResponse(url="/guide?error=server_error")
     finally:
         await conn.close()
-        
         
         
         
@@ -294,33 +294,63 @@ async def request_magic_link(payload: AuthEmail):
     from email.mime.multipart import MIMEMultipart
     from email.header import Header
     import asyncpg
+    from fastapi import HTTPException
 
     target_email = payload.email.strip().lower()
     clean_db_url = DATABASE_URL.replace("postgresql+asyncpg://", "postgresql://")
     
     conn = await asyncpg.connect(clean_db_url, statement_cache_size=0)
     try:
+        # 1. Получаем данные пользователя и статистику запросов
         user_record = await conn.fetchrow(
-            "SELECT customer_email FROM public.paid_sessions WHERE customer_email ILIKE $1 LIMIT 1",
+            """
+            SELECT customer_email, login_attempts_today, last_login_request
+            FROM public.paid_sessions
+            WHERE customer_email ILIKE $1 LIMIT 1
+            """,
             target_email
         )
         
         if not user_record:
-            raise HTTPException(status_code=404, detail="Email not found")
-            
+            raise HTTPException(status_code=404, detail="Email не найден в базе покупателей")
+
         db_email = user_record['customer_email']
+        current_attempts = user_record['login_attempts_today'] or 0
+        last_request = user_record['last_login_request']
+        now = datetime.now() # Для сравнения дат используем локальное время сервера
+
+        # 2. ПРОВЕРКА ЛИМИТА
+        # Если последний запрос был в другой день — сбрасываем счетчик
+        if last_request and last_request.date() < now.date():
+            current_attempts = 0
+
+        # Если попыток уже 2 или больше — блокируем
+        if current_attempts >= 2:
+            logger.warning(f"🚫 Лимит исчерпан для {db_email}")
+            raise HTTPException(
+                status_code=429,
+                detail="Лимит исчерпан. Можно запрашивать ссылку не более 2 раз в сутки."
+            )
+
+        # 3. ГЕНЕРАЦИЯ ДАННЫХ
         token = secrets.token_urlsafe(32)
         expires_at = datetime.utcnow() + timedelta(minutes=15)
+        new_attempts = current_attempts + 1
 
+        # 4. ОБНОВЛЯЕМ БАЗУ (токен + инкремент счетчика)
         await conn.execute(
             """
             UPDATE public.paid_sessions
-            SET magic_link_token = $1, token_expires_at = $2
-            WHERE customer_email = $3
+            SET magic_link_token = $1,
+                token_expires_at = $2,
+                login_attempts_today = $3,
+                last_login_request = $4
+            WHERE customer_email = $5
             """,
-            token, expires_at, db_email
+            token, expires_at, new_attempts, now, db_email
         )
 
+        # 5. ОТПРАВКА ПИСЬМА
         magic_link = f"https://botolink.pro/auth/verify?token={token}"
         
         msg = MIMEMultipart()
@@ -332,9 +362,11 @@ async def request_magic_link(payload: AuthEmail):
         <html>
             <body style="font-family: Arial, sans-serif; padding: 20px;">
                 <h2 style="color: #635bff;">Привет!</h2>
-                <p>Нажми на кнопку ниже, чтобы войти в гайд:</p>
+                <p>Вы запросили доступ к гайду. Нажмите на кнопку ниже:</p>
                 <a href="{magic_link}" style="display: inline-block; padding: 12px 25px; background: #635bff; color: #fff; text-decoration: none; border-radius: 8px;">Войти в Гайд</a>
-                <p style="margin-top: 20px; font-size: 12px; color: #999;">Ссылка сгорит через 15 минут.</p>
+                <p style="margin-top: 20px; font-size: 13px; color: #666;">
+                    ⚠️ Ссылка <b>многоразовая</b> в течение 15 минут, но запрашивать новое письмо можно не более 2 раз в сутки.
+                </p>
             </body>
         </html>
         """
@@ -344,14 +376,18 @@ async def request_magic_link(payload: AuthEmail):
             server.login(SMTP_USER, SMTP_PASSWORD)
             server.send_message(msg)
 
-        logger.info(f"📧 Письмо отправлено на {db_email}")
+        logger.info(f"📧 Письмо #{new_attempts} отправлено на {db_email}")
         return {"status": "success"}
 
+    except HTTPException as he:
+        raise he
     except Exception as e:
-        logger.error(f"❌ Ошибка Шага 3: {str(e)}")
-        raise HTTPException(status_code=500, detail="Internal Server Error")
+        logger.error(f"❌ Ошибка лимитов/отправки: {str(e)}")
+        raise HTTPException(status_code=500, detail="Ошибка сервера")
     finally:
         await conn.close()
+        
+        
         
         
         
