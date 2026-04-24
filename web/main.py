@@ -230,12 +230,12 @@ async def verify_magic_link(token: str):
 
     logger = logging.getLogger("uvicorn")
 
-    # Очистка URL для asyncpg
+    # Очистка URL для asyncpg (удаляем префикс драйвера, если он есть)
     db_url = DATABASE_URL.replace("postgresql+asyncpg://", "postgresql://")
     
     conn = await asyncpg.connect(db_url)
     try:
-        # Проверяем токен
+        # 1. Проверяем токен и время его жизни
         query = """
             SELECT session_id, customer_email
             FROM public.paid_sessions
@@ -243,36 +243,38 @@ async def verify_magic_link(token: str):
         """
         user_record = await conn.fetchrow(query, token, datetime.utcnow())
 
+        # 2. Если токен не найден (уже использован) или просрочен
         if not user_record:
-            logger.warning(f"Invalid token attempt: {token}")
-            return RedirectResponse(url="/?error=expired")
+            logger.warning(f"⚠️ Попытка входа по невалидному токену: {token}")
+            # Редирект на лендинг с параметром, что ссылка использована или неверна
+            return RedirectResponse(url="/guide?error=link_invalid_or_used")
 
-        # Создаем редирект на страницу гайда
-        # ВАЖНО: Убедись, что путь /my-guide существует в твоем коде!
+        # 3. Токен верный. Создаем редирект на страницу платного контента
         response = RedirectResponse(url="/my-guide", status_code=303)
 
-        # Ставим куку
+        # 4. Устанавливаем Cookie (абонемент на вход)
         response.set_cookie(
             key="guide_auth_token",
             value=str(user_record['session_id']),
-            httponly=True,
-            max_age=31536000,
+            httponly=True,    # Защита от кражи куки через JS
+            max_age=31536000, # 1 год в секундах
             samesite="lax",
-            secure=False # Поставь True когда будет HTTPS
+            secure=False      # Смени на True, когда будет работать HTTPS на домене
         )
 
-        # Удаляем токен, чтобы не использовали дважды
+        # 5. Одноразовость: зануляем токен в базе сразу после использования
         await conn.execute(
             "UPDATE public.paid_sessions SET magic_link_token = NULL WHERE session_id = $1",
             user_record['session_id']
         )
 
+        logger.info(f"✅ Успешный вход по ссылке: {user_record['customer_email']}")
         return response
 
     except Exception as e:
-        # Это выведет реальную ошибку в консоль PyCharm!
+        # Вывод ошибки в консоль PyCharm для отладки
         print(f"!!! ОШИБКА В VERIFY: {e}")
-        return RedirectResponse(url="/?error=server_error")
+        return RedirectResponse(url="/guide?error=server_error")
     finally:
         await conn.close()
         

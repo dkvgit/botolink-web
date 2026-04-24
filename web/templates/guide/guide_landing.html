@@ -723,7 +723,8 @@ document.getElementById('magic-link-form').addEventListener('submit', async (e) 
             // Показываем сообщение
             messageBox.style.display = 'block';
             messageBox.style.color = "#4ade80";
-            messageBox.innerHTML = `✅ Ссылка отправлена на почту <b>${email}</b>!`;
+           // Сделай так (чтобы человек сразу считал правила):
+           messageBox.innerHTML = `✅ Ссылка отправлена! Она <b>одноразовая</b> и действует 15 минут.`;
 
             // Через 60 секунд возвращаем форму обратно
             setTimeout(() => {
