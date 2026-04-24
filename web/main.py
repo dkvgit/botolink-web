@@ -585,8 +585,15 @@ async def stripe_webhook(request: Request):
 @app.get("/success", response_class=HTMLResponse)
 async def payment_success_page(request: Request, session_id: str = None):
     from core.config import STRIPE_SECRET_KEY, DATABASE_URL
+    from core.config import SMTP_USER, SMTP_PASSWORD, SMTP_SERVER, SMTP_PORT
     import stripe
     import asyncpg
+    import secrets
+    from datetime import datetime, timedelta
+    import smtplib
+    from email.mime.text import MIMEText
+    from email.mime.multipart import MIMEMultipart
+    from email.header import Header
 
     if not session_id:
         return HTMLResponse("<h1>Ошибка: Нет ID сессии</h1>", status_code=400)
@@ -596,29 +603,62 @@ async def payment_success_page(request: Request, session_id: str = None):
         session = stripe.checkout.Session.retrieve(session_id)
         
         if session.payment_status == "paid":
-            email = session.customer_details.email if session.customer_details else "вашу почту"
+            email = session.customer_details.email if session.customer_details else None
             
-            # ✅ ДОБАВЛЯЕМ ЗАПИСЬ В БД ПРЯМО ЗДЕСЬ
+            if not email:
+                return HTMLResponse("<h1>Ошибка: Email не получен</h1>", status_code=400)
+            
             clean_db_url = DATABASE_URL.replace("postgresql+asyncpg://", "postgresql://")
             conn = await asyncpg.connect(clean_db_url)
+            
             try:
-                # Проверяем, нет ли уже такой сессии
-                existing = await conn.fetchrow(
-                    "SELECT session_id FROM paid_sessions WHERE session_id = $1",
-                    session_id
-                )
-                if not existing:
-                    await conn.execute("""
-                        INSERT INTO paid_sessions (session_id, customer_email, download_count)
-                        VALUES ($1, $2, 0)
-                    """, session_id, email)
-                    logger.info(f"✅ [SUCCESS PAGE] Добавлен пользователь {email} с session_id {session_id}")
-                else:
-                    logger.info(f"ℹ️ [SUCCESS PAGE] Пользователь {email} уже есть в БД")
+                # Генерируем токен
+                token = secrets.token_urlsafe(32)
+                expires_at = datetime.utcnow() + timedelta(minutes=15)
+                
+                # Обновляем запись с токеном
+                await conn.execute("""
+                    UPDATE paid_sessions
+                    SET magic_link_token = $1,
+                        token_expires_at = $2
+                    WHERE customer_email = $3 AND session_id = $4
+                """, token, expires_at, email, session_id)
+                
+                logger.info(f"✅ [SUCCESS] Токен создан для {email}")
+                
+                # Отправляем письмо
+                magic_link = f"https://botolink.pro/auth/verify?token={token}"
+                
+                msg = MIMEMultipart()
+                msg['From'] = SMTP_USER
+                msg['To'] = email
+                msg['Subject'] = Header("Ваш доступ к Гайду по Нячангу", 'utf-8').encode()
+                
+                html_body = f"""
+                <html>
+                    <body style="font-family: Arial, sans-serif; padding: 20px;">
+                        <h2 style="color: #635bff;">Спасибо за оплату! 🎉</h2>
+                        <p>Ваш доступ к гайду активирован. Нажмите на кнопку ниже:</p>
+                        <a href="{magic_link}" style="display: inline-block; padding: 12px 25px; background: #635bff; color: #fff; text-decoration: none; border-radius: 8px;">Войти в Гайд</a>
+                        <p style="margin-top: 20px; font-size: 13px; color: #666;">
+                            Ссылка действительна 15 минут. Если кнопка не работает, скопируйте ссылку:<br>
+                            {magic_link}
+                        </p>
+                    </body>
+                </html>
+                """
+                msg.attach(MIMEText(html_body, 'html', 'utf-8'))
+                
+                with smtplib.SMTP_SSL(SMTP_SERVER, SMTP_PORT) as server:
+                    server.login(SMTP_USER, SMTP_PASSWORD)
+                    server.send_message(msg)
+                
+                logger.info(f"📧 [SUCCESS] Письмо отправлено на {email}")
+                
             finally:
                 await conn.close()
             
-            # Возвращаем HTML
+            # Показываем страницу успеха
             return HTMLResponse(content=f"""
                 <div style="text-align: center; margin-top: 100px; font-family: sans-serif; padding: 20px;">
                     <div style="font-size: 60px;">🎉</div>
@@ -636,6 +676,8 @@ async def payment_success_page(request: Request, session_id: str = None):
         
     except Exception as e:
         logger.error(f"❌ Ошибка в /success: {e}")
+        import traceback
+        traceback.print_exc()
         return HTMLResponse(f"<h1>Ошибка</h1><p>{str(e)}</p>", status_code=500)
 
 
@@ -644,6 +686,7 @@ async def payment_success_page(request: Request, session_id: str = None):
 # ========== СИСТЕМНЫЕ РОУТЫ И ГАЙД ==========
 
 @app.get("/")
+@app.head("/")  # Добавь это
 async def root():
     # Редирект на главного бота при заходе на корень домена
     return RedirectResponse(url="https://t.me/botolinkprobot")
