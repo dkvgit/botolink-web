@@ -34,14 +34,15 @@
 
 
 <div class="auth-sticky-bar">
-    <div class="auth-container">
+    <div class="auth-container" id="auth-input-group">
         <span class="auth-text">Уже купили гайд?</span>
         <form class="auth-form" id="magic-link-form">
             <input type="email" id="auth-email" placeholder="Ваш Email" required>
             <button type="submit" id="auth-submit-btn">Войти</button>
         </form>
     </div>
-    <div id="auth-message" class="auth-message"></div>
+
+    <div id="auth-message" class="auth-message" style="display: none;"></div>
 </div>
 
 
@@ -691,6 +692,46 @@ document.getElementById('magic-link-form').addEventListener('submit', async (e) 
     }
 });
 </script>
+
+
+
+document.getElementById('magic-link-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const email = document.getElementById('auth-email').value;
+    const inputGroup = document.querySelector('.auth-container'); // Твоя общая обертка
+    const messageBox = document.getElementById('auth-message');
+
+    try {
+        const response = await fetch('/auth/request-magic-link', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: email })
+        });
+
+        if (response.ok) {
+            // Скрываем всё содержимое контейнера
+            inputGroup.style.display = 'none';
+
+            // Настраиваем и показываем сообщение
+            messageBox.style.display = 'block';
+            messageBox.style.color = "#4ade80"; // Приятный зеленый
+            messageBox.innerHTML = `✅ Ссылка отправлена на почту!`;
+
+            // Через 60 секунд возвращаем как было
+            setTimeout(() => {
+                messageBox.style.display = 'none';
+                inputGroup.style.display = 'flex';
+            }, 60000);
+        }
+    } catch (err) {
+        messageBox.style.display = 'block';
+        messageBox.style.color = "#ff4d4d";
+        messageBox.innerText = "Ошибка. Попробуйте позже.";
+    }
+});
+
+
 
 
 

@@ -6,13 +6,8 @@
 import logging
 import mimetypes  # ← ДОБАВЬ ЭТОТ ИМПОРТ
 import os
-import secrets
-import smtplib
 import sys
 from contextlib import asynccontextmanager
-from datetime import datetime, timedelta
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
 from urllib.parse import urlparse
 
 import asyncpg

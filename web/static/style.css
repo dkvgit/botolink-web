@@ -1280,9 +1280,12 @@ transform: translateY(0);
     background: rgba(17, 17, 17, 0.95);
     backdrop-filter: blur(10px);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    z-index: 10001; /* Выше всех элементов */
-    padding: 10px 20px;
+    z-index: 10001;
+    padding: 12px 20px; /* Немного увеличил отступ для баланса */
     font-family: 'Montserrat', sans-serif;
+    min-height: 60px; /* Фиксируем высоту, чтобы панель не дергалась при скрытии формы */
+    display: flex;
+    align-items: center;
 }
 
 .auth-container {
@@ -1292,6 +1295,8 @@ transform: translateY(0);
     justify-content: center;
     align-items: center;
     gap: 20px;
+    width: 100%;
+    transition: opacity 0.3s ease; /* Плавное исчезновение */
 }
 
 .auth-text {
@@ -1341,27 +1346,45 @@ transform: translateY(0);
     box-shadow: 0 6px 20px rgba(99, 91, 255, 0.4);
 }
 
+.auth-form button:disabled {
+    background: #333;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Стили для сообщения об успехе/ошибке */
 .auth-message {
-    display: none;
-    font-size: 12px;
-    margin-top: 8px;
+    display: none; /* Управляется через JS */
+    font-size: 14px;
     text-align: center;
     font-weight: 500;
+    width: 100%;
+    animation: fadeIn 0.4s ease forwards;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 /* Адаптивность для смартфонов */
 @media (max-width: 768px) {
+    .auth-sticky-bar {
+        padding: 15px 10px;
+    }
     .auth-container {
         flex-direction: column;
-        gap: 10px;
-        text-align: center;
+        gap: 12px;
     }
     .auth-text {
         font-size: 12px;
     }
+    .auth-form {
+        width: 100%;
+        justify-content: center;
+    }
     .auth-form input {
-        width: 180px;
+        width: 160px;
     }
 }
-
-
