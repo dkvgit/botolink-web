@@ -6,20 +6,27 @@
 import logging
 import mimetypes  # ← ДОБАВЬ ЭТОТ ИМПОРТ
 import os
+import secrets
+import smtplib
 import sys
 from contextlib import asynccontextmanager
+from datetime import datetime, timedelta
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 from urllib.parse import urlparse
 
 import asyncpg
 import httpx
 from dotenv import load_dotenv
-from fastapi import FastAPI, Response
+from fastapi import FastAPI
 from fastapi import HTTPException
 from fastapi import Request
+from fastapi import Response
 from fastapi.responses import FileResponse
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from pydantic import BaseModel, EmailStr
 from starlette.responses import RedirectResponse
 from telegram import Update
 
@@ -163,6 +170,174 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+
+
+
+
+
+@app.get("/my-guide", response_class=HTMLResponse)
+async def read_guide(request: Request):
+    from core.config import DATABASE_URL
+    
+    # 1. Достаем нашу куку "абонемент"
+    auth_token = request.cookies.get("guide_auth_token")
+
+    if not auth_token:
+        # Нет куки? Иди на лендинг покупай
+        return RedirectResponse(url="/guide")
+
+    conn = await asyncpg.connect(DATABASE_URL)
+    try:
+        # 2. Проверяем в базе, жива ли еще эта сессия (оплата)
+        # Мы используем session_id, который сохранили в куку на Шаге 4
+        user_check = await conn.fetchrow(
+            "SELECT customer_email FROM public.paid_sessions WHERE session_id = $1 LIMIT 1",
+            auth_token
+        )
+
+        if not user_check:
+            # Кука есть, но в базе такой сессии нет (например, удалил)
+            response = RedirectResponse(url="/guide")
+            response.delete_cookie("guide_auth_token") # Стираем невалидную куку
+            return response
+
+        # 3. Всё ок! Отдаем страницу гайда
+        # В реале тут лучше использовать Jinja2 шаблоны, но для теста отдадим строкой или файлом
+        with open("templates/guide_content.html", "r", encoding="utf-8") as f:
+            html_content = f.read()
+        
+        return HTMLResponse(content=html_content)
+
+    finally:
+        await conn.close()
+        
+        
+        
+@app.get("/auth/verify")
+async def verify_magic_link(token: str, response: Response):
+    from core.config import DATABASE_URL
+    
+    conn = await asyncpg.connect(DATABASE_URL)
+    try:
+        # 1. Ищем запись с таким токеном
+        # Также проверяем, не истекло ли время (15 минут)
+        query = """
+            SELECT session_id, customer_email
+            FROM public.paid_sessions
+            WHERE magic_link_token = $1 AND token_expires_at > $2
+        """
+        user_record = await conn.fetchrow(query, token, datetime.utcnow())
+
+        if not user_record:
+            # Если токен неверный или протух — отправляем обратно на лендинг
+            # Можно добавить параметр ошибки, чтобы показать сообщение
+            return RedirectResponse(url="/guide?error=invalid_token")
+
+        # 2. Токен верный! Нам нужно «пометить» пользователя.
+        # Создаем ответ-редирект на будущую страницу гайда
+        redirect_to_guide = RedirectResponse(url="/my-guide", status_code=303)
+
+        # 3. Устанавливаем Cookie (наша "печать")
+        # session_id — это уникальный ID покупки, он станет нашим ключом в куке
+        redirect_to_guide.set_cookie(
+            key="guide_auth_token",
+            value=user_record['session_id'], # Используем session_id как идентификатор
+            httponly=True,   # Защита: JavaScript не сможет украсть эту куку
+            max_age=31536000, # Срок жизни — 1 год (в секундах)
+            samesite="lax",
+            secure=True      # Только для HTTPS (в продакшене обязательно)
+        )
+
+        # 4. Стираем использованный токен из базы (в целях безопасности)
+        await conn.execute(
+            "UPDATE public.paid_sessions SET magic_link_token = NULL WHERE session_id = $1",
+            user_record['session_id']
+        )
+
+        logger.info(f"🔑 Успешный вход для {user_record['customer_email']}. Кука установлена.")
+        return redirect_to_guide
+
+    except Exception as e:
+        logger.error(f"❌ Ошибка Шага 4: {str(e)}")
+        return RedirectResponse(url="/guide?error=server_error")
+    finally:
+        await conn.close()
+
+class AuthEmail(BaseModel):
+    email: EmailStr
+
+@app.post("/auth/request-magic-link")
+async def request_magic_link(payload: AuthEmail):
+    from core.config import DATABASE_URL, SMTP_USER, SMTP_PASSWORD, SMTP_SERVER, SMTP_PORT
+    import secrets
+    from datetime import datetime, timedelta
+    import smtplib
+    from email.mime.text import MIMEText
+    from email.mime.multipart import MIMEMultipart
+    from email.header import Header
+    import asyncpg
+
+    target_email = payload.email.strip().lower()
+    clean_db_url = DATABASE_URL.replace("postgresql+asyncpg://", "postgresql://")
+    
+    conn = await asyncpg.connect(clean_db_url, statement_cache_size=0)
+    try:
+        user_record = await conn.fetchrow(
+            "SELECT customer_email FROM public.paid_sessions WHERE customer_email ILIKE $1 LIMIT 1",
+            target_email
+        )
+        
+        if not user_record:
+            raise HTTPException(status_code=404, detail="Email not found")
+            
+        db_email = user_record['customer_email']
+        token = secrets.token_urlsafe(32)
+        expires_at = datetime.utcnow() + timedelta(minutes=15)
+
+        await conn.execute(
+            """
+            UPDATE public.paid_sessions
+            SET magic_link_token = $1, token_expires_at = $2
+            WHERE customer_email = $3
+            """,
+            token, expires_at, db_email
+        )
+
+        magic_link = f"https://botolink.pro/auth/verify?token={token}"
+        
+        msg = MIMEMultipart()
+        msg['From'] = SMTP_USER
+        msg['To'] = db_email
+        msg['Subject'] = Header("Ваш доступ к Гайду по Нячангу", 'utf-8').encode()
+
+        html_body = f"""
+        <html>
+            <body style="font-family: Arial, sans-serif; padding: 20px;">
+                <h2 style="color: #635bff;">Привет!</h2>
+                <p>Нажми на кнопку ниже, чтобы войти в гайд:</p>
+                <a href="{magic_link}" style="display: inline-block; padding: 12px 25px; background: #635bff; color: #fff; text-decoration: none; border-radius: 8px;">Войти в Гайд</a>
+                <p style="margin-top: 20px; font-size: 12px; color: #999;">Ссылка сгорит через 15 минут.</p>
+            </body>
+        </html>
+        """
+        msg.attach(MIMEText(html_body, 'html', 'utf-8'))
+
+        with smtplib.SMTP_SSL(SMTP_SERVER, SMTP_PORT) as server:
+            server.login(SMTP_USER, SMTP_PASSWORD)
+            server.send_message(msg)
+
+        logger.info(f"📧 Письмо отправлено на {db_email}")
+        return {"status": "success"}
+
+    except Exception as e:
+        logger.error(f"❌ Ошибка Шага 3: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+    finally:
+        await conn.close()
+        
+        
+        
+        
 # ПУТИ К СТАТИКЕ
 current_dir = os.path.dirname(os.path.realpath(__file__))
 

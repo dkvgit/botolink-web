@@ -57,3 +57,11 @@ ADMIN_IDS = [int(i.strip()) for i in raw_admin_ids.split(",") if i.strip().isdig
 # Лимиты (те самые, из-за которых был ImportError)
 FREE_LINKS_LIMIT = int(get_env("FREE_LINKS_LIMIT", 3))
 PRO_LINKS_LIMIT = int(get_env("PRO_LINKS_LIMIT", 50))
+
+
+
+# core/config.py
+SMTP_SERVER = "smtp.gmail.com"
+SMTP_PORT = 465
+SMTP_USER = "dkvkabakov@gmail.com"
+SMTP_PASSWORD = "ykmn jnfn zmpi goxw" # Твой пароль приложения

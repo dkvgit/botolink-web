@@ -30,6 +30,24 @@
 <body>
 <!-- Ваш контент -->
 
+
+
+
+<div class="auth-sticky-bar">
+    <div class="auth-container">
+        <span class="auth-text">Уже купили гайд?</span>
+        <form class="auth-form" id="magic-link-form">
+            <input type="email" id="auth-email" placeholder="Ваш Email" required>
+            <button type="submit" id="auth-submit-btn">Войти</button>
+        </form>
+    </div>
+    <div id="auth-message" class="auth-message"></div>
+</div>
+
+
+
+
+
 <!-- HERO -->
 <section class="hero">
   <div class="hero-left">
@@ -619,6 +637,62 @@ window.onclick = function(event) {
         });
     }
 </script>
+
+
+
+
+<script>
+document.getElementById('magic-link-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('auth-email').value;
+    const msgBox = document.getElementById('auth-message');
+    const btn = document.getElementById('auth-submit-btn');
+
+    // Визуальный отклик
+    btn.disabled = true;
+    btn.innerText = '⏳';
+
+    console.log("Отправка запроса для:", email);
+
+    try {
+        // Пока эндпоинт не создан, запрос будет падать в ошибку,
+        // но мы проверяем саму механику отправки.
+        const response = await fetch('/auth/request-magic-link', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: email })
+        });
+
+        if (response.status === 200) {
+            msgBox.style.color = '#4caf50';
+            msgBox.innerText = 'Ссылка отправлена! Проверьте почту.';
+            msgBox.style.display = 'block';
+        } else {
+            // Если не нашли в базе (404), летим к ценам
+            msgBox.style.color = '#ff5252';
+            msgBox.innerText = 'Оплата не найдена. Посмотрите тарифы ниже...';
+            msgBox.style.display = 'block';
+
+            setTimeout(() => {
+                const priceSection = document.getElementById('price');
+                if (priceSection) {
+                    priceSection.scrollIntoView({ behavior: 'smooth' });
+                }
+            }, 2000);
+        }
+    } catch (err) {
+        // Ошибка будет здесь, пока мы не настроили бэкенд
+        msgBox.style.color = '#ffb700';
+        msgBox.innerText = 'Сервер пока не отвечает, но форма работает!';
+        msgBox.style.display = 'block';
+    } finally {
+        btn.disabled = false;
+        btn.innerText = 'Войти';
+    }
+});
+</script>
+
+
 
 </body>
 </html>

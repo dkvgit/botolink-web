@@ -5,8 +5,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="722a5f0e-b122-4002-a32f-b6e7799afca3" name="Changes" comment="added local run logic">
+      <change afterPath="$PROJECT_DIR$/web/templates/guide/guide_content.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/core/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/core/config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/web/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/static/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/web/static/style.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/web/templates/guide/guide_landing.html" beforeDir="false" afterPath="$PROJECT_DIR$/web/templates/guide/guide_landing.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -218,14 +223,6 @@
       <workItem from="1774937818207" duration="518000" />
       <workItem from="1774940860921" duration="18261000" />
       <workItem from="1774968693809" duration="5349000" />
-    </task>
-    <task id="LOCAL-00044" summary="added local run logic">
-      <option name="closed" value="true" />
-      <created>1776817788341</created>
-      <option name="number" value="00044" />
-      <option name="presentableId" value="LOCAL-00044" />
-      <option name="project" value="LOCAL" />
-      <updated>1776817788341</updated>
     </task>
     <task id="LOCAL-00045" summary="added local run logic">
       <option name="closed" value="true" />
@@ -611,7 +608,15 @@
       <option name="project" value="LOCAL" />
       <updated>1776970251410</updated>
     </task>
-    <option name="localTasksCounter" value="93" />
+    <task id="LOCAL-00093" summary="added local run logic">
+      <option name="closed" value="true" />
+      <created>1777012260083</created>
+      <option name="number" value="00093" />
+      <option name="presentableId" value="LOCAL-00093" />
+      <option name="project" value="LOCAL" />
+      <updated>1777012260084</updated>
+    </task>
+    <option name="localTasksCounter" value="94" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

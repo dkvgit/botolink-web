@@ -1267,3 +1267,101 @@ transform: translateY(0);
         font-size: 20px;
     }
 }
+
+
+
+
+
+/* Липкая панель авторизации */
+.auth-sticky-bar {
+    position: sticky;
+    top: 0;
+    width: 100%;
+    background: rgba(17, 17, 17, 0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 10001; /* Выше всех элементов */
+    padding: 10px 20px;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.auth-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+}
+
+.auth-text {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+.auth-form {
+    display: flex;
+    gap: 10px;
+}
+
+.auth-form input {
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    padding: 8px 15px;
+    border-radius: 8px;
+    font-size: 13px;
+    outline: none;
+    width: 220px;
+    transition: 0.3s;
+}
+
+.auth-form input:focus {
+    border-color: #635bff;
+    background: rgba(0, 0, 0, 0.8);
+}
+
+.auth-form button {
+    background: linear-gradient(135deg, #635bff 0%, #4339ca 100%);
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+    box-shadow: 0 4px 15px rgba(99, 91, 255, 0.2);
+}
+
+.auth-form button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(99, 91, 255, 0.4);
+}
+
+.auth-message {
+    display: none;
+    font-size: 12px;
+    margin-top: 8px;
+    text-align: center;
+    font-weight: 500;
+}
+
+/* Адаптивность для смартфонов */
+@media (max-width: 768px) {
+    .auth-container {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+    }
+    .auth-text {
+        font-size: 12px;
+    }
+    .auth-form input {
+        width: 180px;
+    }
+}
+
+
