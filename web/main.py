@@ -1067,61 +1067,7 @@ async def create_checkout(user_id: str):
 
 # --- СИСТЕМНЫЕ ПУТИ (Вставлять строго перед @app.get("/{username}")) ---
 
-@app.get("/success", response_class=HTMLResponse)
-async def payment_success_page(request: Request, session_id: str = None):
-    from core.config import STRIPE_SECRET_KEY
-    import stripe
 
-    if not session_id:
-        return HTMLResponse("<h1>Ошибка: Нет ID сессии</h1>", status_code=400)
-
-    try:
-        # Настройка Stripe
-        stripe.api_key = STRIPE_SECRET_KEY
-        session = stripe.checkout.Session.retrieve(session_id)
-        
-        if session.payment_status == "paid":
-            # Вытаскиваем email, чтобы показать его пользователю для уверенности
-            customer_email = session.customer_details.email if session.customer_details else "вашу почту"
-            
-            # Мы больше не пишем здесь в базу!
-            # Всю работу по созданию записи в paid_sessions делает @app.post("/stripe-webhook")
-            
-            return HTMLResponse(content=f"""
-                <div style="text-align: center; margin-top: 80px; font-family: 'Montserrat', sans-serif; background: #f4f7f6; min-height: 100vh; padding-top: 50px;">
-                    <div style="background: white; max-width: 500px; margin: 0 auto; padding: 40px; border-radius: 20px; shadow: 0 10px 25px rgba(0,0,0,0.05);">
-                        <div style="font-size: 50px; margin-bottom: 20px;">✅</div>
-                        <h1 style="color: #1a1a1a; margin-bottom: 10px;">Оплата принята!</h1>
-                        <p style="color: #666; font-size: 16px; line-height: 1.5;">
-                            Доступ для <strong>{customer_email}</strong> активирован.<br>
-                            Мы отправили вам письмо с ссылкой для входа.
-                        </p>
-                        
-                        <div style="background: #fff9e6; border: 1px solid #ffeeba; padding: 15px; border-radius: 10px; margin: 25px 0; text-align: left;">
-                            <small style="color: #856404;">
-                                ℹ️ <strong>Что дальше?</strong> Перейдите на страницу входа и введите свой email.
-                                Если письма нет — проверьте папку "Спам".
-                            </small>
-                        </div>
-
-                        <a href="/guide" style="display: inline-block; width: 100%; padding: 18px 0; background: #635bff; color: white; text-decoration: none; border-radius: 12px; font-weight: bold; transition: 0.3s;">
-                            ПЕРЕЙТИ К ВХОДУ
-                        </a>
-                        
-                        <div style="margin-top: 20px;">
-                            <a href="/" style="color: #888; text-decoration: none; font-size: 14px;">Вернуться на главную</a>
-                        </div>
-                    </div>
-                </div>
-            """)
-        else:
-            return HTMLResponse("<h1>Статус оплаты: Ожидание...</h1><p>Обновите страницу через минуту.</p>", status_code=402)
-            
-    except Exception as e:
-        import traceback
-        print(f"❌ ОШИБКА НА СТРАНИЦЕ SUCCESS: {traceback.format_exc()}")
-        return HTMLResponse(f"<h1>Техническая ошибка</h1><p>Пожалуйста, свяжитесь с поддержкой. ID: {session_id}</p>")
-    
     
 
 @app.get("/guide", response_class=HTMLResponse, include_in_schema=False)
