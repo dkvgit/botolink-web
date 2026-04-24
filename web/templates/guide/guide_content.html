@@ -153,7 +153,7 @@
         p { font-size: 16px; line-height: 1.7; color: var(--text-main); margin-bottom: 20px; }
 
         /* ========== ТАБЛИЦЫ ========== */
-        .table-wrapper { background: var(--bg-card); border-radius: 20px; border: 1px solid #252530; overflow-x: auto; margin: 25px 0; }
+        .table-wrapper { background: var(--bg-card); border-radius: 20px;  margin: 25px 0; }
         .res-table { width: 100%; border-collapse: collapse; min-width: 500px; }
 
         @media (min-width: 1025px) {
@@ -353,7 +353,7 @@
 
         /* ДЕСКТОП */
         @media (min-width: 1025px) {
-            /* Лупа и поле поиска — слева, рядом с сайдбаром */
+            /* Лупа и поле поиска - слева, рядом с сайдбаром */
             .floating-search-container {
                 position: fixed;
                 top: 15px;
@@ -362,7 +362,7 @@
                 bottom: auto;
             }
 
-            /* Кнопки управления — ПРАВЕЕ поля поиска */
+            /* Кнопки управления - ПРАВЕЕ поля поиска */
             .search-controls {
                 position: fixed;
                 top: 15px;
@@ -396,7 +396,7 @@
                 width: 160px;
             }
 
-            /* Кнопки управления — СПРАВА ОТ ПОЛЯ ПОИСКА */
+            /* Кнопки управления - СПРАВА ОТ ПОЛЯ ПОИСКА */
             .search-controls,
             .search-controls.active {
                 position: fixed;
@@ -877,6 +877,9 @@
             }
         }
 
+
+
+
     </style>
 </head>
 <body>
@@ -1117,9 +1120,9 @@
                 margin: 25px 0;
             }
             .pros-card, .cons-card {
-                background: #0f0f12;
+
                 border-radius: 16px;
-                border: 1px solid #2a2a2a;
+
                 padding: 20px;
             }
             .pros-card h2, .cons-card h2 {
@@ -1190,8 +1193,121 @@
         </style>
 
         <h3>Кто я и почему стоит читать</h3>
-        <p><strong>Автор гайда - Денис Кабаков</strong>, тревел-эксперт, специализирующийся на подготовке структурированных, фактологических материалов для русскоязычных путешественников из стран бывшего СССР.</p>
-        <p>Информация собрана из личного опыта проживания в азиатских странах, а также из открытых источников, официальных данных и проверенных отчётов за 2025–2026 годы. Гайд не содержит личных историй, эмоциональных оценок или неподтверждённых рекомендаций. Каждый раздел построен как алгоритм действий - от первого дня до долгосрочного проживания.</p>
+
+        <style>
+            /* ПРЕМИАЛЬНАЯ КАРТОЧКА АВТОРА */
+                .author-premium-card {
+                    background: #111114;
+                    border: 1px solid #2a2a2a;
+                    border-radius: 20px;
+                    position: relative;
+                    overflow: hidden;
+                    margin: 30px 0 45px 0;
+                    display: flex;
+                }
+
+                .author-accent-line {
+                    width: 6px;
+                    background: linear-gradient(to bottom, var(--primary), #5f9eff);
+                }
+
+                .author-main-content {
+                    padding: 30px;
+                    width: 100%;
+                }
+
+                .author-meta {
+                    margin-bottom: 20px;
+                }
+
+                .author-label {
+                    font-size: 10px;
+                    text-transform: uppercase;
+                    letter-spacing: 2px;
+                    color: var(--primary);
+                    font-weight: 800;
+                    display: block;
+                    margin-bottom: 5px;
+                }
+
+                .author-name {
+                    margin: 0 !important;
+                    font-size: 28px !important;
+                    color: #fff !important;
+                    font-weight: 900;
+                }
+
+                .expert-tag {
+                    color: #fff;
+                    font-size: 16px;
+                    font-weight: 600;
+                    margin-bottom: 12px;
+                }
+
+                .author-text {
+                    font-size: 15px;
+                    color: #b0b0c0;
+                    line-height: 1.6;
+                    margin-bottom: 20px;
+                    max-width: 800px;
+                }
+
+                .data-verification {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    background: rgba(124, 110, 255, 0.05);
+                    padding: 12px 18px;
+                    border-radius: 12px;
+                    border: 1px solid rgba(124, 110, 255, 0.1);
+                }
+
+                .status-icon {
+                    font-size: 20px;
+                }
+
+                .status-text {
+                    font-size: 13px;
+                    color: #ddd;
+                }
+
+                @media (max-width: 768px) {
+                    .author-main-content { padding: 20px; }
+                    .author-name { font-size: 22px !important; }
+                }
+        </style>
+        <div class="author-description">
+            <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
+                <!-- Фото -->
+                <img src="images/den.png" alt="Денис Кабаков" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid #7c6eff;">
+
+                <div style="flex: 1;">
+                    <p class="expert-tag" style="margin-bottom: 5px;">Тревел-эксперт по странам Азии</p>
+                    <p class="author-text" style="margin-bottom: 0;">
+                        Специализируюсь на подготовке структурированных материалов для путешественников из стран бывшего СССР. Информация в этом гайде — это <strong>алгоритм действий</strong>, очищенный от личных историй и лишних эмоций.
+                    </p>
+                </div>
+            </div>
+
+            <div class="data-verification" style="margin-top: 15px;">
+                <span class="status-icon">🛡️</span>
+                <span class="status-text">Данные верифицированы на период <b>2025–2026 гг.</b> на основе официальных отчётов и личного опыта проживания.</span>
+            </div>
+
+            <!-- Контакты -->
+            <div class="author-contacts" style="margin-top: 16px; padding-top: 12px; border-top: 1px solid #2a2a2a;">
+                <p style="color: #b0b0c0; margin-bottom: 8px; font-size: 13px;">📬 Свяжитесь со мной:</p>
+                <div style="display: flex; gap: 15px; flex-wrap: wrap; align-items: center;">
+                    <a href="https://t.me/dekavetel" target="_blank" rel="noopener noreferrer" style="color: #7c6eff; text-decoration: none; border-bottom: 1px dashed #7c6eff; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s ease;" onmouseover="this.style.color='#5f4ae2'; this.style.borderBottomColor='#5f4ae2';" onmouseout="this.style.color='#7c6eff'; this.style.borderBottomColor='#7c6eff';">
+                        <i class="fa-brands fa-telegram"></i> @dekavetel
+                    </a>
+                    <span style="color: #3a3a4a;">•</span>
+                    <a href="mailto:dkvkabakov@gmail.com" style="color: #5f9eff; text-decoration: none; border-bottom: 1px dashed #5f9eff; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s ease;" onmouseover="this.style.color='#7c6eff'; this.style.borderBottomColor='#7c6eff';" onmouseout="this.style.color='#5f9eff'; this.style.borderBottomColor='#5f9eff';">
+                        <i class="fa-regular fa-envelope"></i> dkvkabakov@gmail.com
+                    </a>
+                </div>
+            </div>
+        </div>
 
         <hr style="margin: 25px 0; border-color: #2a2a2a;">
 
@@ -1570,213 +1686,555 @@
             </div>
         </div>
 
-        <h4>Курс (май 2026)</h4>
-        <ul style="margin-left: 25px; color: #ccc; line-height: 1.8;">
-            <li><strong>Выгодный обмен:</strong> 25 000 – 25 200 VND за 1 USD</li>
-            <li><strong>Курс рубля:</strong> умножьте цену в тысячах донгов на 3 и уберите три ноля (например, 100 000 VND ≈ 300 RUB)</li>
-            <li><strong>Курс гривны:</strong> 1 000 VND ≈ 1,5–1,6 UAH (100 000 VND ≈ 150–160 UAH)</li>
-            <li><strong>Курс тенге:</strong> 1 000 VND ≈ 19–21 KZT (100 000 VND ≈ 1 900–2 100 KZT)</li>
-        </ul>
+        <style>
+            /* Стили для финансового блока */
+            .currency-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+                gap: 16px;
+                margin: 20px 0 35px 0;
+            }
 
-        <h4>Правила</h4>
-        <ul style="margin-left: 25px; color: #ccc; line-height: 1.8;">
-            <li>Меняйте только <strong>новые долларовые купюры</strong> без повреждений, пятен и надписей</li>
-            <li>Старые или мятые купюры могут не принять либо дать заниженный курс</li>
-        </ul>
+            .currency-card {
+                background: linear-gradient(145deg, #111114 0%, #09090b 100%);
+                border: 1px solid #2a2a2a;
+                border-radius: 20px;
+                padding: 22px;
+                transition: 0.3s ease;
+            }
+
+            .currency-card:hover {
+                border-color: #afffaf;
+                transform: translateY(-3px);
+            }
+
+            .currency-header {
+                font-size: 11px;
+                text-transform: uppercase;
+                letter-spacing: 1.5px;
+                color: #666;
+                margin-bottom: 8px;
+                display: block;
+            }
+
+            .currency-value {
+                font-size: 20px;
+                font-weight: 900;
+                color: #fff;
+                display: block;
+                margin-bottom: 5px;
+            }
+
+            .currency-formula {
+                font-size: 13px;
+                color: #afffaf;
+                font-family: monospace;
+            }
+
+            /* Блок правил и UnionPay */
+            .finance-info-box {
+                background: #0f0f12;
+                border-left: 4px solid var(--primary);
+                border-radius: 0 16px 16px 0;
+                padding: 20px;
+                margin-bottom: 20px;
+            }
+
+            .finance-info-box h5 {
+                margin: 0 0 10px 0;
+                color: #fff;
+                font-size: 16px;
+            }
+
+            .finance-info-box p, .finance-info-box li {
+                color: #b0b0c0;
+                font-size: 14px;
+                line-height: 1.6;
+                margin-bottom: 5px;
+            }
+
+            .unionpay-badge {
+                display: inline-block;
+                background: rgba(124, 110, 255, 0.1);
+                border: 1px solid rgba(124, 110, 255, 0.2);
+                color: #fff;
+                padding: 15px;
+                border-radius: 16px;
+                width: 100%;
+            }
+        </style>
+
+        <h4>Курс (май 2026)</h4>
+        <div class="currency-grid">
+            <div class="currency-card">
+                <span class="currency-header">Выгодный обмен</span>
+                <span class="currency-value">1 USD ≈ 25 100 ₫</span>
+                <span class="currency-formula">VND за 1 доллар</span>
+            </div>
+
+            <div class="currency-card">
+                <span class="currency-header">Для рублей (RUB)</span>
+                <span class="currency-value">100k ₫ ≈ 300 ₽</span>
+                <span class="currency-formula">Цена × 3 - 000</span>
+            </div>
+
+            <div class="currency-card">
+                <span class="currency-header">Для гривны (UAH)</span>
+                <span class="currency-value">100k ₫ ≈ 155 ₴</span>
+                <span class="currency-formula">1k ₫ ≈ 1.55 UAH</span>
+            </div>
+
+            <div class="currency-card">
+                <span class="currency-header">Для тенге (KZT)</span>
+                <span class="currency-value">100k ₫ ≈ 2000 ₸</span>
+                <span class="currency-formula">1k ₫ ≈ 20 KZT</span>
+            </div>
+        </div>
+
+        <div class="finance-info-box">
+            <h5>⚠️ Правила обмена</h5>
+            <ul style="padding-left: 18px; margin: 0;">
+                <li>Меняйте только <strong>новые долларовые купюры</strong> (синие сотни). Любые пятна, надписи или заломы - повод для отказа или занижения курса.</li>
+                <li>Старые купюры («белые» доллары) принимают неохотно.</li>
+            </ul>
+        </div>
 
         <h4>Снятие с карты UnionPay</h4>
-        <p>С карт UnionPay (Россельхозбанк, Сбербанк - реже) можно снять донги в банкоматах Vietcombank, BIDV, VietinBank. Комиссия: 3–5%. Лимит: 2–5 млн VND за раз.</p>
+        <div class="unionpay-badge">
+            <p style="margin: 0;">Работают карты <strong>Россельхозбанк</strong> и <strong>Газпромбанк</strong>. Снимать лучше в банкоматах <strong>Vietcombank, BIDV</strong> или <strong>VietinBank</strong>.</p>
+            <div style="margin-top: 10px; font-size: 13px; color: #b0b0c0;">
+                📊 Комиссия: <strong>3–5%</strong> | Лимит: <strong>2–5 млн ₫</strong> за транзакцию.
+            </div>
+        </div>
 
-        <hr style="margin: 25px 0; border-color: #2a2a2a;">
+        <hr style="margin: 35px 0; border-color: #2a2a2a;">
 
         <!-- 3.2. Покупка SIM-карты -->
         <h3>3.2. Покупка SIM-карты</h3>
 
         <style>
-            .operator-grid {
+            /* Стили для SIM-карт и Операторов */
+                .sim-container {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+                    gap: 20px;
+                    margin: 25px 0;
+                }
+
+                .sim-premium-card {
+                    background: #111114;
+                    border: 1px solid #2a2a2a;
+                    border-radius: 20px;
+                    padding: 24px;
+                    position: relative;
+                    overflow: hidden;
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    display: flex;
+                    flex-direction: column;
+                }
+
+                .sim-premium-card:hover {
+                    transform: translateY(-5px);
+                    border-color: #444;
+                    background: #16161a;
+                }
+
+                /* Цветовые акценты для брендов */
+                .brand-viettel { border-top: 4px solid #ee0033; }
+                .brand-vinaphone { border-top: 4px solid #007aff; }
+                .brand-mobifone { border-top: 4px solid #f29100; }
+
+                .brand-logo {
+                    font-size: 10px;
+                    text-transform: uppercase;
+                    letter-spacing: 2px;
+                    font-weight: 800;
+                    margin-bottom: 12px;
+                    display: block;
+                }
+
+                .brand-viettel .brand-logo { color: #ee0033; }
+                .brand-vinaphone .brand-logo { color: #007aff; }
+                .brand-mobifone .brand-logo { color: #f29100; }
+
+                .sim-title {
+                    font-size: 20px;
+                    font-weight: 800;
+                    color: #fff;
+                    margin-bottom: 8px;
+                }
+
+                .sim-feature {
+                    font-size: 14px;
+                    color: #b0b0c0;
+                    line-height: 1.5;
+                    margin-bottom: 20px;
+                    flex-grow: 1;
+                }
+
+                /* Блок данных внутри карточки */
+                .sim-data-badge {
+                    background: rgba(255, 255, 255, 0.05);
+                    padding: 12px;
+                    border-radius: 12px;
+                    margin-bottom: 15px;
+                    border: 1px solid rgba(255, 255, 255, 0.03);
+                }
+
+                .data-limit {
+                    display: block;
+                    font-size: 18px;
+                    font-weight: 800;
+                    color: #fff;
+                }
+
+                .data-label {
+                    font-size: 11px;
+                    color: #666;
+                    text-transform: uppercase;
+                }
+
+                .sim-price-row {
+                    display: flex;
+                    align-items: baseline;
+                    gap: 8px;
+                    margin-top: auto;
+                }
+
+                .sim-price-val {
+                    font-size: 22px;
+                    font-weight: 900;
+                    color: #afffaf; /* Мягкий зеленый для цен */
+                }
+
+                .sim-price-unit {
+                    font-size: 12px;
+                    color: #555;
+                }
+
+                /* Специальные предупреждения */
+                .sim-warning {
+                    background: rgba(255, 107, 107, 0.05);
+                    border: 1px solid rgba(255, 107, 107, 0.2);
+                    border-radius: 15px;
+                    padding: 16px;
+                    display: flex;
+                    gap: 15px;
+                    align-items: center;
+                    margin-top: 25px;
+                }
+
+                .warning-icon { font-size: 24px; }
+                .warning-text { font-size: 14px; color: #ff6b6b; line-height: 1.4; }
+        </style>
+
+        <style>
+            .sim-container {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+                gap: 20px;
+                margin: 25px 0;
+            }
+
+            .sim-premium-card {
+                background: linear-gradient(145deg, #111114 0%, #09090b 100%);
+                border: 1px solid #2a2a2a;
+                border-radius: 24px;
+                padding: 28px;
+                position: relative;
+                overflow: hidden;
+                transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
                 display: flex;
                 flex-direction: column;
-                gap: 12px;
-                width: 100%;
-                margin: 20px 0;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             }
-            .operator-card {
-                background: #0f0f12;
+
+            .sim-premium-card:hover {
+                transform: translateY(-8px);
+                border-color: #444;
+                box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            }
+
+            /* Брендирование */
+            .brand-viettel { border-top: 5px solid #ee0033; }
+            .brand-vinaphone { border-top: 5px solid #007aff; }
+            .brand-mobifone { border-top: 5px solid #f29100; }
+
+            .brand-logo {
+                font-size: 11px;
+                text-transform: uppercase;
+                letter-spacing: 2px;
+                font-weight: 800;
+                padding: 4px 10px;
+                background: rgba(255,255,255,0.03);
+                border-radius: 8px;
+                margin-bottom: 15px;
+                display: inline-block;
+            }
+
+            .brand-viettel .brand-logo { color: #ff3355; }
+            .brand-vinaphone .brand-logo { color: #3399ff; }
+            .brand-mobifone .brand-logo { color: #ffaa33; }
+
+            .sim-title {
+                font-size: 26px;
+                font-weight: 900;
+                color: #fff;
+                margin-bottom: 12px;
+            }
+
+            .sim-feature {
+                font-size: 14px;
+                color: #94a3b8;
+                line-height: 1.6;
+                margin-bottom: 25px;
+                flex-grow: 1;
+            }
+
+            .sim-price-row {
+                background: rgba(175, 255, 175, 0.03);
+                padding: 15px;
                 border-radius: 16px;
-                border: 1px solid #2a2a2a;
-                padding: 16px;
-                width: 100%;
-                transition: all 0.2s ease;
-            }
-            .operator-card:hover {
-                background: #1a1a20;
-                transform: translateX(4px);
-            }
-            .operator-name {
-                font-weight: 800;
-                color: #7c6eff;
-                margin-bottom: 10px;
-                font-size: 18px;
-            }
-            .operator-desc {
-                color: #f0f0f0;
-                margin-bottom: 10px;
-                word-break: break-word;
-                font-size: 14px;
-                line-height: 1.5;
-            }
-            .operator-price {
-                color: #5f9eff;
-                font-weight: 600;
-                word-break: break-word;
-                font-size: 15px;
-                padding-top: 8px;
-                border-top: 1px dashed #2a2a2a;
-            }
-            .sim-grid {
                 display: flex;
-                flex-direction: column;
-                gap: 12px;
-                width: 100%;
-                margin: 20px 0;
+                align-items: baseline;
+                gap: 6px;
+                border: 1px solid rgba(175, 255, 175, 0.1);
             }
-            .sim-card {
-                background: #0f0f12;
-                border-radius: 14px;
-                border: 1px solid #2a2a2a;
-                padding: 14px 16px;
-                width: 100%;
+
+            .sim-price-val {
+                font-size: 24px;
+                font-weight: 900;
+                color: #afffaf;
             }
-            .sim-name {
-                font-weight: 800;
-                color: #7c6eff;
-                margin-bottom: 8px;
-                font-size: 15px;
-            }
-            .sim-price {
-                color: #5f9eff;
+
+            .sim-price-unit {
+                font-size: 12px;
+                color: #52525b;
                 font-weight: 600;
-                margin-bottom: 6px;
-            }
-            .sim-data {
-                color: #b0b0c0;
-                font-size: 13px;
-            }
-            .warning-box {
-                background: rgba(255, 107, 107, 0.1);
-                border-left: 3px solid #ff6b6b;
-                padding: 12px 20px;
-                margin: 15px 0;
-            }
-            .warning-box p {
-                margin-bottom: 0;
-            }
-            .important-grid {
-                display: flex;
-                flex-direction: column;
-                gap: 12px;
-                margin: 20px 0;
-            }
-            .important-card {
-                background: #0f0f12;
-                border-radius: 14px;
-                border: 1px solid #2a2a2a;
-                padding: 14px 16px;
-            }
-            .important-title {
-                font-weight: 800;
-                color: #ff6b6b;
-                margin-bottom: 6px;
-            }
-            .important-desc {
-                color: #b0b0c0;
-                font-size: 14px;
-            }
-            @media (min-width: 1025px) {
-                .operator-grid {
-                    display: grid;
-                    grid-template-columns: repeat(3, 1fr);
-                    gap: 15px;
-                }
-                .sim-grid {
-                    display: grid;
-                    grid-template-columns: repeat(3, 1fr);
-                    gap: 15px;
-                }
-                .important-grid {
-                    display: grid;
-                    grid-template-columns: repeat(3, 1fr);
-                    gap: 15px;
-                }
             }
         </style>
 
         <h4>Какого оператора выбрать</h4>
-        <div class="operator-grid">
-            <div class="operator-card">
-                <div class="operator-name">📡 Viettel</div>
-                <div class="operator-desc">Лучшее покрытие 4G/5G в городе и на островах</div>
-                <div class="operator-price">💵 200 000 – 300 000 VND</div>
+        <div class="sim-container">
+            <div class="sim-premium-card brand-viettel">
+                <span class="brand-logo">Network Leader</span>
+                <div class="sim-title">Viettel</div>
+                <div class="sim-feature">
+                    Лучшее покрытие 4G/5G во всем Вьетнаме. Стабильно работает на островах, в горах и в лифтах.
+                </div>
+                <div class="sim-price-row">
+                    <span class="sim-price-val">200k – 300k</span>
+                    <span class="sim-price-unit">VND</span>
+                </div>
             </div>
-            <div class="operator-card">
-                <div class="operator-name">📱 Vinaphone</div>
-                <div class="operator-desc">Отличная скорость в городах (Нячанг, Ханой, Хошимин)</div>
-                <div class="operator-price">💵 170 000 – 250 000 VND</div>
+
+            <div class="sim-premium-card brand-vinaphone">
+                <span class="brand-logo">City Speed</span>
+                <div class="sim-title">Vinaphone</div>
+                <div class="sim-feature">
+                    Отличная скорость в Нячанге и Ханое. Часто выбирают для удаленной работы из дома.
+                </div>
+                <div class="sim-price-row">
+                    <span class="sim-price-val">170k – 250k</span>
+                    <span class="sim-price-unit">VND</span>
+                </div>
             </div>
-            <div class="operator-card">
-                <div class="operator-name">📶 Mobifone</div>
-                <div class="operator-desc">Хорошее, стабильное, бюджетный вариант</div>
-                <div class="operator-price">💵 120 000 – 200 000 VND</div>
+
+            <div class="sim-premium-card brand-mobifone">
+                <span class="brand-logo">Budget Choice</span>
+                <div class="sim-title">Mobifone</div>
+                <div class="sim-feature">
+                    Хороший эконом-вариант. В центре Нячанга работает отлично, на окраинах чуть хуже.
+                </div>
+                <div class="sim-price-row">
+                    <span class="sim-price-val">120k – 200k</span>
+                    <span class="sim-price-unit">VND</span>
+                </div>
             </div>
         </div>
+
+
 
         <h4>Туристические пакеты на месяц (2026)</h4>
-        <div class="sim-grid">
-            <div class="sim-card">
-                <div class="sim-name">📡 Viettel Tourist SIM</div>
-                <div class="sim-price">💰 200 000 – 300 000 VND</div>
-                <div class="sim-data">📶 5–8 ГБ в день + местные звонки</div>
+        <div class="sim-container">
+            <div class="sim-premium-card">
+                <div class="sim-title" style="font-size: 16px;">Viettel Tourist</div>
+                <div class="sim-data-badge">
+                    <span class="data-limit">5–8 ГБ / день</span>
+                    <span class="data-label">Мобильный интернет</span>
+                </div>
+                <div class="sim-feature" style="font-size: 12px;">Бесплатные входящие + пакет минут по Вьетнаму.</div>
+                <div class="sim-price-row">
+                    <span class="sim-price-val">~250 000</span>
+                    <span class="sim-price-unit">VND</span>
+                </div>
             </div>
-            <div class="sim-card">
-                <div class="sim-name">📱 Vinaphone Tourist Plan</div>
-                <div class="sim-price">💰 170 000 – 250 000 VND</div>
-                <div class="sim-data">📶 5 ГБ в день + местные звонки</div>
+
+            <div class="sim-premium-card">
+                <div class="sim-title" style="font-size: 16px;">Vina Tourist Plan</div>
+                <div class="sim-data-badge">
+                    <span class="data-limit">5 ГБ / день</span>
+                    <span class="data-label">Мобильный интернет</span>
+                </div>
+                <div class="sim-feature" style="font-size: 12px;">Стабильный пинг для звонков в Telegram/WhatsApp.</div>
+                <div class="sim-price-row">
+                    <span class="sim-price-val">~200 000</span>
+                    <span class="sim-price-unit">VND</span>
+                </div>
             </div>
-            <div class="sim-card">
-                <div class="sim-name">📶 Mobifone Tourist SIM</div>
-                <div class="sim-price">💰 120 000 – 200 000 VND</div>
-                <div class="sim-data">📶 4 ГБ в день + местные звонки</div>
+
+            <div class="sim-premium-card">
+                <div class="sim-title" style="font-size: 16px;">Mobi Global</div>
+                <div class="sim-data-badge">
+                    <span class="data-limit">4 ГБ / день</span>
+                    <span class="data-label">Мобильный интернет</span>
+                </div>
+                <div class="sim-feature" style="font-size: 12px;">Самый дешевый входной билет в сеть.</div>
+                <div class="sim-price-row">
+                    <span class="sim-price-val">~150 000</span>
+                    <span class="sim-price-unit">VND</span>
+                </div>
             </div>
         </div>
 
-        <div class="warning-box">
-            <p><strong>⚠️ Важно:</strong> почти все туристические SIM-карты во Вьетнаме дают <strong>ежедневный лимит трафика</strong> (например, 2–10 ГБ в день).</p>
-            <p style="margin-top: 10px;"><strong>📌 Что нужно знать:</strong> многие SIM-карты дают только интернет. У них есть виртуальный номер, но он либо не работает для входящих звонков, либо требует отдельной активации.</p>
+        <div class="sim-warning">
+            <div class="warning-icon">📢</div>
+            <div class="warning-text">
+                <strong>Важно:</strong> Для оформления SIM-карты обязательно нужен <b>оригинал паспорта</b>. Регистрация на скан или фото в 2026 году практически невозможна.
+            </div>
         </div>
+
+
+        <style>
+            /* Стили для блоков важности и инструкций */
+            .utility-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+                gap: 16px;
+                margin: 20px 0 40px 0;
+            }
+
+            .utility-card {
+                background: #111114;
+                border: 1px solid #2a2a2a;
+                border-radius: 18px;
+                padding: 20px;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                transition: 0.3s ease;
+            }
+
+            .utility-card:hover {
+                border-color: var(--primary);
+                background: #16161a;
+            }
+
+            .utility-icon {
+                font-size: 24px;
+                margin-bottom: 5px;
+            }
+
+            .utility-title {
+                font-weight: 800;
+                color: #fff;
+                font-size: 16px;
+                letter-spacing: 0.5px;
+            }
+
+            .utility-desc {
+                color: #b0b0c0;
+                font-size: 14px;
+                line-height: 1.5;
+            }
+
+            /* Инструкция "Что делать" */
+            .action-steps {
+                background: linear-gradient(145deg, #111114, #0a0a0c);
+                border: 1px solid rgba(124, 110, 255, 0.15);
+                border-radius: 20px;
+                padding: 25px;
+                margin: 20px 0;
+            }
+
+            .action-list {
+                list-style: none;
+                padding: 0;
+                margin: 0;
+            }
+
+            .action-item {
+                display: flex;
+                align-items: flex-start;
+                gap: 15px;
+                margin-bottom: 15px;
+                color: #e0e0e0;
+                font-size: 15px;
+                line-height: 1.6;
+            }
+
+            .action-item:last-child { margin-bottom: 0; }
+
+            .action-bullet {
+                background: var(--primary);
+                color: #fff;
+                min-width: 24px;
+                height: 24px;
+                border-radius: 6px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                font-size: 12px;
+                font-weight: 800;
+            }
+
+            .phrase-box {
+                background: rgba(124, 110, 255, 0.1);
+                border: 1px dashed var(--primary);
+                color: #fff;
+                padding: 4px 8px;
+                border-radius: 6px;
+                font-family: monospace;
+                font-weight: 600;
+            }
+        </style>
 
         <h4>Почему это важно:</h4>
-        <div class="important-grid">
-            <div class="important-card">
-                <div class="important-title">🚖 Grab / Maxim (такси)</div>
-                <div class="important-desc">Без голосовой SIM не позвонить водителю, если не найдёт место</div>
+        <div class="utility-grid">
+            <div class="utility-card">
+                <div class="utility-icon">🚖</div>
+                <div class="utility-title">Grab / Maxim</div>
+                <div class="utility-desc">Без голосовой связи вы не сможете ответить на звонок водителя, если он не находит точку посадки.</div>
             </div>
-            <div class="important-card">
-                <div class="important-title">🏦 Банки (онлайн-банкинг)</div>
-                <div class="important-desc">Без SMS не подтвердить операции</div>
+            <div class="utility-card">
+                <div class="utility-icon">🏦</div>
+                <div class="utility-title">Банкинг</div>
+                <div class="utility-desc">Большинство операций в онлайн-банках требуют подтверждения через SMS на вьетнамский номер.</div>
             </div>
-            <div class="important-card">
-                <div class="important-title">🏨 Отели, приложения</div>
-                <div class="important-desc">Без SMS не пройти верификацию</div>
+            <div class="utility-card">
+                <div class="utility-icon">🏨</div>
+                <div class="utility-title">Сервисы</div>
+                <div class="utility-desc">Регистрация в локальных приложениях доставки и верификация отелей завязаны на приём сообщений.</div>
             </div>
         </div>
 
         <h4>Что делать:</h4>
-        <div class="info-blue" style="margin: 15px 0;">
-            <ul style="margin-left: 20px;">
-                <li>При покупке SIM уточните у продавца: «Этот тариф включает входящие звонки и SMS?»</li>
-                <li>Попросите тариф с голосовой связью - он может стоить на 50 000 – 100 000 VND дороже</li>
-                <li>Самый простой вариант: скажите продавцу <strong>«Tourist SIM for 30 days with calls and SMS»</strong></li>
-            </ul>
+        <div class="action-steps">
+            <div class="action-list">
+                <div class="action-item">
+                    <div class="action-bullet">1</div>
+                    <div>При покупке обязательно уточните: <span style="color: var(--primary)">«Включены ли входящие звонки и SMS?»</span></div>
+                </div>
+                <div class="action-item">
+                    <div class="action-bullet">2</div>
+                    <div>Выбирайте тариф с голосовой связью - он обычно дороже на <b>50k – 100k VND</b>, но экономит массу нервов.</div>
+                </div>
+                <div class="action-item">
+                    <div class="action-bullet">3</div>
+                    <div>Просто скажите продавцу фразу: <br>
+                    <span class="phrase-box">Tourist SIM for 30 days with calls and SMS</span></div>
+                </div>
+            </div>
         </div>
 
         <style>
@@ -1964,18 +2422,130 @@
         <p><strong>Рекомендация:</strong> используйте Google Maps как основной навигатор, Maps.me - резервный офлайн-вариант.</p>
 
         <hr style="margin: 25px 0; border-color: #2a2a2a;">
-        <!-- 3.6. Что сделать в первый же день -->
-        <h3>3.6. Что сделать в первый же день, чтобы не мучиться</h3>
-        <ol style="margin-left: 25px; color: #ccc; line-height: 1.8;">
-            <li><strong>Получить донги.</strong> Обменяйте в аэропорту 20–30 USD на транспорт и SIM. Основную сумму меняйте в городе на следующий день.</li>
-            <li><strong>Установить Grab и доехать до отеля.</strong> Заказывайте GrabCar (не такси на улице) - фиксированная цена. Из аэропорта до центра: 320 000 – 370 000 VND.</li>
-            <li><strong>Купить SIM.</strong> Сразу после заселения найдите ближайший Viettel Store или The Gioi Di Dong. Без интернета в Нячанге сложно.</li>
-            <li><strong>Купить воду и базовые вещи.</strong> Зайдите в VinMart за водой, кремом от солнца и репеллентом.</li>
-            <li><strong>Не ходить на пляж в первые 2–3 часа после прилёта.</strong> Акклиматизация. Сначала душ, лёгкий обед, прогулка в тени.</li>
-            <li><strong>Проверить карты.</strong> Откройте Google Maps, скачайте офлайн-карту Нячанга в Maps.me.</li>
-        </ol>
+        <style>
+            /* Стили для чек-листа первого дня */
+            .onboarding-list {
+                display: flex;
+                flex-direction: column;
+                gap: 15px;
+                margin: 25px 0;
+            }
 
-        <hr style="margin: 25px 0; border-color: #2a2a2a;">
+            .onboarding-step {
+                background: #111114;
+                border: 1px solid #2a2a2a;
+                border-radius: 18px;
+                padding: 20px;
+                display: flex;
+                align-items: flex-start;
+                gap: 18px;
+                transition: all 0.3s ease;
+            }
+
+            .onboarding-step:hover {
+                border-color: var(--primary);
+                background: #16161a;
+            }
+
+            .step-number {
+                background: rgba(124, 110, 255, 0.1);
+                color: var(--primary);
+                min-width: 32px;
+                height: 32px;
+                border-radius: 10px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                font-weight: 800;
+                font-size: 14px;
+                border: 1px solid rgba(124, 110, 255, 0.2);
+            }
+
+            .step-content {
+                flex: 1;
+            }
+
+            .step-title {
+                display: block;
+                font-weight: 800;
+                color: #fff;
+                font-size: 16px;
+                margin-bottom: 6px;
+            }
+
+            .step-desc {
+                color: #b0b0c0;
+                font-size: 14px;
+                line-height: 1.5;
+            }
+
+            .step-price-tag {
+                display: inline-block;
+                margin-top: 8px;
+                padding: 4px 10px;
+                background: rgba(175, 255, 175, 0.05);
+                border: 1px solid rgba(175, 255, 175, 0.1);
+                border-radius: 8px;
+                color: #afffaf;
+                font-size: 12px;
+                font-weight: 600;
+            }
+        </style>
+
+        <h3>3.6. Чек-лист: Первый день без мучений</h3>
+
+        <div class="onboarding-list">
+            <div class="onboarding-step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <span class="step-title">Получить стартовые донги</span>
+                    <p class="step-desc">В аэропорту поменяйте только <strong>$20–30</strong>. Этого хватит на такси и SIM. Основную сумму выгоднее менять в городе в ювелирных лавках на следующий день.</p>
+                </div>
+            </div>
+
+            <div class="onboarding-step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <span class="step-title">Установить Grab и уехать</span>
+                    <p class="step-desc">Заказывайте <b>GrabCar</b> прямо в приложении - цена фиксированная. Избегайте таксистов «от борта», они накрутят счетчик.</p>
+                    <div class="step-price-tag">💵 Трансфер: 320k – 370k ₫</div>
+                </div>
+            </div>
+
+            <div class="onboarding-step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <span class="step-title">Активировать связь</span>
+                    <p class="step-desc">После заселения дойдите до <b>The Gioi Di Dong</b> или <b>Viettel Store</b>. В аэропорту SIM дороже и часто работают нестабильно.</p>
+                </div>
+            </div>
+
+            <div class="onboarding-step">
+                <div class="step-number">4</div>
+                <div class="step-content">
+                    <span class="step-title">Базовый набор (VinMart / WinMart)</span>
+                    <p class="step-desc">Купите 5-литровую бутылку воды, крем SPF 50+ и репеллент от комаров. Воду из-под крана здесь пить нельзя.</p>
+                </div>
+            </div>
+
+            <div class="onboarding-step" style="border-left: 3px solid #ff6b6b;">
+                <div class="step-number" style="color:#ff6b6b">5</div>
+                <div class="step-content">
+                    <span class="step-title">Правило акклиматизации</span>
+                    <p class="step-desc">Не бегите на пляж в первые 2 часа. Солнце в Нячанге агрессивное. Сначала душ, легкий суп Фо и отдых в тени.</p>
+                </div>
+            </div>
+
+            <div class="onboarding-step">
+                <div class="step-number">6</div>
+                <div class="step-content">
+                    <span class="step-title">Офлайн-навигация</span>
+                    <p class="step-desc">Скачайте офлайн-карту города в <b>Google Maps</b> или <b>Maps.me</b>. В переулках Нячанга легко заблудиться без GPS.</p>
+                </div>
+            </div>
+        </div>
+
+        <hr style="margin: 35px 0; border-color: #2a2a2a;">
 
         <!-- 3.7. Необходимые приложения (скачать сразу) -->
         <h3>3.7. Необходимые приложения (скачать сразу)</h3>
@@ -2150,9 +2720,9 @@
             margin: 20px 0;
         }
         .compare-card {
-            background: #0f0f12;
+
             border-radius: 14px;
-            border: 1px solid #2a2a2a;
+
             padding: 16px;
             width: 100%;
         }
@@ -2240,9 +2810,9 @@
             margin: 20px 0;
         }
         .price-card {
-            background: #0f0f12;
+
             border-radius: 14px;
-            border: 1px solid #2a2a2a;
+
             padding: 14px 16px;
             width: 100%;
         }
@@ -2356,7 +2926,11 @@
 
         <h4>Telegram боты и каналы</h4>
         <ul style="margin-left: 25px; color: #ccc; line-height: 1.8;">
-            <li>@EasyVietnamBot (полный справочник по Нячангу с ИИ Агентом)</li>
+            <li>
+                <a href="https://t.me/easyvietnambot" target="_blank" rel="noopener noreferrer" style="color: #7c6eff; text-decoration: none; border-bottom: 1px dashed #7c6eff;">
+                    @EasyVietnamBot
+                </a> (полный справочник по Нячангу с ИИ Агентом)
+            </li>
             <li>«Нячанг Чат» (аренда в закреплённых сообщениях)</li>
             <li>«Вьетнам. Аренда квартир»</li>
         </ul>
@@ -2874,7 +3448,12 @@
                 </div>
                 <div class="rent-card">
                     <div class="rent-type">🤖 Telegram-бот</div>
-                    <div class="rent-location">📍 @EasyVietnamBot</div>
+                    <div class="rent-location">
+                        📍 <a href="https://t.me/easyvietnambot" target="_blank" rel="noopener noreferrer" style="color: #7c6eff; text-decoration: underline; text-decoration-style: dashed; text-underline-offset: 4px; display: inline-flex; align-items: center; gap: 4px;">
+                            <i class="fa-brands fa-telegram"></i> @EasyVietnamBot
+                        </a>
+
+                    </div>
                     <div class="rent-desc">Быстрый поиск по всем Telegram-группам Нячанга</div>
                 </div>
             </div>
@@ -4454,49 +5033,326 @@
     <section id="safety">
         <h2>10. Разводы и безопасность</h2>
 
+        <style>
+            /* Стили для раздела Безопасность и Медицина */
+                .danger-grid, .hospital-grid, .sickness-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+                    gap: 15px;
+                    margin: 20px 0;
+                }
+
+                .danger-card, .hospital-card, .sickness-card {
+                    background: var(--bg-card);
+                    border: 1px solid var(--border-subtle);
+                    padding: 16px;
+                    border-radius: 16px;
+                    transition: 0.3s;
+                }
+
+                .danger-card:hover { border-color: var(--accent-red); transform: translateY(-3px); }
+
+                .danger-title { color: var(--accent-red); font-weight: 700; margin-bottom: 8px; font-size: 16px; }
+                .danger-desc { font-size: 14px; color: var(--text-secondary); }
+
+                .hospital-name { color: var(--primary); font-weight: 700; margin-bottom: 5px; }
+                .hospital-badge {
+                    display: inline-block;
+                    padding: 4px 10px;
+                    border-radius: 20px;
+                    font-size: 11px;
+                    margin-top: 10px;
+                    background: rgba(124, 110, 255, 0.1);
+                    color: var(--primary);
+                }
+
+                /* Экстренные номера */
+                .emergency-grid {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 15px;
+                    margin-bottom: 25px;
+                }
+
+                .emergency-item {
+                    flex: 1;
+                    min-width: 140px;
+                    background: linear-gradient(145deg, #1a1a20, #0f0f12);
+                    padding: 15px;
+                    border-radius: 15px;
+                    text-align: center;
+                    border: 1px solid #333;
+                }
+
+                .emergency-number strong { font-size: 20px; color: var(--accent-red); }
+
+                /* Таблица аптек */
+                .pharmacy-grid {
+                    background: var(--bg-card);
+                    border-radius: 16px;
+                    border: 1px solid var(--border-subtle);
+                    overflow: hidden;
+                }
+
+                .pharmacy-row {
+                    display: flex;
+                    padding: 12px 16px;
+                    border-bottom: 1px solid #222;
+                    align-items: center;
+                }
+
+                .pharmacy-row:last-child { border-bottom: none; }
+                .pharmacy-category { width: 30%; font-weight: 700; color: var(--primary); font-size: 14px; }
+                .pharmacy-available { width: 40%; font-size: 14px; color: #ddd; }
+                .pharmacy-prescription { width: 30%; font-size: 12px; color: var(--text-muted); text-align: right; }
+
+                @media (max-width: 768px) {
+                    .pharmacy-row { flex-direction: column; align-items: flex-start; gap: 5px; }
+                    .pharmacy-category, .pharmacy-available, .pharmacy-prescription { width: 100%; text-align: left; }
+                }
+
+            /* Оформление карточек разводов */
+                .scam-card {
+                    background: #0f0f12;
+                    border: 1px solid #222;
+                    border-left: 4px solid var(--accent-red);
+                    border-radius: 12px;
+                    padding: 20px;
+                    margin-bottom: 25px;
+                    transition: transform 0.2s ease;
+                }
+
+                .scam-card:hover {
+                    border-color: #444;
+                    background: #141418;
+                }
+
+                .scam-header {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    margin-bottom: 15px;
+                }
+
+                .scam-number {
+                    background: var(--accent-red);
+                    color: white;
+                    font-size: 12px;
+                    font-weight: 800;
+                    padding: 2px 8px;
+                    border-radius: 6px;
+                    text-transform: uppercase;
+                }
+
+                .scam-card h4 {
+                    margin: 0 !important;
+                    font-size: 20px !important;
+                    color: #fff !important;
+                }
+
+                .scam-body {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 20px;
+                    margin-top: 15px;
+                }
+
+                .scam-section {
+                    font-size: 14px;
+                }
+
+                .scam-section strong {
+                    display: block;
+                    color: var(--text-muted);
+                    text-transform: uppercase;
+                    font-size: 11px;
+                    letter-spacing: 1px;
+                    margin-bottom: 5px;
+                }
+
+                .how-it-works { color: #e0e0e0; }
+                .how-to-avoid {
+                    color: #afffaf;
+                    background: rgba(175, 255, 175, 0.05);
+                    padding: 10px;
+                    border-radius: 8px;
+                }
+
+                @media (max-width: 768px) {
+                    .scam-body { grid-template-columns: 1fr; }
+                }
+
+            </style>
+
         <!-- 10.1. Топ разводов -->
-        <h3>10.1. Топ-10 реальных разводов с туристами</h3>
+        <div class="scam-card">
+            <div class="scam-header">
+                <span class="scam-number">Развод 10.1.1</span>
+                <h4>Подмена купюры</h4>
+            </div>
+            <div class="scam-body">
+                <div class="scam-section how-it-works">
+                    <strong>Как работает</strong>
+                    Водитель берет 500.000 ₫, говорит что она «мятая» и подменяет её на фальшивку или 50.000 ₫, пока вы не видите.
+                </div>
+                <div class="scam-section how-to-avoid">
+                    <strong>Как избежать</strong>
+                    Считайте нули (на 500к их ПЯТЬ). Не отдавайте деньги в руки, пока не увидите сдачу.
+                </div>
+            </div>
+        </div>
 
-        <h4>10.1.1. Подмена купюры в такси / при обмене</h4>
-        <p><strong>Как работает:</strong> водитель или продавец берёт крупную купюру (500 000 ₫), затем показывает, что она мятая или надорвана, возвращает её и просит другую. Подменённая купюра оказывается фальшивой или меньшего номинала (50 000 ₫ вместо 500 000 ₫).</p>
-        <p><strong>Как избежать:</strong> всегда проверяйте номинал каждой купюры при получении сдачи и не берите обратно ту же банкноту, которую уже отдали.</p>
+        <div class="scam-card" style="border-left-color: var(--primary);">
+            <div class="scam-header">
+                <span class="scam-number" style="background: var(--primary);">Развод 10.1.2</span>
+                <h4>Пересчёт в темноте</h4>
+            </div>
+            <div class="scam-body">
+                <div class="scam-section how-it-works">
+                    <strong>Как работает</strong>
+                    Таксист выключает свет в салоне, имитирует суету и «теряет» ваши купюры, утверждая что вы дали меньше.
+                </div>
+                <div class="scam-section how-to-avoid">
+                    <strong>Как избежать</strong>
+                    Включайте фонарик на телефоне СРАЗУ. Не выходите из машины, пока не пересчитаете всё до донга.
+                </div>
+            </div>
+        </div>
+        <div class="scam-card">
+            <div class="scam-header">
+                <span class="scam-number">Развод 10.1.2</span>
+                <h4>Магия чисел в такси</h4>
+            </div>
+            <div class="scam-body">
+                <div class="scam-section how-it-works">
+                    <strong>Как работает</strong>
+                    Водитель имитирует суету в темноте, «случайно» роняет купюры или кладет сдачу на сиденье мелкими бумажками, утверждая, что вы недоплатили.
+                </div>
+                <div class="scam-section how-to-avoid">
+                    <strong>Как избежать</strong>
+                    Включайте свет в салоне (или фонарик). Не выходите из машины, пока не пересчитаете всё до последнего донга.
+                </div>
+            </div>
+        </div>
 
-        <h4>10.1.2. Пересчёт денег в такси</h4>
-        <p><strong>Как работает:</strong> водитель начинает пересчитывать сдачу в темноте, «теряет» часть купюр и просит добавить. Либо кладёт на сиденье пачку мелких купюр, а когда вы выходите - утверждает, что вы недоплатили.</p>
-        <p><strong>Как избежать:</strong> всегда пересчитывайте сдачу при свете, не выходя из машины. Говорите «кам он» только после того, как убедились в правильности суммы.</p>
+        <div class="scam-card">
+            <div class="scam-header">
+                <span class="scam-number">Развод 10.1.3</span>
+                <h4>Байк с «сюрпризом»</h4>
+            </div>
+            <div class="scam-body">
+                <div class="scam-section how-it-works">
+                    <strong>Как работает</strong>
+                    При возврате арендодатель находит «свежую» царапину или трещину, которая была там годами. Требует за ремонт от 500к до 2 млн ₫.
+                </div>
+                <div class="scam-section how-to-avoid">
+                    <strong>Как избежать</strong>
+                    Снимайте подробное видео обхода байка при аренде. Фиксируйте каждую коцку. Никогда не оставляйте оригинал паспорта.
+                </div>
+            </div>
+        </div>
 
-        <h4>10.1.3. Аренда байка с уже сломанной деталью</h4>
-        <p><strong>Как работает:</strong> при возврате байка арендодатель указывает на царапину или сломанный поворотник, которых при выдаче не было. Доказательств у вас нет. Требует компенсацию - 500 000 – 2 000 000 ₫.</p>
-        <p><strong>Как избежать:</strong> до аренды сфотографируйте байк со всех сторон на телефон (обязательно с датой и временем). Видеообъезд с комментариями - ещё лучше. Никогда не оставляйте оригинал паспорта.</p>
+        <div class="scam-card">
+            <div class="scam-header">
+                <span class="scam-number">Развод 10.1.4</span>
+                <h4>Липовый патруль</h4>
+            </div>
+            <div class="scam-body">
+                <div class="scam-section how-it-works">
+                    <strong>Как работает</strong>
+                    Человек в форме (часто неполной) тормозит вас за «нарушение» и требует оплатить штраф наличными прямо в руки.
+                </div>
+                <div class="scam-section how-to-avoid">
+                    <strong>Как действовать</strong>
+                    Требуйте удостоверение. Настоящий полицейский выписывает квитанцию. При сомнениях - демонстративно звоните <strong>113</strong>.
+                </div>
+            </div>
+        </div>
 
-        <h4>10.1.4. «Полицейский» на улице</h4>
-        <p><strong>Как работает:</strong> человек в форме (часто без значка или нашивок) останавливает вас, утверждает, что вы нарушили ПДД, и требует штраф на месте - 500 000 – 1 000 000 ₫.</p>
-        <p><strong>Как действовать:</strong> вежливо попросите показать удостоверение. Настоящий полицейский выпишет квитанцию. Не передавайте деньги в руки. Если сомневаетесь - звоните <strong>113</strong>.</p>
+        <div class="scam-card">
+            <div class="scam-header">
+                <span class="scam-number">Развод 10.1.5</span>
+                <h4>Бесплатный сыр (экскурсии)</h4>
+            </div>
+            <div class="scam-body">
+                <div class="scam-section how-it-works">
+                    <strong>Как работает</strong>
+                    Предлагают «бесплатную» прогулку, которая превращается в 3-часовой марафон по магазинам шёлка и жемчуга с агрессивными продажами.
+                </div>
+                <div class="scam-section how-to-avoid">
+                    <strong>Правило</strong>
+                    Бесплатных экскурсий не бывает. Вежливо, но твердо игнорируйте любых уличных зазывал.
+                </div>
+            </div>
+        </div>
 
-        <h4>10.1.5. Бесплатная экскурсия → жёсткий шопинг</h4>
-        <p><strong>Как работает:</strong> на улице подходят с предложением «бесплатной» экскурсии на полдня. Вас везут в магазин шёлка, лаков или жемчуга, где держат 2–3 часа, мягко принуждая к покупке.</p>
-        <p><strong>Правило:</strong> бесплатных экскурсий не бывает. Вежливо отказывайтесь от любых уличных предложений.</p>
+        <div class="scam-card" style="border-left-color: #ff9800;">
+            <div class="scam-header">
+                <span class="scam-number" style="background: #ff9800;">Актуально 2026</span>
+                <h4>Фейковые туры в соцсетях</h4>
+            </div>
+            <div class="scam-body">
+                <div class="scam-section how-it-works">
+                    <strong>Как работает</strong>
+                    Красивые страницы в Facebook имитируют бренды. Предлагают туры по «шок-цене». После предоплаты - бан.
+                </div>
+                <div class="scam-section how-to-avoid">
+                    <strong>Как избежать</strong>
+                    Никаких переводов незнакомцам. Покупайте через официальные офисы или крупные агрегаторы (Klook, Traveloka).
+                </div>
+            </div>
+        </div>
 
-        <h4>10.1.6. Развод с турами и авиабилетами в соцсетях (актуально на 2026)</h4>
-        <p><strong>Как работает:</strong> мошенники создают фейковые страницы в Facebook, имитирующие сайты крупных туркомпаний. Предлагают «горящие туры» по нереально низким ценам. Требуют предоплату. После перевода денег блокируют номер и страницу.</p>
-        <p><strong>Как избежать:</strong> не переводите предоплату незнакомцам. Покупайте туры только в официальных туристических офисах или через проверенные агрегаторы (Klook, GetYourGuide).</p>
+        <div class="scam-card">
+            <div class="scam-header">
+                <span class="scam-number">Развод 10.1.7</span>
+                <h4>Золотое электричество</h4>
+            </div>
+            <div class="scam-body">
+                <div class="scam-section how-it-works">
+                    <strong>Как работает</strong>
+                    Владелец жилья завышает гос. тариф (3.000 ₫) в два раза. К концу месяца набегает лишний миллион «в карман».
+                </div>
+                <div class="scam-section how-to-avoid">
+                    <strong>Как избежать</strong>
+                    Заранее фиксируйте тариф в договоре. В 2026 году норма - около 3.500–4.000 ₫ за кВт (с учетом сервиса).
+                </div>
+            </div>
+        </div>
 
-        <h4>10.1.7. Завышенный счёт за свет в аренде</h4>
-        <p><strong>Как работает:</strong> владелец квартиры выставляет счёт по тарифу 5 000 – 6 000 ₫/кВт, хотя государственный - 2 500 – 3 000 ₫. Разница уходит в карман арендодателя.</p>
+        <div class="scam-card">
+            <div class="scam-header">
+                <span class="scam-number">Развод 10.1.9</span>
+                <h4>Исчезающий байк</h4>
+            </div>
+            <div class="scam-body">
+                <div class="scam-section how-it-works">
+                    <strong>Как работает</strong>
+                    Байк «угоняют» вторым ключом сами арендодатели, пока вы в магазине. Потом требуют выплатить полную стоимость.
+                </div>
+                <div class="scam-section how-to-avoid">
+                    <strong>Как избежать</strong>
+                    Паркуйтесь только на платных стоянках с талончиками. Всегда блокируйте руль своим навесным замком.
+                </div>
+            </div>
+        </div>
 
-        <h4>10.1.8. Сломанный скутер в аренде - ремонт за ваш счёт</h4>
-        <p><strong>Как работает:</strong> байк ломается по дороге. Арендодатель утверждает, что вы виноваты, и требует оплатить ремонт.</p>
-        <p><strong>Как избежать:</strong> берите байк только у проверенных точек. В договоре должно быть прописано, что поломки не по вашей вине - за счёт арендодателя.</p>
-
-        <h4>10.1.9. Мошенничество с «утерянным» байком</h4>
-        <p><strong>Как работает:</strong> вы оставляете байк на 5 минут. Возвращаетесь - его нет. Арендодатель требует полную стоимость (часто завышенную).</p>
-        <p><strong>Как избежать:</strong> всегда ставьте на замок руля и используйте трос. Паркуйтесь только в охраняемых местах.</p>
-
-        <h4>10.1.10. Развод при обмене денег в уличных обменниках</h4>
-        <p><strong>Как работает:</strong> вам дают курс выше банковского, но при пересчёте оказывается, что в пачке не хватает 100 000 – 200 000 ₫.</p>
-        <p><strong>Как избежать:</strong> меняйте деньги только в ювелирных магазинах («Vang») или банках.</p>
-
-        <hr style="margin: 25px 0; border-color: #2a2a2a;">
+        <div class="scam-card">
+            <div class="scam-header">
+                <span class="scam-number">Развод 10.1.10</span>
+                <h4>Ловкость рук в обменниках</h4>
+            </div>
+            <div class="scam-body">
+                <div class="scam-section how-it-works">
+                    <strong>Как работает</strong>
+                    Высокий курс заманивает вас, но при пересчете пачки «исчезают» 100-200 тысяч донгов.
+                </div>
+                <div class="scam-section how-to-avoid">
+                    <strong>Как избежать</strong>
+                    Меняйте валюту только в официальных банках или проверенных ювелирках (например, Princess Jewelry или «Vàng»).
+                </div>
+            </div>
+        </div>
 
         <!-- 10.2. Безопасность на байке -->
         <h3>10.2. Безопасность на байке</h3>
@@ -4939,7 +5795,7 @@
 
         <h4>Жесты</h4>
         <div class="gesture-grid">
-            <div class="gesture-item"><span class="gesture-name">👉 Указательный палец вверх</span><span class="gesture-meaning">«один» — одна порция, один билет</span></div>
+            <div class="gesture-item"><span class="gesture-name">👉 Указательный палец вверх</span><span class="gesture-meaning">«один» - одна порция, один билет</span></div>
             <div class="gesture-item"><span class="gesture-name">👍 Большой палец вверх</span><span class="gesture-meaning">хорошо, согласен, спасибо</span></div>
             <div class="gesture-item"><span class="gesture-name">🔄 Круговое движение кистью (у живота)</span><span class="gesture-meaning">«давай, поехали», «продолжай»</span></div>
             <div class="gesture-item"><span class="gesture-name">🙅 Махание ладонью перед лицом</span><span class="gesture-meaning">нет, не надо, отказ</span></div>
@@ -5444,7 +6300,14 @@
 
         <h4>Telegram-каналы (по делу)</h4>
         <div class="group-grid">
-            <div class="group-item"><span class="group-name">@EasyVietnamBot</span><span class="group-purpose">Справочник по г. Нячанг + ИИ Агент</span></div>
+            <div class="group-item">
+                <span class="group-name">
+                    <a href="https://t.me/easyvietnambot" target="_blank" rel="noopener noreferrer" style="color: #7c6eff; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+                        <i class="fa-brands fa-telegram"></i> @EasyVietnamBot
+                    </a>
+                </span>
+                <span class="group-purpose">Справочник по г. Нячанг + ИИ Агент</span>
+            </div>
             <div class="group-item"><span class="group-name">«Нячанг Чат»</span><span class="group-purpose">Основной чат города: вопросы, помощь, поиск жилья</span></div>
             <div class="group-item"><span class="group-name">«Вьетнам. Аренда квартир»</span><span class="group-purpose">Поиск долгосрочной аренды</span></div>
             <div class="group-item"><span class="group-name">«Нячанг - аренда квартир»</span><span class="group-purpose">Аренда, поиск соседей</span></div>
@@ -5779,11 +6642,19 @@
                 <li>❓ Ответы на все вопросы</li>
             </ul>
         </div>
-        <p>Стоимость и ссылку на бронирование уточняйте в Telegram-канале или по почте.</p>
+        <p>Стоимость и ссылку на бронирование уточняйте в
+            <a href="https://t.me/dekavetel" target="_blank" rel="noopener noreferrer" style="color: #7c6eff; text-decoration: none; border-bottom: 1px dashed #7c6eff; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s ease;" onmouseover="this.style.color='#5f4ae2'; this.style.borderBottomColor='#5f4ae2';" onmouseout="this.style.color='#7c6eff'; this.style.borderBottomColor='#7c6eff';">
+                <i class="fa-brands fa-telegram"></i> @dekavetel
+            </a>
+            или по
+            <a href="mailto:dkvkabakov@gmail.com" style="color: #7c6eff; text-decoration: none; border-bottom: 1px dashed #7c6eff; transition: all 0.2s ease;" onmouseover="this.style.color='#5f4ae2'; this.style.borderBottomColor='#5f4ae2';" onmouseout="this.style.color='#7c6eff'; this.style.borderBottomColor='#7c6eff';">
+                <i class="fa-regular fa-envelope"></i> dkvkabakov@gmail.com
+            </a>
+        </p>
     </section>
 
     <footer>
-            <i class="fa-regular fa-circle-info"></i> Гид обновлён под реалии 2026 · Советы живущего экспата Den · Нячанг ждёт
+            </i> Гид обновлён под реалии 2026 · Советы живущего экспата Denis Kabakov · Нячанг ждёт
         </footer>
     </main>
 
@@ -5999,7 +6870,59 @@ window.addEventListener('scroll', () => {
         }
     });
 });
+
+
+    // === ПОДСВЕТКА АКТИВНОГО ПУНКТА И СКРОЛЛ САЙДБАРА ===
+    function updateActiveNavOnScroll() {
+        const sections = document.querySelectorAll('section');
+        const navLinks = document.querySelectorAll('.nav-link');
+        const sidebar = document.querySelector('.sidebar');
+
+        let currentSection = '';
+        const scrollPosition = window.scrollY + 200;
+
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop;
+            const sectionBottom = sectionTop + section.offsetHeight;
+
+            if (scrollPosition >= sectionTop && scrollPosition < sectionBottom) {
+                currentSection = section.getAttribute('id');
+            }
+        });
+
+        navLinks.forEach(link => {
+            link.classList.remove('active');
+            const href = link.getAttribute('href');
+            if (href === `#${currentSection}`) {
+                link.classList.add('active');
+
+                // ⭐ ГЛАВНОЕ: скроллим сайдбар к активному пункту
+                if (sidebar) {
+                    const linkTop = link.offsetTop;
+                    const sidebarScrollTop = sidebar.scrollTop;
+                    const sidebarHeight = sidebar.clientHeight;
+                    const linkHeight = link.clientHeight;
+
+                    // Прокручиваем, чтобы активный пункт был по центру видимой области
+                    const targetScroll = linkTop - sidebarHeight / 2 + linkHeight / 2;
+
+                    sidebar.scrollTo({
+                        top: targetScroll,
+                        behavior: 'smooth'
+                    });
+                }
+            }
+        });
+    }
+
+    // Слушаем скролл страницы
+    window.addEventListener('scroll', updateActiveNavOnScroll);
+    // При загрузке
+    window.addEventListener('load', updateActiveNavOnScroll);
 </script>
+
+
+
 
     </body>
     </html>
