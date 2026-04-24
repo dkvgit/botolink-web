@@ -212,57 +212,66 @@ async def read_guide(request: Request):
         await conn.close()
         
         
-        
+
 @app.get("/auth/verify")
 async def verify_magic_link(token: str, response: Response):
     from core.config import DATABASE_URL
+    from datetime import datetime
+    import asyncpg
+    from fastapi.responses import RedirectResponse
+
+    # Очищаем URL базы (убираем +asyncpg если есть, так как asyncpg.connect хочет чистый postgres://)
+    clean_db_url = DATABASE_URL.replace("postgresql+asyncpg://", "postgresql://")
     
-    conn = await asyncpg.connect(DATABASE_URL)
+    conn = await asyncpg.connect(clean_db_url)
     try:
-        # 1. Ищем запись с таким токеном
-        # Также проверяем, не истекло ли время (15 минут)
+        # 1. Ищем запись с токеном и проверяем время жизни (15 мин)
         query = """
             SELECT session_id, customer_email
             FROM public.paid_sessions
             WHERE magic_link_token = $1 AND token_expires_at > $2
         """
+        # Используем datetime.utcnow() для сравнения с временем в базе
         user_record = await conn.fetchrow(query, token, datetime.utcnow())
 
         if not user_record:
-            # Если токен неверный или протух — отправляем обратно на лендинг
-            # Можно добавить параметр ошибки, чтобы показать сообщение
+            logger.warning(f"⚠️ Невалидный или просроченный токен: {token}")
             return RedirectResponse(url="/guide?error=invalid_token")
 
-        # 2. Токен верный! Нам нужно «пометить» пользователя.
-        # Создаем ответ-редирект на будущую страницу гайда
+        # 2. Токен верный. Готовим переход на страницу гайда
+        # ВАЖНО: Убедись, что роут "/my-guide" у тебя существует
         redirect_to_guide = RedirectResponse(url="/my-guide", status_code=303)
 
-        # 3. Устанавливаем Cookie (наша "печать")
-        # session_id — это уникальный ID покупки, он станет нашим ключом в куке
+        # 3. Устанавливаем Cookie
+        # Мы записываем session_id в браузер, чтобы сайт "узнавал" пользователя
         redirect_to_guide.set_cookie(
             key="guide_auth_token",
-            value=user_record['session_id'], # Используем session_id как идентификатор
-            httponly=True,   # Защита: JavaScript не сможет украсть эту куку
-            max_age=31536000, # Срок жизни — 1 год (в секундах)
+            value=str(user_record['session_id']),
+            httponly=True,   # Защита от XSS атак
+            max_age=31536000, # 1 год
             samesite="lax",
-            secure=True      # Только для HTTPS (в продакшене обязательно)
+            secure=False      # Поставь True, когда будет HTTPS на домене
         )
 
-        # 4. Стираем использованный токен из базы (в целях безопасности)
+        # 4. Удаляем токен, чтобы его нельзя было использовать второй раз
         await conn.execute(
             "UPDATE public.paid_sessions SET magic_link_token = NULL WHERE session_id = $1",
             user_record['session_id']
         )
 
-        logger.info(f"🔑 Успешный вход для {user_record['customer_email']}. Кука установлена.")
+        logger.info(f"🔑 Успешный вход: {user_record['customer_email']}")
         return redirect_to_guide
 
     except Exception as e:
-        logger.error(f"❌ Ошибка Шага 4: {str(e)}")
+        logger.error(f"❌ Ошибка при верификации: {str(e)}")
         return RedirectResponse(url="/guide?error=server_error")
     finally:
         await conn.close()
-
+        
+        
+        
+        
+        
 class AuthEmail(BaseModel):
     email: EmailStr
 
