@@ -168,76 +168,76 @@ app = FastAPI(lifespan=lifespan)
 
 # ==============ВРЕМЯНКА==========================================
 
-@app.get("/my-guide", response_class=HTMLResponse)
-async def read_guide(request: Request):
-    import os
-    from fastapi.responses import HTMLResponse
-    
-    # --- ВРЕМЕННО ЗАКОММЕНТИРУЙ ВСЮ ПРОВЕРКУ КУК И БАЗЫ ДАННЫХ ---
-    # auth_token = request.cookies.get("guide_auth_token")
-    # ... (и весь код с asyncpg тоже можешь пока не трогать) ...
-
-    # 3. Всё ок! Просто отдаем страницу гайда для разработки
-    template_path = "web/templates/guide/guide_content.html"
-    
-    if not os.path.exists(template_path):
-        return HTMLResponse(content=f"<h1>Файл не найден по пути: {template_path}</h1>", status_code=404)
-
-    with open(template_path, "r", encoding="utf-8") as f:
-        html_content = f.read()
-    
-    return HTMLResponse(content=html_content)
+# @app.get("/my-guide", response_class=HTMLResponse)
+# async def read_guide(request: Request):
+#     import os
+#     from fastapi.responses import HTMLResponse
+#
+#     # --- ВРЕМЕННО ЗАКОММЕНТИРУЙ ВСЮ ПРОВЕРКУ КУК И БАЗЫ ДАННЫХ ---
+#     # auth_token = request.cookies.get("guide_auth_token")
+#     # ... (и весь код с asyncpg тоже можешь пока не трогать) ...
+#
+#     # 3. Всё ок! Просто отдаем страницу гайда для разработки
+#     template_path = "web/templates/guide/guide_content.html"
+#
+#     if not os.path.exists(template_path):
+#         return HTMLResponse(content=f"<h1>Файл не найден по пути: {template_path}</h1>", status_code=404)
+#
+#     with open(template_path, "r", encoding="utf-8") as f:
+#         html_content = f.read()
+#
+#     return HTMLResponse(content=html_content)
 
 # ========================================================
 
-# @app.get("/my-guide", response_class=HTMLResponse)
-# async def read_guide(request: Request):
-#     from core.config import DATABASE_URL
-#     import asyncpg
-#     from fastapi.responses import HTMLResponse, RedirectResponse
-#     import os
-#
-#     # 1. Достаем нашу куку "абонемент"
-#     auth_token = request.cookies.get("guide_auth_token")
-#
-#     if not auth_token:
-#         # Нет куки? Отправляем на лендинг
-#         return RedirectResponse(url="/guide")
-#
-#     # Очищаем URL (стандарт для работы с asyncpg напрямую)
-#     db_url = DATABASE_URL.replace("postgresql+asyncpg://", "postgresql://")
-#
-#     conn = await asyncpg.connect(db_url)
-#     try:
-#         # 2. Проверяем в базе, есть ли такая сессия
-#         user_check = await conn.fetchrow(
-#             "SELECT customer_email FROM public.paid_sessions WHERE session_id = $1 LIMIT 1",
-#             auth_token
-#         )
-#
-#         if not user_check:
-#             # Кука левая или сессия удалена
-#             response = RedirectResponse(url="/guide")
-#             response.delete_cookie("guide_auth_token")
-#             return response
-#
-#         # 3. Всё ок! Отдаем страницу гайда
-#         # Указываем правильный путь с учетом подпапки guide
-#         template_path = "web/templates/guide/guide_content.html"
-#
-#         if not os.path.exists(template_path):
-#             return HTMLResponse(content="<h1>Файл гайда не найден</h1>", status_code=404)
-#
-#         with open(template_path, "r", encoding="utf-8") as f:
-#             html_content = f.read()
-#
-#         return HTMLResponse(content=html_content)
-#
-#     except Exception as e:
-#         print(f"!!! Ошибка доступа к гайду: {e}")
-#         return HTMLResponse(content="Ошибка сервера", status_code=500)
-#     finally:
-#         await conn.close()
+@app.get("/my-guide", response_class=HTMLResponse)
+async def read_guide(request: Request):
+    from core.config import DATABASE_URL
+    import asyncpg
+    from fastapi.responses import HTMLResponse, RedirectResponse
+    import os
+
+    # 1. Достаем нашу куку "абонемент"
+    auth_token = request.cookies.get("guide_auth_token")
+
+    if not auth_token:
+        # Нет куки? Отправляем на лендинг
+        return RedirectResponse(url="/guide")
+
+    # Очищаем URL (стандарт для работы с asyncpg напрямую)
+    db_url = DATABASE_URL.replace("postgresql+asyncpg://", "postgresql://")
+
+    conn = await asyncpg.connect(db_url)
+    try:
+        # 2. Проверяем в базе, есть ли такая сессия
+        user_check = await conn.fetchrow(
+            "SELECT customer_email FROM public.paid_sessions WHERE session_id = $1 LIMIT 1",
+            auth_token
+        )
+
+        if not user_check:
+            # Кука левая или сессия удалена
+            response = RedirectResponse(url="/guide")
+            response.delete_cookie("guide_auth_token")
+            return response
+
+        # 3. Всё ок! Отдаем страницу гайда
+        # Указываем правильный путь с учетом подпапки guide
+        template_path = "web/templates/guide/guide_content.html"
+
+        if not os.path.exists(template_path):
+            return HTMLResponse(content="<h1>Файл гайда не найден</h1>", status_code=404)
+
+        with open(template_path, "r", encoding="utf-8") as f:
+            html_content = f.read()
+
+        return HTMLResponse(content=html_content)
+
+    except Exception as e:
+        print(f"!!! Ошибка доступа к гайду: {e}")
+        return HTMLResponse(content="Ошибка сервера", status_code=500)
+    finally:
+        await conn.close()
         
 
 @app.get("/auth/verify")
@@ -487,53 +487,106 @@ async def stripe_webhook(request: Request):
     from core.config import STRIPE_WEBHOOK_SECRET, STRIPE_SECRET_KEY, DATABASE_URL
     import stripe
     import asyncpg
+    from datetime import datetime
 
+    logger.info("🔄 [WEBHOOK] Получен запрос на /stripe-webhook")
+    
     payload = await request.body()
     sig_header = request.headers.get("stripe-signature")
     stripe.api_key = STRIPE_SECRET_KEY
 
     if not sig_header:
+        logger.warning("⚠️ [WEBHOOK] Отсутствует stripe-signature в заголовках")
         return Response(status_code=400)
 
     try:
         event = stripe.Webhook.construct_event(payload, sig_header, STRIPE_WEBHOOK_SECRET)
+        logger.info(f"📦 [WEBHOOK] Событие получено: {event['type']} | ID: {event['id']}")
     except Exception as e:
-        logger.error(f"⚠️ [STRIPE] Ошибка подписи: {e}")
+        logger.error(f"❌ [WEBHOOK] Ошибка подписи: {e}")
         return Response(content=str(e), status_code=400)
 
     if event["type"] == "checkout.session.completed":
         session = event["data"]["object"]
-        customer_email = session.get("customer_details", {}).get("email").lower()
+        logger.info(f"💰 [WEBHOOK] Обработка completed сессии: {session.get('id')}")
+        
+        customer_email = session.get("customer_details", {}).get("email")
+        if customer_email:
+            customer_email = customer_email.lower()
+            logger.info(f"📧 [WEBHOOK] Email клиента: {customer_email}")
+        else:
+            logger.warning(f"⚠️ [WEBHOOK] Email отсутствует в сессии {session.get('id')}")
+        
         user_id_str = session.get("client_reference_id")
+        logger.info(f"🆔 [WEBHOOK] client_reference_id: {user_id_str}")
+        
         session_id = session.get("id")
+        payment_status = session.get("payment_status")
+        logger.info(f"💳 [WEBHOOK] Статус оплаты: {payment_status}")
 
         try:
-            conn = await asyncpg.connect(DATABASE_URL.replace("postgresql+asyncpg://", "postgresql://"))
+            # Чистим URL для asyncpg
+            clean_db_url = DATABASE_URL.replace("postgresql+asyncpg://", "postgresql://")
+            logger.info(f"🗄️ [WEBHOOK] Подключение к БД: {clean_db_url[:50]}...")
             
-            # 1. Обновляем таблицу users
+            conn = await asyncpg.connect(clean_db_url)
+            logger.info("✅ [WEBHOOK] Подключение к БД успешно")
+            
+            # 1. Обновляем таблицу users (если есть user_id)
             if user_id_str and user_id_str.isdigit():
-                await conn.execute("UPDATE users SET email = $1 WHERE id = $2", customer_email, int(user_id_str))
+                user_id = int(user_id_str)
+                logger.info(f"👤 [WEBHOOK] Обновляем users для id={user_id}, email={customer_email}")
+                result = await conn.execute(
+                    "UPDATE users SET email = $1 WHERE id = $2",
+                    customer_email, user_id
+                )
+                logger.info(f"📊 [WEBHOOK] users обновлено: {result}")
+            else:
+                logger.info(f"ℹ️ [WEBHOOK] user_id невалидный или отсутствует: '{user_id_str}', пропускаем users")
             
             # 2. Создаем запись в paid_sessions (UPSERT)
-            # Чтобы система сразу знала покупателя
+            user_id_value = int(user_id_str) if user_id_str and user_id_str.isdigit() else None
+            logger.info(f"💾 [WEBHOOK] Вставляем в paid_sessions: session_id={session_id}, user_id={user_id_value}, email={customer_email}")
+            
             await conn.execute("""
-                INSERT INTO paid_sessions (session_id, user_id, customer_email, download_count)
-                VALUES ($1, $2, $3, 0)
-                ON CONFLICT (session_id) DO NOTHING
-            """, session_id, int(user_id_str) if user_id_str and user_id_str.isdigit() else None, customer_email)
+                INSERT INTO paid_sessions (session_id, user_id, customer_email, download_count, created_at)
+                VALUES ($1, $2, $3, 0, $4)
+                ON CONFLICT (session_id) DO UPDATE SET
+                    user_id = EXCLUDED.user_id,
+                    customer_email = EXCLUDED.customer_email,
+                    updated_at = EXCLUDED.created_at
+            """, session_id, user_id_value, customer_email, datetime.utcnow())
+            
+            # Проверяем, что запись создалась
+            check = await conn.fetchrow(
+                "SELECT session_id, customer_email FROM paid_sessions WHERE session_id = $1",
+                session_id
+            )
+            if check:
+                logger.info(f"✅ [WEBHOOK] Запись подтверждена: {check['session_id']} -> {check['customer_email']}")
+            else:
+                logger.error(f"❌ [WEBHOOK] Не удалось проверить создание записи!")
             
             await conn.close()
-            logger.info(f"✅ [STRIPE] Доступ создан для {customer_email}")
+            logger.info(f"🎉 [WEBHOOK] УСПЕХ! Доступ создан для {customer_email} с session_id={session_id}")
+            
         except Exception as db_err:
-            logger.error(f"❌ [DB ERROR] {db_err}")
+            logger.error(f"❌ [WEBHOOK DB ERROR] {type(db_err).__name__}: {db_err}")
+            import traceback
+            logger.error(f"📋 [WEBHOOK TRACEBACK]: {traceback.format_exc()}")
+            # Не возвращаем ошибку Stripe, чтобы он не переотправлял
 
+    else:
+        logger.info(f"ℹ️ [WEBHOOK] Игнорируем событие типа: {event['type']}")
+
+    logger.info("🏁 [WEBHOOK] Завершение обработки")
     return Response(status_code=200)
-
 
 @app.get("/success", response_class=HTMLResponse)
 async def payment_success_page(request: Request, session_id: str = None):
-    from core.config import STRIPE_SECRET_KEY
+    from core.config import STRIPE_SECRET_KEY, DATABASE_URL
     import stripe
+    import asyncpg
 
     if not session_id:
         return HTMLResponse("<h1>Ошибка: Нет ID сессии</h1>", status_code=400)
@@ -544,23 +597,46 @@ async def payment_success_page(request: Request, session_id: str = None):
         
         if session.payment_status == "paid":
             email = session.customer_details.email if session.customer_details else "вашу почту"
-            # Возвращаем чистый HTML без лишней логики БД
+            
+            # ✅ ДОБАВЛЯЕМ ЗАПИСЬ В БД ПРЯМО ЗДЕСЬ
+            clean_db_url = DATABASE_URL.replace("postgresql+asyncpg://", "postgresql://")
+            conn = await asyncpg.connect(clean_db_url)
+            try:
+                # Проверяем, нет ли уже такой сессии
+                existing = await conn.fetchrow(
+                    "SELECT session_id FROM paid_sessions WHERE session_id = $1",
+                    session_id
+                )
+                if not existing:
+                    await conn.execute("""
+                        INSERT INTO paid_sessions (session_id, customer_email, download_count)
+                        VALUES ($1, $2, 0)
+                    """, session_id, email)
+                    logger.info(f"✅ [SUCCESS PAGE] Добавлен пользователь {email} с session_id {session_id}")
+                else:
+                    logger.info(f"ℹ️ [SUCCESS PAGE] Пользователь {email} уже есть в БД")
+            finally:
+                await conn.close()
+            
+            # Возвращаем HTML
             return HTMLResponse(content=f"""
                 <div style="text-align: center; margin-top: 100px; font-family: sans-serif; padding: 20px;">
                     <div style="font-size: 60px;">🎉</div>
                     <h1 style="color: #111;">Оплата прошла успешно!</h1>
                     <p style="color: #555; font-size: 18px;">Доступ активирован для <strong>{email}</strong>.</p>
-                    <p>Теперь просто введите этот email на странице входа.</p>
+                    <p style="color: #555; font-size: 18px;">🔗 Ссылка для входа отправлена вам на почту.</p>
                     <br>
                     <a href="/guide" style="display: inline-block; padding: 15px 30px; background: #635bff; color: white; text-decoration: none; border-radius: 8px; font-weight: bold;">
                         ПЕРЕЙТИ К ВХОДУ
                     </a>
                 </div>
             """)
+        
         return HTMLResponse("<h1>Оплата еще обрабатывается...</h1>")
+        
     except Exception as e:
-        return HTMLResponse(f"<h1>Ошибка</h1><p>{str(e)}</p>")
-
+        logger.error(f"❌ Ошибка в /success: {e}")
+        return HTMLResponse(f"<h1>Ошибка</h1><p>{str(e)}</p>", status_code=500)
 
 
     
