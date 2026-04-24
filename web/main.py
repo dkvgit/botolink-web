@@ -582,6 +582,9 @@ async def stripe_webhook(request: Request):
     logger.info("🏁 [WEBHOOK] Завершение обработки")
     return Response(status_code=200)
 
+
+
+
 @app.get("/success", response_class=HTMLResponse)
 async def payment_success_page(request: Request, session_id: str = None):
     from core.config import STRIPE_SECRET_KEY, DATABASE_URL
@@ -616,15 +619,13 @@ async def payment_success_page(request: Request, session_id: str = None):
                 token = secrets.token_urlsafe(32)
                 expires_at = datetime.utcnow() + timedelta(minutes=15)
                 
-                # Обновляем запись с токеном
+                # ВСТАВЛЯЕМ новую запись
                 await conn.execute("""
-                    UPDATE paid_sessions
-                    SET magic_link_token = $1,
-                        token_expires_at = $2
-                    WHERE customer_email = $3 AND session_id = $4
-                """, token, expires_at, email, session_id)
+                    INSERT INTO paid_sessions (session_id, customer_email, magic_link_token, token_expires_at, download_count, created_at)
+                    VALUES ($1, $2, $3, $4, 0, $5)
+                """, session_id, email, token, expires_at, datetime.utcnow())
                 
-                logger.info(f"✅ [SUCCESS] Токен создан для {email}")
+                logger.info(f"✅ [SUCCESS] Новая запись создана для {email}, токен: {token[:20]}...")
                 
                 # Отправляем письмо
                 magic_link = f"https://botolink.pro/auth/verify?token={token}"
@@ -641,7 +642,7 @@ async def payment_success_page(request: Request, session_id: str = None):
                         <p>Ваш доступ к гайду активирован. Нажмите на кнопку ниже:</p>
                         <a href="{magic_link}" style="display: inline-block; padding: 12px 25px; background: #635bff; color: #fff; text-decoration: none; border-radius: 8px;">Войти в Гайд</a>
                         <p style="margin-top: 20px; font-size: 13px; color: #666;">
-                            Ссылка действительна 15 минут. Если кнопка не работает, скопируйте ссылку:<br>
+                            Ссылка действительна 15 минут. Если кнопка не работает, скопируйте ссылку в браузер:<br>
                             {magic_link}
                         </p>
                     </body>
@@ -739,39 +740,32 @@ async def redirect_to_easy_bot():
 
 @app.get("/set_webhook")
 async def set_webhook():
-    # # Подготавливаем базовый URL: убираем лишние пробелы и слэши в конце
-    base_url = os.getenv('APP_URL', '').strip().rstrip('/')
-    bot_token = os.getenv("BOT_TOKEN", "").strip()
+    from core.config import APP_URL, BOT_TOKEN
     
-    # # Если URL не задан, пробуем вытянуть его из Railway домена (на всякий случай)
-    if not base_url:
-        base_url = f"https://{os.getenv('RAILWAY_STATIC_URL', '')}".rstrip('/')
-
-    webhook_url = f"{base_url}/webhook"
+    base_url = APP_URL.strip().rstrip('/')
+    bot_token = BOT_TOKEN.strip()
     
     if not base_url or not bot_token:
         return {
             "status": "error",
-            "message": "APP_URL или BOT_TOKEN не установлены в переменных окружения!",
+            "message": "APP_URL или BOT_TOKEN не установлены!",
             "debug": {
                 "base_url": base_url,
                 "has_token": bool(bot_token)
             }
         }
     
-    # # Формируем запрос к Telegram API
+    webhook_url = f"{base_url}/webhook"
     tg_url = f"https://api.telegram.org/bot{bot_token}/setWebhook"
     
-    # # Параметры для Telegram
     payload = {
         "url": webhook_url,
-        "drop_pending_updates": True,  # Очистит очередь старых сообщений, чтобы бот не захлебнулся
+        "drop_pending_updates": True,
         "allowed_updates": ["message", "callback_query", "edited_message"]
     }
     
     async with httpx.AsyncClient() as client:
         try:
-            # # Используем POST, так как передаем JSON с настройками
             response = await client.post(tg_url, json=payload, timeout=10.0)
             result = response.json()
             
@@ -779,16 +773,10 @@ async def set_webhook():
                 "status": "ok" if result.get("ok") else "failed",
                 "webhook_url_sent": webhook_url,
                 "telegram_reply": result,
-                "note": "Если 'ok': true, значит всё четко. Проверяй бота!"
             }
         except Exception as e:
             logger.error(f"❌ Ошибка при установке вебхука: {e}")
-            return {
-                "status": "exception",
-                "error": str(e),
-                "tip": "Проверь соединение сервера с api.telegram.org"
-            }
-        
+            return {"status": "exception", "error": str(e)}
         
         
         
