@@ -340,11 +340,11 @@ async def request_magic_link(payload: AuthEmail):
         now = datetime.now() # Для сравнения дат используем локальное время сервера
 
         # 2. ПРОВЕРКА ЛИМИТА
-        # Если последний запрос был в другой день — сбрасываем счетчик
+        # Если последний запрос был в другой день - сбрасываем счетчик
         if last_request and last_request.date() < now.date():
             current_attempts = 0
 
-        # Если попыток уже 2 или больше — блокируем
+        # Если попыток уже 2 или больше - блокируем
         if current_attempts >= 2:
             logger.warning(f"🚫 Лимит исчерпан для {db_email}")
             raise HTTPException(
@@ -376,7 +376,7 @@ async def request_magic_link(payload: AuthEmail):
         msg = MIMEMultipart()
         msg['From'] = SMTP_USER
         msg['To'] = db_email
-        msg['Subject'] = Header("Ваш доступ к Гайду по Нячангу", 'utf-8').encode()
+        msg['Subject'] = Header("Ваш доступ к Гайду по Нячангу 2026", 'utf-8').encode()
 
         html_body = f"""
         <html>
@@ -686,7 +686,7 @@ async def payment_success_page(request: Request, session_id: str = None):
                     if key in domain:
                         return info
                 
-                # Если почтовик не найден — ведём на лендинг
+                # Если почтовик не найден - ведём на лендинг
                 return {'url': '/guide', 'icon': '🔐', 'name': 'лендинг'}
             
             mail_info = get_mail_link_and_icon(email)
@@ -707,6 +707,16 @@ async def payment_success_page(request: Request, session_id: str = None):
                     VALUES ($1, $2, $3, $4, 0, $5)
                 """, session_id, email, token, expires_at, datetime.utcnow())
                 
+                
+                # 👇👇👇 СЮДА ВСТАВЬ ЭТОТ КОД 👇👇👇
+                # Сохраняем факт согласия с офертой
+                await conn.execute("""
+                    UPDATE paid_sessions
+                    SET offer_accepted_at = $1
+                    WHERE session_id = $2
+                """, datetime.utcnow(), session_id)
+                # 👆👆👆 СЮДА 👆👆👆
+                
                 logger.info(f"✅ [SUCCESS] Создана запись для {email}")
                 
                 magic_link = f"https://botolink.pro/auth/verify?token={token}"
@@ -715,7 +725,7 @@ async def payment_success_page(request: Request, session_id: str = None):
                 msg = MIMEMultipart()
                 msg['From'] = SMTP_USER
                 msg['To'] = email
-                msg['Subject'] = Header("Ваш доступ к Гайду по Нячангу", 'utf-8').encode()
+                msg['Subject'] = Header("Ваш доступ к Гайду по Нячангу 2026", 'utf-8').encode()
                 
                 html_body = f"""
                 <!DOCTYPE html>
@@ -725,10 +735,10 @@ async def payment_success_page(request: Request, session_id: str = None):
                 </head>
                 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; line-height: 1.6; color: #333; max-width: 550px; margin: 0 auto; padding: 20px;">
                     
-                    <div style="text-align: center; padding: 20px 0 10px;">
-                        <div style="font-size: 48px;">📘</div>
+                    <div style="text-align: center; padding: 10px 0 10px;">
+                        
                         <h1 style="color: #635bff; margin: 10px 0 5px;">Ваш доступ к гайду</h1>
-                        <p style="color: #666;">по Нячангу — активен!</p>
+                        <p style="color: #666;">по Нячангу - активен!</p>
                     </div>
                     
                     <div style="text-align: center; margin: 30px 0;">
@@ -742,25 +752,25 @@ async def payment_success_page(request: Request, session_id: str = None):
                     
                     <hr style="border: none; border-top: 1px solid #eee; margin: 25px 0;">
                     
-                    <div style="background: #f8f9ff; border-radius: 10px; padding: 15px; margin-bottom: 20px;">
+                    <div style="background: #f8f9ff; border-radius: 10px; padding: 15px; margin-bottom: 10px;">
                         <p style="margin: 0 0 10px;"><strong>📖 Как пользоваться?</strong></p>
-                        <p style="margin: 0 0 5px;">1. Нажмите на кнопку выше — откроется гайд</p>
+                        <p style="margin: 0 0 5px;">1. Нажмите на кнопку выше - откроется гайд</p>
                         <p style="margin: 0 0 5px;">2. Добавьте страницу в <strong>закладки браузера</strong></p>
                         <p style="margin: 0;">3. В следующий раз гайд откроется сразу</p>
                     </div>
                     
                     <div style="background: #fff3e0; border-radius: 10px; padding: 15px; margin-bottom: 20px;">
                         <p style="margin: 0 0 10px;"><strong>🔐 Если потеряете ссылку</strong></p>
-                        <p style="margin: 0;">Зайдите на <a href="https://botolink.pro/guide" style="color: #635bff;">botolink.pro/guide</a>, введите ваш email <strong>{email}</strong> — мы пришлём новую ссылку (до 2 раз в день).</p>
+                        <p style="margin: 0;">Зайдите на <a href="https://botolink.pro/guide" style="color: #635bff;">botolink.pro/guide</a>, введите ваш email <strong>{email}</strong> - мы пришлём новую ссылку (до 2 раз в день).</p>
                     </div>
                     
                     <hr style="border: none; border-top: 1px solid #eee; margin: 25px 0;">
                     
                     <div style="text-align: center; font-size: 12px; color: #aaa;">
-                        <p>Вопросы? Пишите в Telegram: <a href="https://t.me/botolinkprobot" style="color: #635bff;">@botolinkprobot</a></p>
+                        <p>Вопросы? Пишите в Telegram: <a href="https://t.me/dekavetel" style="color: #635bff;">@dekavetel</a></p>
                     </div>
                 </body>
-                </html>
+                </html>@
                 """
                 msg.attach(MIMEText(html_body, 'html', 'utf-8'))
                 
@@ -775,7 +785,7 @@ async def payment_success_page(request: Request, session_id: str = None):
             
             # ========== СТРАНИЦА УСПЕХА С УМНОЙ КНОПКОЙ ==========
             return HTMLResponse(content=f"""
-            <div style="text-align: center; margin-top: 100px; font-family: sans-serif; padding: 20px;">
+            <div style="text-align: center; margin-top: 60px; font-family: sans-serif; padding: 20px;">
                 <div style="font-size: 60px;">🎉</div>
                 <h1 style="color: #111;">Оплата прошла успешно!</h1>
                 <p style="color: #555; font-size: 18px;">Доступ активирован для <strong>{email}</strong>.</p>
@@ -788,16 +798,22 @@ async def payment_success_page(request: Request, session_id: str = None):
                 </div>
                 
                 <a href="{mail_url}" target="_blank" style="display: inline-block; margin-top: 10px; padding: 14px 28px; background: #635bff; color: white; text-decoration: none; border-radius: 10px; font-weight: bold; font-size: 16px;">
-                    {mail_icon} ОТКРЫТЬ {mail_name}
+                    {mail_icon} ОТКРЫТЬ СЕРВИС {mail_name}
                 </a>
                 <p style="color: #666; font-size: 12px; margin-top: 8px;">
                     Письмо от <strong>dkvkabakov@gmail.com</strong><br>
-                    Если не видите — проверьте папку <strong>Спам</strong>
+                    Если не видите - проверьте папку <strong>Спам</strong>
                 </p>
                 
                 <div style="background: #fff3e0; border-radius: 12px; padding: 15px; margin: 25px auto; max-width: 450px; text-align: left;">
                     <p style="margin: 0 0 5px 0;">🔐 <strong>Не нашли письмо?</strong></p>
                     <p style="margin: 0;">• Запросите новую ссылку на <a href="/guide" style="color: #635bff;">botolink.pro/guide</a></p>
+                </div>
+                
+                <!-- КОНТАКТ ДЛЯ СВЯЗИ -->
+                <div style="background: #f0f0f0; border-radius: 12px; padding: 15px; margin: 25px auto; max-width: 450px; text-align: left;">
+                    <p style="margin: 0 0 5px 0;">📱 <strong>Остались вопросы?</strong></p>
+                    <p style="margin: 0;">Пишите в Telegram: <a href="https://t.me/dekavetel" style="color: #635bff; text-decoration: none;">@dekavetel</a></p>
                 </div>
             </div>
             """)
@@ -822,6 +838,190 @@ async def payment_success_page(request: Request, session_id: str = None):
 async def root():
     # Редирект на главного бота при заходе на корень домена
     return RedirectResponse(url="https://t.me/botolinkprobot")
+
+
+@app.get("/offer", response_class=HTMLResponse)
+async def public_offer():
+    return HTMLResponse("""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Публичная оферта — Гид по Нячангу</title>
+        <style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+                max-width: 800px;
+                margin: 50px auto;
+                padding: 20px;
+                line-height: 1.6;
+                color: #333;
+            }
+            h1 { color: #635bff; font-size: 28px; }
+            h2 { color: #444; font-size: 20px; margin-top: 25px; }
+            p { margin: 10px 0; }
+            a { color: #635bff; text-decoration: none; }
+            a:hover { text-decoration: underline; }
+            .back-link {
+                display: inline-block;
+                margin-top: 40px;
+                padding: 10px 20px;
+                background: #f0f0f0;
+                border-radius: 8px;
+                color: #333;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>📄 Публичная оферта</h1>
+        <p><strong>Индивидуальный предприниматель Кабаков Денис</strong> (ОГРНИП: ___ , ИНН: ___), далее именуемый «Продавец», публикует настоящую оферту для неограниченного круга лиц (далее — «Покупатель») о приобретении цифрового товара — «Гид по Нячангу» (далее — «Товар»).</p>
+        
+        <h2>1. Предмет оферты</h2>
+        <p>Продавец обязуется предоставить Покупателю доступ к Товару (скачивание PDF-файла) после получения 100% предоплаты. Товар продаётся по цене, указанной на сайте <a href="https://botolink.pro">botolink.pro</a>.</p>
+        
+        <h2>2. Порядок оплаты</h2>
+        <p>Оплата производится через платёжную систему Stripe. Покупатель оплачивает Товар банковской картой. Моментом оплаты считается поступление денег на счёт Продавца.</p>
+        
+        <h2>3. Порядок получения Товара</h2>
+        <p>После успешной оплаты Покупатель получает на указанную при оплате электронную почту письмо со ссылкой для доступа к гайду. Дополнительно ссылка отображается на странице успешной оплаты.</p>
+        
+        <h2>4. Сроки</h2>
+        <p>Ссылка для доступа действует бессрочно. Продавец не гарантирует работу сторонних сервисов (почта, хостинг), но обязуется восстановить доступ по запросу Покупателя в Telegram: <a href="https://t.me/dekavetel">@dekavetel</a>.</p>
+        
+        <h2>5. Возврат</h2>
+        <p>В соответствии со ст. 26.1 Федерального закона «О защите прав потребителей», цифровые товары надлежащего качества возврату и обмену не подлежат. Продавец не возвращает деньги в случае, если доступ к гайду был предоставлен (письмо отправлено).</p>
+        
+        <h2>6. Права и обязанности сторон</h2>
+        <p>Товар предоставляется «как есть» (as is). Продавец не несёт ответственности за убытки, связанные с использованием гайда. Покупатель не имеет права распространять Товар третьим лицам.</p>
+        
+        <h2>7. Конфиденциальность</h2>
+        <p>Продавец обрабатывает персональные данные (email) только для выполнения обязательств по настоящей оферте. Подробнее — в <a href="/privacy">Политике конфиденциальности</a>.</p>
+        
+        <h2>8. Реквизиты Продавца</h2>
+        <p>
+            ИП Кабаков Денис<br>
+            ИНН: 1234567890<br>
+            ОГРНИП: 123456789012345<br>
+            Email: dkvkabakov@gmail.com<br>
+            Telegram: <a href="https://t.me/dekavetel">@dekavetel</a>
+        </p>
+        
+        <p style="margin-top: 30px; font-size: 14px; background: #f8f9ff; padding: 15px; border-radius: 8px;">
+            💡 Нажимая «Оплатить» или «Запросить ссылку» на сайте, Покупатель принимает условия настоящей оферты.
+        </p>
+        
+        <a href="/guide" class="back-link">← Вернуться на сайт</a>
+    </body>
+    </html>
+    """)
+
+
+
+@app.get("/privacy", response_class=HTMLResponse)
+async def privacy_policy():
+    return HTMLResponse("""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Политика конфиденциальности — Гид по Нячангу</title>
+        <style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+                max-width: 800px;
+                margin: 50px auto;
+                padding: 20px;
+                line-height: 1.6;
+                color: #333;
+            }
+            h1 { color: #635bff; font-size: 28px; }
+            h2 { color: #444; font-size: 20px; margin-top: 25px; }
+            p { margin: 10px 0; }
+            a { color: #635bff; text-decoration: none; }
+            a:hover { text-decoration: underline; }
+            .back-link {
+                display: inline-block;
+                margin-top: 40px;
+                padding: 10px 20px;
+                background: #f0f0f0;
+                border-radius: 8px;
+                color: #333;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>🔒 Политика конфиденциальности</h1>
+        <p>Настоящая Политика описывает, какие данные собирает <strong>ИП Кабаков Денис</strong> (далее — «Мы», «Продавец») и как их использует.</p>
+        
+        <h2>1. Какие данные мы собираем</h2>
+        <ul>
+            <li><strong>Email</strong> — указанный при оплате через Stripe</li>
+            <li><strong>ID платежа Stripe</strong> (session_id) — для подтверждения оплаты</li>
+            <li><strong>IP-адрес</strong> — технические логи сервера (хранятся до 30 дней)</li>
+            <li><strong>Данные о браузере</strong> — для улучшения работы сайта (через куки)</li>
+        </ul>
+        
+        <h2>2. Как мы используем эти данные</h2>
+        <ul>
+            <li>Для предоставления доступа к гайду (отправка письма со ссылкой)</li>
+            <li>Для восстановления доступа по запросу пользователя</li>
+            <li>Для решения технических проблем и связи с вами</li>
+            <li>Для статистики (количество оплат, успешных входов)</li>
+        </ul>
+        
+        <h2>3. Передача данных третьим лицам</h2>
+        <p>Мы передаём данные только сервисам, необходимым для работы сайта:</p>
+        <ul>
+            <li><strong>Stripe</strong> — платёжный провайдер (транзакции)</li>
+            <li><strong>Gmail / SMTP</strong> — отправка писем</li>
+            <li><strong>Render.com</strong> — хостинг и база данных PostgreSQL</li>
+            <li><strong>Telegram</strong> — для поддержки (только если вы сами пишете)</li>
+        </ul>
+        <p>Эти сервисы имеют свои политики конфиденциальности. Мы не продаём и не передаём данные другим лицам.</p>
+        
+        <h2>4. Хранение и удаление данных</h2>
+        <ul>
+            <li><strong>Email и данные оплаты</strong> хранятся в базе данных бессрочно, пока у вас активен доступ</li>
+            <li><strong>Логи IP</strong> хранятся до 30 дней</li>
+            <li><strong>Куки</strong> — до 1 года или до очистки браузером</li>
+        </ul>
+        <p>Вы можете запросить <strong>удаление ваших персональных данных</strong> в любой момент, написав на <a href="mailto:dkvkabakov@gmail.com">dkvkabakov@gmail.com</a> или в Telegram <a href="https://t.me/dekavetel">@dekavetel</a>. После удаления доступ к гайду будет потерян.</p>
+        
+        <h2>5. Куки (Cookies)</h2>
+        <p>Сайт использует куки для:</p>
+        <ul>
+            <li>Хранения статуса авторизации (чтобы не входить каждый раз)</li>
+            <li>Запоминания согласия на обработку данных</li>
+            <li>Технической стабильности работы</li>
+        </ul>
+        <p>Вы можете отключить куки в настройках браузера, но тогда некоторые функции сайта могут работать некорректно.</p>
+        
+        <h2>6. Ваши права</h2>
+        <p>Вы имеете право:</p>
+        <ul>
+            <li>Знать, какие данные о вас хранятся</li>
+            <li>Исправить неверные данные (например, email)</li>
+            <li>Удалить свои данные</li>
+            <li>Отозвать согласие на обработку</li>
+        </ul>
+        <p>Для реализации этих прав свяжитесь с нами по контактам ниже.</p>
+        
+        <h2>7. Контакты</h2>
+        <p>
+            ИП Кабаков Денис<br>
+            Email: <a href="mailto:dkvkabakov@gmail.com">dkvkabakov@gmail.com</a><br>
+            Telegram: <a href="https://t.me/dekavetel">@dekavetel</a>
+        </p>
+        
+        <p style="margin-top: 30px; font-size: 14px; background: #f0f7ff; padding: 15px; border-radius: 8px;">
+            📅 Актуально на 25 апреля 2026 года. Версия 1.0.
+        </p>
+        
+        <a href="/guide" class="back-link">← Вернуться на сайт</a>
+    </body>
+    </html>
+    """)
+
 
 
 @app.get("/get-my-guide-2026")

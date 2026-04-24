@@ -387,92 +387,119 @@
   </div>
 </section>
 
-<!-- AUTHOR -->
+<!-- Payment -->
 <section class="price-section" id="price">
   <div class="container" style="text-align: center;">
-    <div class="reveal">
-      <div class="section-tag" style="justify-content: center;">Оформить</div>
-      <h2 class="section-title">Купить гайд</h2>
-      <p class="section-lead" style="margin: 0 auto 0;">Мгновенная доставка на e-mail после оплаты. Один раз - используете бесконечно.</p>
-    </div>
+      <div class="reveal">
+        <div class="section-tag" style="justify-content: center;">Оформить</div>
+        <h2 class="section-title">Купить гайд</h2>
+        <p class="section-lead" style="margin: 0 auto 0;">Мгновенная доставка на e-mail после оплаты. Один раз - используете бесконечно.</p>
+      </div>
 
-    <div class="price-grid reveal">
-      <div class="price-card">
-        <span class="price-icon">📄</span>
-        <div class="price-name">Базовый</div>
-        <div class="price-amount"><span class="price-currency">$</span>9</div>
-        <div class="price-local">≈ 770 ₽ | 370 ₴ | 4 400 ₸</div>
-        <div class="price-period" style="margin-top: 12px;">Полная версия гайда</div>
-        <ul class="price-features">
-          <li>Все 14 разделов гайда</li>
-          <li>Актуальные цены на 2026 год</li>
-          <li>Таблицы, чеклисты, контакты</li>
-          <li>Доступ в PDF</li>
-        </ul>
+      <div class="price-grid reveal">
 
-        <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 20px;">
+        <!-- ТАРИФ 1: БАЗОВЫЙ -->
+        <div class="price-card">
+          <span class="price-icon">📄</span>
+          <div class="price-name">Базовый</div>
+          <div class="price-amount"><span class="price-currency">$</span>9</div>
+          <div class="price-local">≈ 770 ₽ | 370 ₴ | 4 400 ₸</div>
+          <div class="price-period" style="margin-top: 12px;">Полная версия гайда</div>
+          <ul class="price-features">
+            <li>Все 14 разделов гайда</li>
+            <li>Актуальные цены на 2026 год</li>
+            <li>Таблицы, чеклисты, контакты</li>
+            <li>Доступ в PDF</li>
+          </ul>
 
+          <!-- ЧЕКБОКС ОФЕРТЫ -->
+          <div style="margin: 15px 0; text-align: left;">
+            <label style="display: flex; align-items: center; gap: 10px; font-size: 12px; color: #ccc; cursor: pointer;">
+              <input type="checkbox" class="offer-agree-basic" style="width: 16px; height: 16px; cursor: pointer;">
+              <span>
+                Я принимаю условия
+                <a href="/offer" target="_blank" style="color: #635bff;">публичной оферты</a>
+                и <a href="/privacy" target="_blank" style="color: #635bff;">политики конфиденциальности</a>
+              </span>
+            </label>
+          </div>
 
-<!--          <a href="https://buy.stripe.com/eVq5kFenBcaW1QA2kA1B601" target="_blank" style="background: linear-gradient(135deg, #635bff 0%, #4339ca 100%); color: white; text-decoration: none; padding: 14px; border-radius: 12px; font-weight: 500; display: block; text-align: center; box-shadow: 0 4px 15px rgba(99, 91, 255, 0.3); transition: 0.3s;">💳 Оплатить картой</a>-->
-<!--          <a href="https://buy.stripe.com/00w00lcft5My9j28IY1B603" target="_blank" style="background: linear-gradient(135deg, #635bff 0%, #4339ca 100%); color: white; text-decoration: none; padding: 14px; border-radius: 12px; font-weight: 500; display: block; text-align: center; box-shadow: 0 4px 15px rgba(99, 91, 255, 0.3); transition: 0.3s;">💳 Оплатить картой</a>-->
+          <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 0;">
+            <a href="https://buy.stripe.com/test_14AbJ3djxdf0fHq4sI1B600" target="_blank" class="stripe-btn-basic" style="background: linear-gradient(135deg, #635bff 0%, #4339ca 100%); color: white; text-decoration: none; padding: 14px; border-radius: 12px; font-weight: 500; display: block; text-align: center; opacity: 0.5; pointer-events: none; transition: 0.3s;">
+              💳 Оплатить картой
+            </a>
+            <button type="button" onclick="openCryptoModal('Базовый', '9$')" class="crypto-btn-basic" style="background: linear-gradient(135deg, #f7931a 0%, #d67e17 100%); color: white; border: none; padding: 14px; border-radius: 12px; font-weight: 500; cursor: pointer; width: 100%; display: block; font-family: inherit; font-size: 16px; opacity: 0.5; pointer-events: none; transition: 0.3s;">
+              ₿ Оплатить криптой
+            </button>
+          </div>
+        </div>
 
+        <!-- ТАРИФ 2: С ПОДДЕРЖКОЙ -->
+        <div class="price-card featured">
+          <div class="price-badge">⭐ Популярный</div>
+          <span class="price-icon">👨‍🏫</span>
+          <div class="price-name">С поддержкой</div>
+          <div class="price-amount"><span class="price-currency">$</span>19</div>
+          <div class="price-local">≈ 1 630 ₽ | 780 ₴ | 9 300 ₸</div>
+          <div class="price-period" style="margin-top: 12px;">Полная версия гайда + Личное сопровождение</div>
+          <ul class="price-features">
+            <li>📖 Всё из базового тарифа</li>
+            <li>💬 Личное общение с автором</li>
+            <li>📋 Консультация по вашей ситуации</li>
+            <li>🎯 Пошаговый разбор вашего кейса</li>
+          </ul>
 
+          <!-- ЧЕКБОКС ОФЕРТЫ -->
+          <div style="margin: 15px 0; text-align: left;">
+            <label style="display: flex; align-items: center; gap: 10px; font-size: 12px; color: #ccc; cursor: pointer;">
+              <input type="checkbox" class="offer-agree-pro" style="width: 16px; height: 16px; cursor: pointer;">
+              <span>
+                Я принимаю условия
+                <a href="/offer" target="_blank" style="color: #635bff;">публичной оферты</a>
+                и <a href="/privacy" target="_blank" style="color: #635bff;">политики конфиденциальности</a>
+              </span>
+            </label>
+          </div>
 
-          <a href="https://buy.stripe.com/test_14AbJ3djxdf0fHq4sI1B600" target="_blank" style="background: linear-gradient(135deg, #635bff 0%, #4339ca 100%); color: white; text-decoration: none; padding: 14px; border-radius: 12px; font-weight: 500; display: block; text-align: center; box-shadow: 0 4px 15px rgba(99, 91, 255, 0.3); transition: 0.3s;">💳 Оплатить картой</a>
+          <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 0;">
+            <a href="https://buy.stripe.com/eVq5kFenBcaW1QA2kA1B601" target="_blank" class="stripe-btn-pro" style="background: linear-gradient(135deg, #635bff 0%, #4339ca 100%); color: white; text-decoration: none; padding: 14px; border-radius: 12px; font-weight: 500; display: block; text-align: center; opacity: 0.5; pointer-events: none; transition: 0.3s;">
+              💳 Оплатить картой
+            </a>
+            <button type="button" onclick="openCryptoModal('С поддержкой', '19$')" class="crypto-btn-pro" style="background: linear-gradient(135deg, #f7931a 0%, #d67e17 100%); color: white; border: none; padding: 14px; border-radius: 12px; font-weight: 500; cursor: pointer; width: 100%; display: block; font-family: inherit; font-size: 16px; opacity: 0.5; pointer-events: none; transition: 0.3s;">
+              ₿ Оплатить криптой
+            </button>
+          </div>
+        </div>
 
-
-          <button type="button" onclick="openCryptoModal('Базовый', '9$')" style="background: linear-gradient(135deg, #f7931a 0%, #d67e17 100%); color: white; border: none; padding: 14px; border-radius: 12px; font-weight: 500; cursor: pointer; width: 100%; display: block; font-family: inherit; font-size: 16px; box-shadow: 0 4px 15px rgba(247, 147, 26, 0.2); transition: 0.3s;">₿ Оплатить криптой</button>
+        <!-- ТАРИФ 3: VIP (без изменений, там кнопки в Telegram/Email) -->
+        <div class="price-card">
+          <div class="price-badge">👑 VIP</div>
+          <span class="price-icon">🤝</span>
+          <div class="price-name">Личная встреча</div>
+          <div class="price-amount"><span class="price-currency">$</span>Договорная</div>
+          <div class="price-period">Индивидуальный подход</div>
+          <ul class="price-features">
+            <li>✨ Всё из тарифа "С поддержкой"</li>
+            <li>✈️ Встреча в аэропорту</li>
+            <li>🏨 Размещение в отеле</li>
+            <li>🏠 Поиск долгосрочного жилья</li>
+            <li>📱 Оформление SIM-карты</li>
+            <li>🏦 Открытие счёта в банке</li>
+            <li>🛵 Аренда транспорта</li>
+          </ul>
+          <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 20px;">
+            <button type="button" onclick="window.open('https://t.me/dekavetel', '_blank')" style="background: linear-gradient(135deg, #24A1DE 0%, #1d82b3 100%); color: white; border: none; padding: 14px; border-radius: 12px; font-weight: 700; cursor: pointer; width: 100%; display: block; font-family: inherit; font-size: 16px; box-shadow: 0 5px 15px rgba(36, 161, 222, 0.3); transition: 0.3s;">💬 Telegram</button>
+            <button type="button" onclick="window.location.href='mailto:dkvkabakov@gmail.com'" style="background: linear-gradient(145deg, #333 0%, #222 100%); color: white; border: none; padding: 14px; border-radius: 12px; font-weight: 700; cursor: pointer; width: 100%; display: block; font-family: inherit; font-size: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); transition: 0.3s;">📧 Email</button>
+          </div>
         </div>
       </div>
 
-      <div class="price-card featured">
-        <div class="price-badge">⭐ Популярный</div>
-        <span class="price-icon">👨‍🏫</span>
-        <div class="price-name">С поддержкой</div>
-        <div class="price-amount"><span class="price-currency">$</span>19</div>
-        <div class="price-local">≈ 1 630 ₽ | 780 ₴ | 9 300 ₸</div>
-        <div class="price-period" style="margin-top: 12px;">Полная версия гайда + Личное сопровождение</div>
-        <ul class="price-features">
-          <li>📖 Всё из базового тарифа</li>
-          <li>💬 Личное общение с автором</li>
-          <li>📋 Консультация по вашей ситуации</li>
-          <li>🎯 Пошаговый разбор вашего кейса</li>
-        </ul>
-
-        <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 20px;">
-          <a href="https://buy.stripe.com/eVq5kFenBcaW1QA2kA1B601" target="_blank" style="background: linear-gradient(135deg, #635bff 0%, #4339ca 100%); color: white; text-decoration: none; padding: 14px; border-radius: 12px; font-weight: 500; display: block; text-align: center; box-shadow: 0 4px 15px rgba(99, 91, 255, 0.3); transition: 0.3s;">💳 Оплатить картой</a>
-          <button type="button" onclick="openCryptoModal('Базовый', '9$')" style="background: linear-gradient(135deg, #f7931a 0%, #d67e17 100%); color: white; border: none; padding: 14px; border-radius: 12px; font-weight: 500; cursor: pointer; width: 100%; display: block; font-family: inherit; font-size: 16px; box-shadow: 0 4px 15px rgba(247, 147, 26, 0.2); transition: 0.3s;">₿ Оплатить криптой</button>
-        </div>
-      </div>
-
-      <div class="price-card">
-        <div class="price-badge">👑 VIP</div>
-        <span class="price-icon">🤝</span>
-        <div class="price-name">Личная встреча</div>
-        <div class="price-amount"><span class="price-currency">$</span>Договорная</div>
-        <div class="price-period">Индивидуальный подход</div>
-        <ul class="price-features">
-          <li>✨ Всё из тарифа "С поддержкой"</li>
-          <li>✈️ Встреча в аэропорту</li>
-          <li>🏨 Размещение в отеле</li>
-          <li>🏠 Поиск долгосрочного жилья</li>
-          <li>📱 Оформление SIM-карты</li>
-          <li>🏦 Открытие счёта в банке</li>
-          <li>🛵 Аренда транспорта</li>
-        </ul>
-        <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 20px;">
-          <button type="button" onclick="window.open('https://t.me/dekavetel', '_blank')" style="background: linear-gradient(135deg, #24A1DE 0%, #1d82b3 100%); color: white; border: none; padding: 14px; border-radius: 12px; font-weight: 700; cursor: pointer; width: 100%; display: block; font-family: inherit; font-size: 16px; box-shadow: 0 5px 15px rgba(36, 161, 222, 0.3); transition: 0.3s;">💬 Telegram</button>
-          <button type="button" onclick="window.location.href='mailto:dkvkabakov@gmail.com'" style="background: linear-gradient(145deg, #333 0%, #222 100%); color: white; border: none; padding: 14px; border-radius: 12px; font-weight: 700; cursor: pointer; width: 100%; display: block; font-family: inherit; font-size: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); transition: 0.3s;">📧 Email</button>
-        </div>
-      </div>
-    </div>
-
-    <p style="margin-top: 32px; font-size: 13px; color: #ffffff;">
-      💳 Оплата картой · ⚡ Мгновенная доставка · 💬 Личное сопровождение · 🤝 VIP встреча
-    </p>
-    <p style="margin-top: 8px; font-size: 11px; color: #ffffff; opacity: 0.6;">
-      *Цены в рублях, гривнах и тенге указаны примерно, по курсу ~86 ₽, 41 ₴, 490 ₸ за 1 USD
-    </p>
+      <p style="margin-top: 32px; font-size: 13px; color: #ffffff;">
+        💳 Оплата картой · ⚡ Мгновенная доставка · 💬 Личное сопровождение · 🤝 VIP встреча
+      </p>
+      <p style="margin-top: 8px; font-size: 11px; color: #ffffff; opacity: 0.6;">
+        *Цены в рублях, гривнах и тенге указаны примерно, по курсу ~86 ₽, 41 ₴, 490 ₸ за 1 USD
+      </p>
   </div>
 
   <div id="cryptoModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10000; justify-content: center; align-items: center; padding: 20px;">
@@ -502,6 +529,21 @@
     </div>
   </div>
 </section>
+
+
+
+
+
+
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <p>© 2026 Гайд по Нячангу · Денис Кабаков</p>
+    <p>Информация актуальна на 2026 год. <a href="#">Политика конфиденциальности</a></p>
+  </div>
+</footer>
+
 
 <script>
 function openCryptoModal(tariff, price) {
@@ -578,17 +620,6 @@ window.onclick = function(event) {
 }
 </script>
 
-
-
-
-
-<!-- FOOTER -->
-<footer>
-  <div class="container">
-    <p>© 2026 Гайд по Нячангу · Денис Кабаков</p>
-    <p>Информация актуальна на 2026 год. <a href="#">Политика конфиденциальности</a></p>
-  </div>
-</footer>
 
 <script>
   // Scroll reveal
@@ -768,9 +799,56 @@ document.getElementById('magic-link-form').addEventListener('submit', async (e) 
 });
 </script>
 
+<script>
+// Для тарифа Базовый
+const basicCheckbox = document.querySelector('.offer-agree-basic');
+const basicStripeBtn = document.querySelector('.stripe-btn-basic');
+const basicCryptoBtn = document.querySelector('.crypto-btn-basic');
 
+if (basicCheckbox) {
+    basicCheckbox.addEventListener('change', function() {
+        const isChecked = this.checked;
+        if (basicStripeBtn) {
+            basicStripeBtn.style.opacity = isChecked ? '1' : '0.5';
+            basicStripeBtn.style.pointerEvents = isChecked ? 'auto' : 'none';
+        }
+        if (basicCryptoBtn) {
+            basicCryptoBtn.style.opacity = isChecked ? '1' : '0.5';
+            basicCryptoBtn.style.pointerEvents = isChecked ? 'auto' : 'none';
+        }
+    });
+}
 
+// Для тарифа С поддержкой
+const proCheckbox = document.querySelector('.offer-agree-pro');
+const proStripeBtn = document.querySelector('.stripe-btn-pro');
+const proCryptoBtn = document.querySelector('.crypto-btn-pro');
 
+if (proCheckbox) {
+    proCheckbox.addEventListener('change', function() {
+        const isChecked = this.checked;
+        if (proStripeBtn) {
+            proStripeBtn.style.opacity = isChecked ? '1' : '0.5';
+            proStripeBtn.style.pointerEvents = isChecked ? 'auto' : 'none';
+        }
+        if (proCryptoBtn) {
+            proCryptoBtn.style.opacity = isChecked ? '1' : '0.5';
+            proCryptoBtn.style.pointerEvents = isChecked ? 'auto' : 'none';
+        }
+    });
+}
+</script>
+
+<script>
+if (!localStorage.getItem('cookiesAccepted')) {
+    const banner = document.createElement('div');
+    banner.innerHTML = `<div style="position: fixed; bottom: 0; left: 0; right: 0; background: #222; color: #fff; padding: 10px; text-align: center; z-index: 1000; font-size: 13px;">
+        🔐 Мы используем куки. <a href="/privacy" style="color: #635bff;">Подробнее</a>
+        <button onclick="this.parentElement.remove(); localStorage.setItem('cookiesAccepted','true')" style="margin-left: 15px; padding: 5px 15px; background: #635bff; color: white; border: none; border-radius: 5px;">OK</button>
+    </div>`;
+    document.body.appendChild(banner);
+}
+</script>
 
 </body>
 </html>
