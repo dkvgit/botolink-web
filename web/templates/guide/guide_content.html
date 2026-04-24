@@ -3,69 +3,192 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Гайд по Нячангу 2026</title>
+    <title>Гайд по Нячангу 202</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --primary: #635bff; --bg: #0a0a0a; --text: #eee; }
-        body { font-family: 'Montserrat', sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; }
+        :root { --primary: #635bff; --bg: #0a0a0a; --text: #eee; --card: #161616; }
+        body { font-family: 'Montserrat', sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; scroll-behavior: smooth; }
 
-        /* Боковое меню */
+        /* Sidebar */
         .sidebar {
-            width: 280px; height: 100vh; background: #111; border-right: 1px solid #222;
-            position: fixed; overflow-y: auto; padding: 20px; box-sizing: border-box;
+            width: 300px; height: 100vh; background: #0f0f0f; border-right: 1px solid #222;
+            position: fixed; overflow-y: auto; padding: 30px 20px; box-sizing: border-box;
         }
-        .sidebar h2 { font-size: 18px; color: var(--primary); margin-bottom: 30px; }
+        .sidebar h2 { font-size: 20px; font-weight: 900; color: #fff; margin-bottom: 25px; text-transform: uppercase; letter-spacing: 1px; }
+        .nav-group { margin-bottom: 20px; }
         .nav-link {
-            display: block; color: #aaa; text-decoration: none; padding: 10px 0;
-            font-size: 14px; border-bottom: 1px solid #1a1a1a; transition: 0.3s;
+            display: block; color: #888; text-decoration: none; padding: 10px 15px;
+            font-size: 13px; border-radius: 8px; transition: 0.3s; margin-bottom: 2px;
         }
-        .nav-link:hover { color: #fff; padding-left: 5px; }
+        .nav-link:hover, .nav-link.active { background: #1a1a1a; color: var(--primary); }
 
-        /* Основной контент */
-        .main-content { margin-left: 280px; padding: 60px; max-width: 800px; line-height: 1.8; }
-        h1 { font-size: 42px; font-weight: 900; margin-bottom: 40px; }
-        section { margin-bottom: 100px; scroll-margin-top: 60px; }
-        h3 { color: var(--primary); font-size: 24px; margin-top: 40px; }
+        /* Main Content */
+        .main-content { margin-left: 300px; padding: 80px 40px; max-width: 900px; }
+        section { margin-bottom: 100px; scroll-margin-top: 40px; }
+        h1 { font-size: 52px; font-weight: 900; line-height: 1.1; margin-bottom: 20px; color: #fff; }
+        h2 { font-size: 32px; color: #fff; margin-top: 60px; border-left: 4px solid var(--primary); padding-left: 20px; margin-bottom: 30px; }
+        h3 { font-size: 22px; color: var(--primary); margin-top: 30px; margin-bottom: 15px; font-weight: 700; }
+        p { font-size: 17px; color: #ccc; line-height: 1.8; margin-bottom: 20px; }
 
-        /* Мобильная версия (упрощенно) */
-        @media (max-width: 768px) {
-            .sidebar { transform: translateX(-100%); z-index: 100; transition: 0.3s; }
+        /* Таблицы */
+        .table-wrapper { margin: 25px 0; background: #161616; border-radius: 12px; border: 1px solid #222; overflow: hidden; }
+        .res-table { width: 100%; border-collapse: collapse; color: #eee; }
+        .res-table th { background: #222; color: var(--primary); text-align: left; padding: 15px; font-size: 12px; text-transform: uppercase; }
+        .res-table td { padding: 15px; border-bottom: 1px solid #222; font-size: 15px; }
+
+        @media screen and (max-width: 600px) {
+            .res-table thead { display: none; }
+            .res-table tr { display: block; border-bottom: 2px solid #333; padding: 10px 0; }
+            .res-table td { display: flex; justify-content: space-between; padding: 8px 15px; border: none; text-align: right; }
+            .res-table td::before { content: attr(data-label); font-weight: bold; color: #888; padding-right: 10px; text-align: left; }
+        }
+
+        /* Кнопки и блоки */
+        .btn-link { display: inline-flex; align-items: center; background: #222; color: #fff; padding: 12px 20px; border-radius: 10px; text-decoration: none; font-weight: 600; border: 1px solid #333; margin: 10px 0; transition: 0.3s; }
+        .btn-link:hover { background: var(--primary); transform: translateY(-2px); }
+        .info-block { background: var(--card); border-radius: 15px; padding: 25px; border: 1px solid #222; margin: 30px 0; }
+
+        @media (max-width: 1024px) {
+            .sidebar { transform: translateX(-100%); z-index: 1000; transition: 0.3s; }
             .sidebar.active { transform: translateX(0); }
-            .main-content { margin-left: 0; padding: 20px; }
-            .menu-toggle { display: block; position: fixed; bottom: 20px; right: 20px; background: var(--primary); padding: 15px; border-radius: 50%; cursor: pointer; z-index: 101; }
+            .main-content { margin-left: 0; padding: 40px 20px; }
+            .menu-toggle { display: flex !important; position: fixed; bottom: 30px; right: 30px; background: var(--primary); width: 60px; height: 60px; border-radius: 50%; justify-content: center; align-items: center; font-size: 24px; cursor: pointer; z-index: 1001; }
         }
     </style>
 </head>
 <body>
 
-    <div class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('active')">🍔</div>
+    <div class="menu-toggle" style="display:none" onclick="document.querySelector('.sidebar').classList.toggle('active')">
+        <i class="fa-solid fa-bars" style="color:white"></i>
+    </div>
 
     <aside class="sidebar">
         <h2>Содержание</h2>
-        <a href="#intro" class="nav-link">1. Вступление</a>
-        <a href="#visa" class="nav-link">2. Визы и документы</a>
-        <a href="#housing" class="nav-link">3. Жилье и районы</a>
-        <a href="#money" class="nav-link">4. Деньги и карты</a>
-        <a href="#transport" class="nav-link">5. Транспорт и байки</a>
-        <a href="#safety" class="nav-link">6. Безопасность</a>
+        <div class="nav-group">
+            <a href="#ch1" class="nav-link">1. Введение</a>
+            <a href="#ch2" class="nav-link">2. Визы и документы</a>
+            <a href="#ch3" class="nav-link">3. Первые 3 дня</a>
+            <a href="#ch4" class="nav-link">4. Жильё и районы</a>
+            <a href="#ch5" class="nav-link">5. Бюджет и цены</a>
+            <a href="#ch6" class="nav-link">6. Транспорт и байки</a>
+            <a href="#ch7" class="nav-link">7. Еда и рестораны</a>
+            <a href="#ch8" class="nav-link">8. Пляжи и активности</a>
+            <a href="#ch9" class="nav-link">9. Сезонные нюансы</a>
+            <a href="#ch10" class="nav-link">10. Безопасность</a>
+            <a href="#ch11" class="nav-link">11. Языковой барьер</a>
+            <a href="#ch12" class="nav-link">12. Связь с домом</a>
+            <a href="#ch13" class="nav-link">13. Жизнь насовсем</a>
+            <a href="#ch14" class="nav-link">14. Психология</a>
+        </div>
     </aside>
 
+    # web/templates/guide/guide_content.html
+
     <main class="main-content">
-        <section id="intro">
+        <section id="_Toc227727415">
             <h1>Гайд по Нячангу 2026</h1>
-            <p>Добро пожаловать! Этот гайд — результат сотен часов изучения Вьетнама. Ниже только мясо, без воды.</p>
+            <h2>Быстрая справка</h2>
+            <p class="intro-text">Базовые факты для тех, кто впервые во Вьетнаме.</p>
+
+            <div class="table-wrapper">
+                <table class="res-table">
+                    <thead>
+                        <tr><th>Вопрос</th><th>Ответ</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td data-label="Вопрос"><strong>📍 Столица</strong></td><td data-label="Ответ">Ханой</td></tr>
+                        <tr><td data-label="Вопрос"><strong>💰 Валюта</strong></td><td data-label="Ответ">Вьетнамский донг (VND), обозначение ₫</td></tr>
+                        <tr><td data-label="Вопрос"><strong>📈 Курс (май 2026)</strong></td><td data-label="Ответ">100 000 ₫ ≈ 4 USD ≈ 310-330 RUB</td></tr>
+                        <tr><td data-label="Вопрос"><strong>🕒 Часовой пояс</strong></td><td data-label="Ответ">UTC+7 (МСК +4 ч зимой, +3 ч летом)</td></tr>
+                        <tr><td data-label="Вопрос"><strong>📞 Код / Экстренные</strong></td><td data-label="Ответ">+84 | 113 (полиция), 115 (скорая)</td></tr>
+                        <tr><td data-label="Вопрос"><strong>🛂 Визы (РФ/Укр/Кз)</strong></td><td data-label="Ответ"><strong>45 дней без визы</strong></td></tr>
+                    </tbody>
+                </table>
+            </div>
         </section>
 
-        <section id="visa">
-            <h3>🛂 Визы и документы</h3>
-            <p>В 2026 году правила следующие: e-visa выдается на 90 дней...</p>
+        <section id="_Toc227727416">
+            <h2>Аэропорт Камрань (CXR) — до Нячанга</h2>
+            <div class="table-wrapper">
+                <table class="res-table">
+                    <thead>
+                        <tr><th>Транспорт</th><th>Время</th><th>Цена</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td data-label="Транспорт"><strong>🚖 GrabCar</strong></td><td data-label="Время">30–45 мин</td><td data-label="Цена">400k – 500k ₫</td></tr>
+                        <tr><td data-label="Транспорт"><strong>🚕 Такси</strong></td><td data-label="Время">30–45 мин</td><td data-label="Цена">600k ₫+</td></tr>
+                        <tr><td data-label="Транспорт"><strong>🚌 Автобус</strong></td><td data-label="Время">45–60 мин</td><td data-label="Цена">~50 000 ₫</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="_Toc227727417">
+            <h2>10 фраз на вьетнамском</h2>
+            <div class="table-wrapper">
+                <table class="res-table">
+                    <thead>
+                        <tr><th>Русский</th><th>Вьетнамский</th><th>Произношение</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td data-label="Русский">Здравствуйте</td><td data-label="Вьетнамский">Xin chào</td><td><strong>Син чао</strong></td></tr>
+                        <tr><td data-label="Русский">Спасибо</td><td data-label="Вьетнамский">Cảm ơn</td><td><strong>Кам он</strong></td></tr>
+                        <tr><td data-label="Русский">Сколько стоит?</td><td data-label="Вьетнамский">Bao nhiêu tiền?</td><td><strong>Бао ньеу тиен?</strong></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="_Toc227727418">
+            <h2>1. Введение</h2>
+            <div class="info-block">
+                <h3>Кто я и почему стоит читать</h3>
+                <p>ВСТАВЬ СЮДА ТЕКСТ ПРО СЕБЯ (про DenDroid / South Hub)</p>
+            </div>
+        </section>
+
+        <section id="_Toc227727427">
+            <h2>2. Визы и документы</h2>
+            <p>Вьетнам в 2026 году стал строже, но возможностей для экспатов больше.</p>
+
+            <div class="table-wrapper">
+                <table class="res-table">
+                    <thead>
+                        <tr><th>Гражданство</th><th>Срок</th><th>Примечание</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td data-label="Гражданство">🇷🇺 Россия</td><td data-label="Срок">45 дней</td><td data-label="Примечание">безвиз</td></tr>
+                        <tr><td data-label="Гражданство">🇺🇦 Украина</td><td data-label="Срок">45 дней</td><td data-label="Примечание">безвиз</td></tr>
+                        <tr><td data-label="Гражданство">🇰🇿 Казахстан</td><td data-label="Срок">45 дней</td><td data-label="Примечание">безвиз</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
             </section>
 
-        <section id="housing">
-            <h3>🏠 Жилье и районы</h3>
-            <p>Север или Центр? Если вы любите тишину, выбирайте...</p>
-            </section>
-    </main>
+        </main>
 
+
+
+
+
+    <script>
+        // Подсветка меню при скролле
+        window.addEventListener('scroll', () => {
+            let current = '';
+            document.querySelectorAll('section').forEach(section => {
+                if (pageYOffset >= (section.offsetTop - 150)) {
+                    current = section.getAttribute('id');
+                }
+            });
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href').substring(1) === current) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
 </body>
 </html>

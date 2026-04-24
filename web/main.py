@@ -464,58 +464,82 @@ async def telegram_webhook(request: Request):
 
 @app.post("/stripe-webhook")
 async def stripe_webhook(request: Request):
-    """Обработка сигналов от Stripe об успешных оплатах"""
-    # Импортируем всё необходимое из нашего конфига
     from core.config import STRIPE_WEBHOOK_SECRET, STRIPE_SECRET_KEY, DATABASE_URL
     import stripe
     import asyncpg
 
     payload = await request.body()
     sig_header = request.headers.get("stripe-signature")
-
-    # Устанавливаем ключ API, чтобы библиотека Stripe могла работать
     stripe.api_key = STRIPE_SECRET_KEY
 
     if not sig_header:
-        logger.error("❌ [STRIPE] Отсутствует заголовок stripe-signature")
         return Response(status_code=400)
 
     try:
-        # Проверяем подпись, используя секрет из конфига (тест или лайв)
-        event = stripe.Webhook.construct_event(
-            payload, sig_header, STRIPE_WEBHOOK_SECRET
-        )
+        event = stripe.Webhook.construct_event(payload, sig_header, STRIPE_WEBHOOK_SECRET)
     except Exception as e:
-        logger.error(f"⚠️ [STRIPE] Ошибка проверки подписи: {e}")
+        logger.error(f"⚠️ [STRIPE] Ошибка подписи: {e}")
         return Response(content=str(e), status_code=400)
 
-    # Когда оплата прошла успешно
     if event["type"] == "checkout.session.completed":
         session = event["data"]["object"]
-        
-        customer_email = session.get("customer_details", {}).get("email")
+        customer_email = session.get("customer_details", {}).get("email").lower()
         user_id_str = session.get("client_reference_id")
+        session_id = session.get("id")
 
-        logger.info(f"💰 [STRIPE SUCCESS] Куплено! Email: {customer_email}, UserID: {user_id_str}")
+        try:
+            conn = await asyncpg.connect(DATABASE_URL.replace("postgresql+asyncpg://", "postgresql://"))
+            
+            # 1. Обновляем таблицу users
+            if user_id_str and user_id_str.isdigit():
+                await conn.execute("UPDATE users SET email = $1 WHERE id = $2", customer_email, int(user_id_str))
+            
+            # 2. Создаем запись в paid_sessions (UPSERT)
+            # Чтобы система сразу знала покупателя
+            await conn.execute("""
+                INSERT INTO paid_sessions (session_id, user_id, customer_email, download_count)
+                VALUES ($1, $2, $3, 0)
+                ON CONFLICT (session_id) DO NOTHING
+            """, session_id, int(user_id_str) if user_id_str and user_id_str.isdigit() else None, customer_email)
+            
+            await conn.close()
+            logger.info(f"✅ [STRIPE] Доступ создан для {customer_email}")
+        except Exception as db_err:
+            logger.error(f"❌ [DB ERROR] {db_err}")
 
-        # Сохраняем email в базу данных
-        if user_id_str and user_id_str.isdigit():
-            try:
-                conn = await asyncpg.connect(DATABASE_URL)
-                # Записываем почту в таблицу пользователей
-                await conn.execute("""
-                    UPDATE users
-                    SET email = $1
-                    WHERE id = $2
-                """, customer_email, int(user_id_str))
-                logger.info(f"✅ [DB] Email {customer_email} успешно привязан к юзеру {user_id_str}")
-                await conn.close()
-            except Exception as db_err:
-                logger.error(f"❌ [DB ERROR] Не удалось сохранить email: {db_err}")
-
-    # Всегда возвращаем 200, чтобы Stripe не слал повторов
     return Response(status_code=200)
 
+
+@app.get("/success", response_class=HTMLResponse)
+async def payment_success_page(request: Request, session_id: str = None):
+    from core.config import STRIPE_SECRET_KEY
+    import stripe
+
+    if not session_id:
+        return HTMLResponse("<h1>Ошибка: Нет ID сессии</h1>", status_code=400)
+
+    try:
+        stripe.api_key = STRIPE_SECRET_KEY
+        session = stripe.checkout.Session.retrieve(session_id)
+        
+        if session.payment_status == "paid":
+            email = session.customer_details.email if session.customer_details else "вашу почту"
+            # Возвращаем чистый HTML без лишней логики БД
+            return HTMLResponse(content=f"""
+                <div style="text-align: center; margin-top: 100px; font-family: sans-serif; padding: 20px;">
+                    <div style="font-size: 60px;">🎉</div>
+                    <h1 style="color: #111;">Оплата прошла успешно!</h1>
+                    <p style="color: #555; font-size: 18px;">Доступ активирован для <strong>{email}</strong>.</p>
+                    <p>Теперь просто введите этот email на странице входа.</p>
+                    <br>
+                    <a href="/guide" style="display: inline-block; padding: 15px 30px; background: #635bff; color: white; text-decoration: none; border-radius: 8px; font-weight: bold;">
+                        ПЕРЕЙТИ К ВХОДУ
+                    </a>
+                </div>
+            """)
+        return HTMLResponse("<h1>Оплата еще обрабатывается...</h1>")
+    except Exception as e:
+        return HTMLResponse(f"<h1>Ошибка</h1><p>{str(e)}</p>")
 
 
 
@@ -918,65 +942,58 @@ async def create_checkout(user_id: str):
 
 @app.get("/success", response_class=HTMLResponse)
 async def payment_success_page(request: Request, session_id: str = None):
-    from core.config import STRIPE_SECRET_KEY, DATABASE_URL, DOWNLOAD_SECRET
+    from core.config import STRIPE_SECRET_KEY
     import stripe
-    import asyncpg
-    import traceback
 
     if not session_id:
         return HTMLResponse("<h1>Ошибка: Нет ID сессии</h1>", status_code=400)
 
     try:
-        # 1. Настройка Stripe
+        # Настройка Stripe
         stripe.api_key = STRIPE_SECRET_KEY
         session = stripe.checkout.Session.retrieve(session_id)
         
         if session.payment_status == "paid":
-            # 2. Очищаем DATABASE_URL для Render/Supabase
-            # Убираем +asyncpg, так как библиотека asyncpg его не понимает
-            db_url = DATABASE_URL.replace("postgresql+asyncpg://", "postgresql://")
+            # Вытаскиваем email, чтобы показать его пользователю для уверенности
+            customer_email = session.customer_details.email if session.customer_details else "вашу почту"
             
-            # Подключаемся
-            conn = await asyncpg.connect(db_url)
-            try:
-                # Проверяем запись об оплате
-                row = await conn.fetchrow("SELECT download_count FROM paid_sessions WHERE session_id = $1", session_id)
-                
-                if row:
-                    count = row['download_count']
-                    if count >= 5:
-                        return HTMLResponse("<h1>Лимит скачиваний исчерпан.</h1>")
-                    await conn.execute("UPDATE paid_sessions SET download_count = download_count + 1 WHERE session_id = $1", session_id)
-                else:
-                    client_id = session.client_reference_id
-                    email = session.customer_details.email if session.customer_details else None
-                    await conn.execute("""
-                        INSERT INTO paid_sessions (session_id, user_id, customer_email, download_count)
-                        VALUES ($1, $2, $3, 1)
-                    """, session_id, int(client_id) if client_id and client_id.isdigit() else None, email)
-                    count = 0
+            # Мы больше не пишем здесь в базу!
+            # Всю работу по созданию записи в paid_sessions делает @app.post("/stripe-webhook")
+            
+            return HTMLResponse(content=f"""
+                <div style="text-align: center; margin-top: 80px; font-family: 'Montserrat', sans-serif; background: #f4f7f6; min-height: 100vh; padding-top: 50px;">
+                    <div style="background: white; max-width: 500px; margin: 0 auto; padding: 40px; border-radius: 20px; shadow: 0 10px 25px rgba(0,0,0,0.05);">
+                        <div style="font-size: 50px; margin-bottom: 20px;">✅</div>
+                        <h1 style="color: #1a1a1a; margin-bottom: 10px;">Оплата принята!</h1>
+                        <p style="color: #666; font-size: 16px; line-height: 1.5;">
+                            Доступ для <strong>{customer_email}</strong> активирован.<br>
+                            Мы отправили вам письмо с ссылкой для входа.
+                        </p>
+                        
+                        <div style="background: #fff9e6; border: 1px solid #ffeeba; padding: 15px; border-radius: 10px; margin: 25px 0; text-align: left;">
+                            <small style="color: #856404;">
+                                ℹ️ <strong>Что дальше?</strong> Перейдите на страницу входа и введите свой email.
+                                Если письма нет — проверьте папку "Спам".
+                            </small>
+                        </div>
 
-                download_url = f"https://botolink.pro/get-my-guide-2026?key={DOWNLOAD_SECRET}&session_id={session_id}"
-                
-                return HTMLResponse(content=f"""
-                    <div style="text-align: center; margin-top: 50px; font-family: sans-serif; background: #f4f7f6; padding: 40px; border-radius: 15px;">
-                        <h1 style="color: #28a745;">Оплата прошла успешно! 🎉</h1>
-                        <p>Доступ подтвержден. Осталось просмотров: {4 - count}</p>
-                        <br>
-                        <a href="{download_url}" style="display: inline-block; padding: 18px 30px; background: #007bff; color: white; text-decoration: none; border-radius: 10px; font-weight: bold;">
-                            📥 СКАЧАТЬ ГАЙД (PDF)
+                        <a href="/guide" style="display: inline-block; width: 100%; padding: 18px 0; background: #635bff; color: white; text-decoration: none; border-radius: 12px; font-weight: bold; transition: 0.3s;">
+                            ПЕРЕЙТИ К ВХОДУ
                         </a>
+                        
+                        <div style="margin-top: 20px;">
+                            <a href="/" style="color: #888; text-decoration: none; font-size: 14px;">Вернуться на главную</a>
+                        </div>
                     </div>
-                """)
-            finally:
-                await conn.close()
+                </div>
+            """)
         else:
-            return HTMLResponse("<h1>Оплата не подтверждена.</h1>", status_code=402)
+            return HTMLResponse("<h1>Статус оплаты: Ожидание...</h1><p>Обновите страницу через минуту.</p>", status_code=402)
             
     except Exception as e:
-        # Это выведется в логи Render!
-        print(f"❌ ОШИБКА НА RENDER: {traceback.format_exc()}")
-        return HTMLResponse(f"<h1>Техническая ошибка</h1><p>ID: {session_id}</p>")
+        import traceback
+        print(f"❌ ОШИБКА НА СТРАНИЦЕ SUCCESS: {traceback.format_exc()}")
+        return HTMLResponse(f"<h1>Техническая ошибка</h1><p>Пожалуйста, свяжитесь с поддержкой. ID: {session_id}</p>")
     
     
 
