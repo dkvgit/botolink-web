@@ -5,7 +5,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="722a5f0e-b122-4002-a32f-b6e7799afca3" name="Changes" comment="added local run logic">
-      <change beforePath="$PROJECT_DIR$/web/images/den.png" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/web/templates/guide/guide_content.html" beforeDir="false" afterPath="$PROJECT_DIR$/web/templates/guide/guide_content.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -220,14 +219,6 @@
       <workItem from="1774937818207" duration="518000" />
       <workItem from="1774940860921" duration="18261000" />
       <workItem from="1774968693809" duration="5349000" />
-    </task>
-    <task id="LOCAL-00055" summary="added local run logic">
-      <option name="closed" value="true" />
-      <created>1776825000923</created>
-      <option name="number" value="00055" />
-      <option name="presentableId" value="LOCAL-00055" />
-      <option name="project" value="LOCAL" />
-      <updated>1776825000923</updated>
     </task>
     <task id="LOCAL-00056" summary="added local run logic">
       <option name="closed" value="true" />
@@ -613,7 +604,15 @@
       <option name="project" value="LOCAL" />
       <updated>1777064810888</updated>
     </task>
-    <option name="localTasksCounter" value="104" />
+    <task id="LOCAL-00104" summary="added local run logic">
+      <option name="closed" value="true" />
+      <created>1777065057253</created>
+      <option name="number" value="00104" />
+      <option name="presentableId" value="LOCAL-00104" />
+      <option name="project" value="LOCAL" />
+      <updated>1777065057254</updated>
+    </task>
+    <option name="localTasksCounter" value="105" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
