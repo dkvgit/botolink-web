@@ -615,19 +615,16 @@ async def payment_success_page(request: Request, session_id: str = None):
             conn = await asyncpg.connect(clean_db_url)
             
             try:
-                # Генерируем токен
                 token = secrets.token_urlsafe(32)
                 expires_at = datetime.utcnow() + timedelta(minutes=15)
                 
-                # ВСТАВЛЯЕМ новую запись
                 await conn.execute("""
                     INSERT INTO paid_sessions (session_id, customer_email, magic_link_token, token_expires_at, download_count, created_at)
                     VALUES ($1, $2, $3, $4, 0, $5)
                 """, session_id, email, token, expires_at, datetime.utcnow())
                 
-                logger.info(f"✅ [SUCCESS] Новая запись создана для {email}, токен: {token[:20]}...")
+                logger.info(f"✅ [SUCCESS] Создана запись для {email}")
                 
-                # Отправляем письмо
                 magic_link = f"https://botolink.pro/auth/verify?token={token}"
                 
                 msg = MIMEMultipart()
@@ -642,8 +639,7 @@ async def payment_success_page(request: Request, session_id: str = None):
                         <p>Ваш доступ к гайду активирован. Нажмите на кнопку ниже:</p>
                         <a href="{magic_link}" style="display: inline-block; padding: 12px 25px; background: #635bff; color: #fff; text-decoration: none; border-radius: 8px;">Войти в Гайд</a>
                         <p style="margin-top: 20px; font-size: 13px; color: #666;">
-                            Ссылка действительна 15 минут. Если кнопка не работает, скопируйте ссылку в браузер:<br>
-                            {magic_link}
+                            Ссылка действительна 15 минут. Если потеряете — на странице входа запросите новую.
                         </p>
                     </body>
                 </html>
@@ -654,24 +650,35 @@ async def payment_success_page(request: Request, session_id: str = None):
                     server.login(SMTP_USER, SMTP_PASSWORD)
                     server.send_message(msg)
                 
-                logger.info(f"📧 [SUCCESS] Письмо отправлено на {email}")
+                logger.info(f"📧 Письмо отправлено на {email}")
                 
             finally:
                 await conn.close()
             
-            # Показываем страницу успеха
             return HTMLResponse(content=f"""
-                <div style="text-align: center; margin-top: 100px; font-family: sans-serif; padding: 20px;">
-                    <div style="font-size: 60px;">🎉</div>
-                    <h1 style="color: #111;">Оплата прошла успешно!</h1>
-                    <p style="color: #555; font-size: 18px;">Доступ активирован для <strong>{email}</strong>.</p>
-                    <p style="color: #555; font-size: 18px;">🔗 Ссылка для входа отправлена вам на почту.</p>
-                    <br>
-                    <a href="/guide" style="display: inline-block; padding: 15px 30px; background: #635bff; color: white; text-decoration: none; border-radius: 8px; font-weight: bold;">
-                        ПЕРЕЙТИ К ВХОДУ
-                    </a>
+            <div style="text-align: center; margin-top: 100px; font-family: sans-serif; padding: 20px;">
+                <div style="font-size: 60px;">🎉</div>
+                <h1 style="color: #111;">Оплата прошла успешно!</h1>
+                <p style="color: #555; font-size: 18px;">Доступ активирован для <strong>{email}</strong>.</p>
+                
+                <div style="background: #e8f5e9; border-radius: 12px; padding: 20px; margin: 30px auto; max-width: 450px; text-align: left;">
+                    <p style="margin: 0 0 10px 0; font-size: 18px; font-weight: bold;">📧 Что дальше?</p>
+                    <p style="margin: 0 0 8px 0;">1️⃣ На почту <strong>{email}</strong> придет письмо</p>
+                    <p style="margin: 0 0 8px 0;">2️⃣ Откройте его (отправитель: <strong>dkvkabakov@gmail.com</strong>)</p>
+                    <p style="margin: 0 0 8px 0;">3️⃣ Нажмите на кнопку «Войти в Гайд»</p>
+                    <p style="margin: 0;">4️⃣ Сохраните гайд в закладки</p>
                 </div>
+                
+                <div style="background: #fff3e0; border-radius: 12px; padding: 20px; margin: 20px auto; max-width: 450px; text-align: left;">
+                    <p style="margin: 0 0 8px 0;">🔐 <strong>Не пришло письмо?</strong></p>
+                    <p style="margin: 0 0 5px 0;">• Проверьте папку <strong>Спам</strong></p>
+                    <p style="margin: 0;">• Запросите новую ссылку на <a href="/guide" style="color: #635bff;">botolink.pro/guide</a></p>
+                </div>
+                
+                <p style="color: #999; font-size: 12px; margin-top: 20px;">⏱ Письмо приходит за 1-2 минуты</p>
+            </div>
             """)
+         
         
         return HTMLResponse("<h1>Оплата еще обрабатывается...</h1>")
         
@@ -680,7 +687,10 @@ async def payment_success_page(request: Request, session_id: str = None):
         import traceback
         traceback.print_exc()
         return HTMLResponse(f"<h1>Ошибка</h1><p>{str(e)}</p>", status_code=500)
-
+    
+    
+    
+    
 
     
 # ========== ОСТАЛЬНЫЕ ЭНДПОИНТЫ ==========
