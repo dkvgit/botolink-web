@@ -166,58 +166,78 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 
-
-
-
+# ==============ВРЕМЯНКА==========================================
 
 @app.get("/my-guide", response_class=HTMLResponse)
 async def read_guide(request: Request):
-    from core.config import DATABASE_URL
-    import asyncpg
-    from fastapi.responses import HTMLResponse, RedirectResponse
     import os
-
-    # 1. Достаем нашу куку "абонемент"
-    auth_token = request.cookies.get("guide_auth_token")
-
-    if not auth_token:
-        # Нет куки? Отправляем на лендинг
-        return RedirectResponse(url="/guide")
-
-    # Очищаем URL (стандарт для работы с asyncpg напрямую)
-    db_url = DATABASE_URL.replace("postgresql+asyncpg://", "postgresql://")
+    from fastapi.responses import HTMLResponse
     
-    conn = await asyncpg.connect(db_url)
-    try:
-        # 2. Проверяем в базе, есть ли такая сессия
-        user_check = await conn.fetchrow(
-            "SELECT customer_email FROM public.paid_sessions WHERE session_id = $1 LIMIT 1",
-            auth_token
-        )
+    # --- ВРЕМЕННО ЗАКОММЕНТИРУЙ ВСЮ ПРОВЕРКУ КУК И БАЗЫ ДАННЫХ ---
+    # auth_token = request.cookies.get("guide_auth_token")
+    # ... (и весь код с asyncpg тоже можешь пока не трогать) ...
 
-        if not user_check:
-            # Кука левая или сессия удалена
-            response = RedirectResponse(url="/guide")
-            response.delete_cookie("guide_auth_token")
-            return response
+    # 3. Всё ок! Просто отдаем страницу гайда для разработки
+    template_path = "web/templates/guide/guide_content.html"
+    
+    if not os.path.exists(template_path):
+        return HTMLResponse(content=f"<h1>Файл не найден по пути: {template_path}</h1>", status_code=404)
 
-        # 3. Всё ок! Отдаем страницу гайда
-        # Указываем правильный путь с учетом подпапки guide
-        template_path = "web/templates/guide/guide_content.html"
-        
-        if not os.path.exists(template_path):
-            return HTMLResponse(content="<h1>Файл гайда не найден</h1>", status_code=404)
+    with open(template_path, "r", encoding="utf-8") as f:
+        html_content = f.read()
+    
+    return HTMLResponse(content=html_content)
 
-        with open(template_path, "r", encoding="utf-8") as f:
-            html_content = f.read()
-        
-        return HTMLResponse(content=html_content)
+# ========================================================
 
-    except Exception as e:
-        print(f"!!! Ошибка доступа к гайду: {e}")
-        return HTMLResponse(content="Ошибка сервера", status_code=500)
-    finally:
-        await conn.close()
+# @app.get("/my-guide", response_class=HTMLResponse)
+# async def read_guide(request: Request):
+#     from core.config import DATABASE_URL
+#     import asyncpg
+#     from fastapi.responses import HTMLResponse, RedirectResponse
+#     import os
+#
+#     # 1. Достаем нашу куку "абонемент"
+#     auth_token = request.cookies.get("guide_auth_token")
+#
+#     if not auth_token:
+#         # Нет куки? Отправляем на лендинг
+#         return RedirectResponse(url="/guide")
+#
+#     # Очищаем URL (стандарт для работы с asyncpg напрямую)
+#     db_url = DATABASE_URL.replace("postgresql+asyncpg://", "postgresql://")
+#
+#     conn = await asyncpg.connect(db_url)
+#     try:
+#         # 2. Проверяем в базе, есть ли такая сессия
+#         user_check = await conn.fetchrow(
+#             "SELECT customer_email FROM public.paid_sessions WHERE session_id = $1 LIMIT 1",
+#             auth_token
+#         )
+#
+#         if not user_check:
+#             # Кука левая или сессия удалена
+#             response = RedirectResponse(url="/guide")
+#             response.delete_cookie("guide_auth_token")
+#             return response
+#
+#         # 3. Всё ок! Отдаем страницу гайда
+#         # Указываем правильный путь с учетом подпапки guide
+#         template_path = "web/templates/guide/guide_content.html"
+#
+#         if not os.path.exists(template_path):
+#             return HTMLResponse(content="<h1>Файл гайда не найден</h1>", status_code=404)
+#
+#         with open(template_path, "r", encoding="utf-8") as f:
+#             html_content = f.read()
+#
+#         return HTMLResponse(content=html_content)
+#
+#     except Exception as e:
+#         print(f"!!! Ошибка доступа к гайду: {e}")
+#         return HTMLResponse(content="Ошибка сервера", status_code=500)
+#     finally:
+#         await conn.close()
         
 
 @app.get("/auth/verify")
