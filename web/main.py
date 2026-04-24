@@ -611,6 +611,90 @@ async def payment_success_page(request: Request, session_id: str = None):
             if not email:
                 return HTMLResponse("<h1>Ошибка: Email не получен</h1>", status_code=400)
             
+            # ========== ФУНКЦИЯ ДЛЯ ОПРЕДЕЛЕНИЯ ПОЧТОВОГО СЕРВИСА ==========
+            def get_mail_link_and_icon(email):
+                domain = email.split('@')[-1].lower()
+                
+                mail_info = {
+                    # Google
+                    'gmail.com': {'url': 'https://mail.google.com', 'icon': '📧', 'name': 'Gmail'},
+                    
+                    # Яндекс
+                    'yandex.ru': {'url': 'https://mail.yandex.ru', 'icon': '📬', 'name': 'Яндекс Почта'},
+                    'ya.ru': {'url': 'https://mail.yandex.ru', 'icon': '📬', 'name': 'Яндекс Почта'},
+                    
+                    # Mail.ru
+                    'mail.ru': {'url': 'https://mail.ru', 'icon': '📫', 'name': 'Mail.ru'},
+                    'bk.ru': {'url': 'https://mail.ru', 'icon': '📫', 'name': 'Mail.ru'},
+                    'list.ru': {'url': 'https://mail.ru', 'icon': '📫', 'name': 'Mail.ru'},
+                    'inbox.ru': {'url': 'https://mail.ru', 'icon': '📫', 'name': 'Mail.ru'},
+                    
+                    # Microsoft
+                    'outlook.com': {'url': 'https://outlook.live.com', 'icon': '📧', 'name': 'Outlook'},
+                    'hotmail.com': {'url': 'https://outlook.live.com', 'icon': '📧', 'name': 'Outlook'},
+                    'live.com': {'url': 'https://outlook.live.com', 'icon': '📧', 'name': 'Outlook'},
+                    'live.ru': {'url': 'https://outlook.live.com', 'icon': '📧', 'name': 'Outlook'},
+                    
+                    # Yahoo
+                    'yahoo.com': {'url': 'https://mail.yahoo.com', 'icon': '📨', 'name': 'Yahoo Mail'},
+                    'yahoo.co.uk': {'url': 'https://mail.yahoo.com', 'icon': '📨', 'name': 'Yahoo Mail'},
+                    
+                    # Rambler
+                    'rambler.ru': {'url': 'https://mail.rambler.ru', 'icon': '📭', 'name': 'Rambler'},
+                    
+                    # Apple
+                    'icloud.com': {'url': 'https://www.icloud.com/mail', 'icon': '🍎', 'name': 'iCloud'},
+                    'me.com': {'url': 'https://www.icloud.com/mail', 'icon': '🍎', 'name': 'iCloud'},
+                    'mac.com': {'url': 'https://www.icloud.com/mail', 'icon': '🍎', 'name': 'iCloud'},
+                    
+                    # ProtonMail
+                    'protonmail.com': {'url': 'https://mail.proton.me', 'icon': '🔒', 'name': 'ProtonMail'},
+                    'proton.me': {'url': 'https://mail.proton.me', 'icon': '🔒', 'name': 'ProtonMail'},
+                    
+                    # AOL
+                    'aol.com': {'url': 'https://mail.aol.com', 'icon': '📧', 'name': 'AOL Mail'},
+                    
+                    # Seznam (Чехия)
+                    'seznam.cz': {'url': 'https://email.seznam.cz', 'icon': '📧', 'name': 'Seznam Email'},
+                    
+                    # WP (Польша)
+                    'wp.pl': {'url': 'https://poczta.wp.pl', 'icon': '📧', 'name': 'WP Poczta'},
+                    
+                    # Ukr.net (Украина)
+                    'ukr.net': {'url': 'https://mail.ukr.net', 'icon': '📧', 'name': 'Ukr.net'},
+                    
+                    # GMX
+                    'gmx.de': {'url': 'https://www.gmx.net', 'icon': '📧', 'name': 'GMX'},
+                    'gmx.com': {'url': 'https://www.gmx.com', 'icon': '📧', 'name': 'GMX'},
+                    
+                    # Zoho
+                    'zoho.com': {'url': 'https://mail.zoho.com', 'icon': '📧', 'name': 'Zoho Mail'},
+                    
+                    # Mail.com
+                    'mail.com': {'url': 'https://www.mail.com', 'icon': '📧', 'name': 'Mail.com'},
+                    
+                    # Tutanota
+                    'tutanota.com': {'url': 'https://mail.tutanota.com', 'icon': '🔒', 'name': 'Tutanota'},
+                    'tuta.com': {'url': 'https://mail.tutanota.com', 'icon': '🔒', 'name': 'Tutanota'},
+                    
+                    # FastMail
+                    'fastmail.com': {'url': 'https://www.fastmail.com', 'icon': '⚡', 'name': 'FastMail'},
+                    'fastmail.fm': {'url': 'https://www.fastmail.com', 'icon': '⚡', 'name': 'FastMail'},
+                }
+                
+                for key, info in mail_info.items():
+                    if key in domain:
+                        return info
+                
+                # Если почтовик не найден — ведём на лендинг
+                return {'url': '/guide', 'icon': '🔐', 'name': 'лендинг'}
+            
+            mail_info = get_mail_link_and_icon(email)
+            mail_url = mail_info['url']
+            mail_icon = mail_info['icon']
+            mail_name = mail_info['name']
+            # ==================================================================
+            
             clean_db_url = DATABASE_URL.replace("postgresql+asyncpg://", "postgresql://")
             conn = await asyncpg.connect(clean_db_url)
             
@@ -627,21 +711,55 @@ async def payment_success_page(request: Request, session_id: str = None):
                 
                 magic_link = f"https://botolink.pro/auth/verify?token={token}"
                 
+                # ========== ПИСЬМО ==========
                 msg = MIMEMultipart()
                 msg['From'] = SMTP_USER
                 msg['To'] = email
                 msg['Subject'] = Header("Ваш доступ к Гайду по Нячангу", 'utf-8').encode()
                 
                 html_body = f"""
+                <!DOCTYPE html>
                 <html>
-                    <body style="font-family: Arial, sans-serif; padding: 20px;">
-                        <h2 style="color: #635bff;">Спасибо за оплату! 🎉</h2>
-                        <p>Ваш доступ к гайду активирован. Нажмите на кнопку ниже:</p>
-                        <a href="{magic_link}" style="display: inline-block; padding: 12px 25px; background: #635bff; color: #fff; text-decoration: none; border-radius: 8px;">Войти в Гайд</a>
-                        <p style="margin-top: 20px; font-size: 13px; color: #666;">
-                            Ссылка действительна 15 минут. Если потеряете — на странице входа запросите новую.
+                <head>
+                    <meta charset="UTF-8">
+                </head>
+                <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; line-height: 1.6; color: #333; max-width: 550px; margin: 0 auto; padding: 20px;">
+                    
+                    <div style="text-align: center; padding: 20px 0 10px;">
+                        <div style="font-size: 48px;">📘</div>
+                        <h1 style="color: #635bff; margin: 10px 0 5px;">Ваш доступ к гайду</h1>
+                        <p style="color: #666;">по Нячангу — активен!</p>
+                    </div>
+                    
+                    <div style="text-align: center; margin: 30px 0;">
+                        <a href="{magic_link}" style="display: inline-block; padding: 16px 32px; background: #635bff; color: white; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 18px;">
+                            🚀 ОТКРЫТЬ ГАЙД
+                        </a>
+                        <p style="font-size: 12px; color: #999; margin-top: 10px;">
+                            ⏰ Ссылка действительна 15 минут
                         </p>
-                    </body>
+                    </div>
+                    
+                    <hr style="border: none; border-top: 1px solid #eee; margin: 25px 0;">
+                    
+                    <div style="background: #f8f9ff; border-radius: 10px; padding: 15px; margin-bottom: 20px;">
+                        <p style="margin: 0 0 10px;"><strong>📖 Как пользоваться?</strong></p>
+                        <p style="margin: 0 0 5px;">1. Нажмите на кнопку выше — откроется гайд</p>
+                        <p style="margin: 0 0 5px;">2. Добавьте страницу в <strong>закладки браузера</strong></p>
+                        <p style="margin: 0;">3. В следующий раз гайд откроется сразу</p>
+                    </div>
+                    
+                    <div style="background: #fff3e0; border-radius: 10px; padding: 15px; margin-bottom: 20px;">
+                        <p style="margin: 0 0 10px;"><strong>🔐 Если потеряете ссылку</strong></p>
+                        <p style="margin: 0;">Зайдите на <a href="https://botolink.pro/guide" style="color: #635bff;">botolink.pro/guide</a>, введите ваш email <strong>{email}</strong> — мы пришлём новую ссылку (до 2 раз в день).</p>
+                    </div>
+                    
+                    <hr style="border: none; border-top: 1px solid #eee; margin: 25px 0;">
+                    
+                    <div style="text-align: center; font-size: 12px; color: #aaa;">
+                        <p>Вопросы? Пишите в Telegram: <a href="https://t.me/botolinkprobot" style="color: #635bff;">@botolinkprobot</a></p>
+                    </div>
+                </body>
                 </html>
                 """
                 msg.attach(MIMEText(html_body, 'html', 'utf-8'))
@@ -655,6 +773,7 @@ async def payment_success_page(request: Request, session_id: str = None):
             finally:
                 await conn.close()
             
+            # ========== СТРАНИЦА УСПЕХА С УМНОЙ КНОПКОЙ ==========
             return HTMLResponse(content=f"""
             <div style="text-align: center; margin-top: 100px; font-family: sans-serif; padding: 20px;">
                 <div style="font-size: 60px;">🎉</div>
@@ -663,22 +782,25 @@ async def payment_success_page(request: Request, session_id: str = None):
                 
                 <div style="background: #e8f5e9; border-radius: 12px; padding: 20px; margin: 30px auto; max-width: 450px; text-align: left;">
                     <p style="margin: 0 0 10px 0; font-size: 18px; font-weight: bold;">📧 Что дальше?</p>
-                    <p style="margin: 0 0 8px 0;">1️⃣ На почту <strong>{email}</strong> придет письмо</p>
-                    <p style="margin: 0 0 8px 0;">2️⃣ Откройте его (отправитель: <strong>dkvkabakov@gmail.com</strong>)</p>
-                    <p style="margin: 0 0 8px 0;">3️⃣ Нажмите на кнопку «Войти в Гайд»</p>
-                    <p style="margin: 0;">4️⃣ Сохраните гайд в закладки</p>
+                    <p style="margin: 0 0 8px 0;">1️⃣ Мы отправили письмо на <strong>{email}</strong></p>
+                    <p style="margin: 0 0 8px 0;">2️⃣ Нажмите на кнопку <strong style="color: #635bff;">«ОТКРЫТЬ ГАЙД»</strong> внутри письма</p>
+                    <p style="margin: 0;">3️⃣ Сохраните гайд в закладки</p>
                 </div>
                 
-                <div style="background: #fff3e0; border-radius: 12px; padding: 20px; margin: 20px auto; max-width: 450px; text-align: left;">
-                    <p style="margin: 0 0 8px 0;">🔐 <strong>Не пришло письмо?</strong></p>
-                    <p style="margin: 0 0 5px 0;">• Проверьте папку <strong>Спам</strong></p>
+                <a href="{mail_url}" target="_blank" style="display: inline-block; margin-top: 10px; padding: 14px 28px; background: #635bff; color: white; text-decoration: none; border-radius: 10px; font-weight: bold; font-size: 16px;">
+                    {mail_icon} ОТКРЫТЬ {mail_name}
+                </a>
+                <p style="color: #666; font-size: 12px; margin-top: 8px;">
+                    Письмо от <strong>dkvkabakov@gmail.com</strong><br>
+                    Если не видите — проверьте папку <strong>Спам</strong>
+                </p>
+                
+                <div style="background: #fff3e0; border-radius: 12px; padding: 15px; margin: 25px auto; max-width: 450px; text-align: left;">
+                    <p style="margin: 0 0 5px 0;">🔐 <strong>Не нашли письмо?</strong></p>
                     <p style="margin: 0;">• Запросите новую ссылку на <a href="/guide" style="color: #635bff;">botolink.pro/guide</a></p>
                 </div>
-                
-                <p style="color: #999; font-size: 12px; margin-top: 20px;">⏱ Письмо приходит за 1-2 минуты</p>
             </div>
             """)
-         
         
         return HTMLResponse("<h1>Оплата еще обрабатывается...</h1>")
         
@@ -687,7 +809,6 @@ async def payment_success_page(request: Request, session_id: str = None):
         import traceback
         traceback.print_exc()
         return HTMLResponse(f"<h1>Ошибка</h1><p>{str(e)}</p>", status_code=500)
-    
     
     
     
