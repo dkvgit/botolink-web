@@ -250,55 +250,41 @@ async def verify_magic_link(token: str):
 
     logger = logging.getLogger("uvicorn")
 
-    # Очистка URL для asyncpg
     db_url = DATABASE_URL.replace("postgresql+asyncpg://", "postgresql://")
     
     conn = await asyncpg.connect(db_url)
     try:
-        # 1. Проверяем токен.
-        # Если прошло более 15 минут с момента генерации, база ничего не вернет ($2 = текущее время)
+        # УБРАЛИ ПРОВЕРКУ ВРЕМЕНИ
         query = """
             SELECT session_id, customer_email
             FROM public.paid_sessions
-            WHERE magic_link_token = $1 AND token_expires_at > $2
+            WHERE magic_link_token = $1
         """
-        user_record = await conn.fetchrow(query, token, datetime.utcnow())
+        user_record = await conn.fetchrow(query, token)
 
-        # 2. Если токен не найден или время (15 мин) уже вышло
         if not user_record:
-            logger.warning(f"⚠️ Токен невалиден или протух: {token}")
+            logger.warning(f"⚠️ Токен не найден: {token}")
             return RedirectResponse(url="/guide?error=link_invalid_or_used")
 
-        # 3. Токен верный. Готовим переход в гайд
         response = RedirectResponse(url="/my-guide", status_code=303)
 
-        # 4. Устанавливаем куку-абонемент
         response.set_cookie(
             key="guide_auth_token",
             value=str(user_record['session_id']),
             httponly=True,
-            max_age=31536000,
+            max_age=31536000,  # 1 год
             samesite="lax",
             secure=False
         )
 
-        # 5. Одноразовость отключена
-        # Мы НЕ зануляем magic_link_token.
-        # Теперь ссылку можно нажать 2, 3 или 10 раз, пока не истечет время в колонке token_expires_at.
-        # await conn.execute(
-        #     "UPDATE public.paid_sessions SET magic_link_token = NULL WHERE session_id = $1",
-        #     user_record['session_id']
-        # )
-
-        logger.info(f"✅ Вход выполнен (ссылка активна до истечения времени): {user_record['customer_email']}")
+        logger.info(f"✅ Вход выполнен: {user_record['customer_email']}")
         return response
 
     except Exception as e:
-        print(f"!!! ОШИБКА В VERIFY: {e}")
+        logger.error(f"❌ ОШИБКА В VERIFY: {e}")
         return RedirectResponse(url="/guide?error=server_error")
     finally:
         await conn.close()
-        
         
         
 class AuthEmail(BaseModel):
@@ -736,9 +722,8 @@ async def payment_success_page(request: Request, session_id: str = None):
                 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; line-height: 1.6; color: #333; max-width: 550px; margin: 0 auto; padding: 20px;">
                     
                     <div style="text-align: center; padding: 10px 0 10px;">
-                        
                         <h1 style="color: #635bff; margin: 10px 0 5px;">Ваш доступ к гайду</h1>
-                        <p style="color: #666;">по Нячангу - активен!</p>
+                        <p style="color: #666;">по Нячангу — активен!</p>
                     </div>
                     
                     <div style="text-align: center; margin: 30px 0;">
@@ -754,14 +739,15 @@ async def payment_success_page(request: Request, session_id: str = None):
                     
                     <div style="background: #f8f9ff; border-radius: 10px; padding: 15px; margin-bottom: 10px;">
                         <p style="margin: 0 0 10px;"><strong>📖 Как пользоваться?</strong></p>
-                        <p style="margin: 0 0 5px;">1. Нажмите на кнопку выше - откроется гайд</p>
+                        <p style="margin: 0 0 5px;">1. Нажмите на кнопку выше — откроется гайд</p>
                         <p style="margin: 0 0 5px;">2. Добавьте страницу в <strong>закладки браузера</strong></p>
                         <p style="margin: 0;">3. В следующий раз гайд откроется сразу</p>
                     </div>
                     
                     <div style="background: #fff3e0; border-radius: 10px; padding: 15px; margin-bottom: 20px;">
-                        <p style="margin: 0 0 10px;"><strong>🔐 Если потеряете ссылку</strong></p>
-                        <p style="margin: 0;">Зайдите на <a href="https://botolink.pro/guide" style="color: #635bff;">botolink.pro/guide</a>, введите ваш email <strong>{email}</strong> - мы пришлём новую ссылку (до 2 раз в день).</p>
+                        <p style="margin: 0 0 10px;"><strong>🔐 Другое устройство или потеря ссылки</strong></p>
+                        <p style="margin: 0 0 10px;">Если хотите зайти с <strong>компьютера</strong> или другого телефона:</p>
+                        <p style="margin: 0;">Зайдите на <a href="https://botolink.pro/guide" style="color: #635bff;">botolink.pro/guide</a> с нужного устройства, введите ваш email <strong>{email}</strong> — и мы пришлём новую магическую ссылку.</p>
                     </div>
                     
                     <hr style="border: none; border-top: 1px solid #eee; margin: 25px 0;">
@@ -785,7 +771,7 @@ async def payment_success_page(request: Request, session_id: str = None):
             
             # ========== СТРАНИЦА УСПЕХА С УМНОЙ КНОПКОЙ ==========
             return HTMLResponse(content=f"""
-            <div style="text-align: center; margin-top: 60px; font-family: sans-serif; padding: 20px;">
+            <div style="text-align: center; margin-top: 15px; font-family: sans-serif; padding: 20px;">
                 <div style="font-size: 60px;">🎉</div>
                 <h1 style="color: #111;">Оплата прошла успешно!</h1>
                 <p style="color: #555; font-size: 18px;">Доступ активирован для <strong>{email}</strong>.</p>
