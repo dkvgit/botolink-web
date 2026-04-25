@@ -494,31 +494,34 @@ async def stripe_webhook(request: Request):
 
     if event["type"] == "checkout.session.completed":
         session = event["data"]["object"]
-        logger.info(f"💰 [WEBHOOK] Обработка completed сессии: {session.get('id')}")
         
-        customer_email = session.get("customer_details", {}).get("email")
+        # ✅ ИСПРАВЛЕНО: используем .id, а не .get('id')
+        logger.info(f"💰 [WEBHOOK] Обработка completed сессии: {session.id}")
+        
+        # ✅ ИСПРАВЛЕНО: обращаемся напрямую к атрибутам
+        customer_email = session.customer_details.email if session.customer_details else None
         if customer_email:
             customer_email = customer_email.lower()
             logger.info(f"📧 [WEBHOOK] Email клиента: {customer_email}")
         else:
-            logger.warning(f"⚠️ [WEBHOOK] Email отсутствует в сессии {session.get('id')}")
+            logger.warning(f"⚠️ [WEBHOOK] Email отсутствует в сессии {session.id}")
         
-        user_id_str = session.get("client_reference_id")
+        # ✅ ИСПРАВЛЕНО
+        user_id_str = session.client_reference_id
         logger.info(f"🆔 [WEBHOOK] client_reference_id: {user_id_str}")
         
-        session_id = session.get("id")
-        payment_status = session.get("payment_status")
+        # ✅ ИСПРАВЛЕНО
+        session_id = session.id
+        payment_status = session.payment_status
         logger.info(f"💳 [WEBHOOK] Статус оплаты: {payment_status}")
 
         try:
-            # Чистим URL для asyncpg
             clean_db_url = DATABASE_URL.replace("postgresql+asyncpg://", "postgresql://")
             logger.info(f"🗄️ [WEBHOOK] Подключение к БД: {clean_db_url[:50]}...")
             
             conn = await asyncpg.connect(clean_db_url)
             logger.info("✅ [WEBHOOK] Подключение к БД успешно")
             
-            # 1. Обновляем таблицу users (если есть user_id)
             if user_id_str and user_id_str.isdigit():
                 user_id = int(user_id_str)
                 logger.info(f"👤 [WEBHOOK] Обновляем users для id={user_id}, email={customer_email}")
@@ -530,7 +533,6 @@ async def stripe_webhook(request: Request):
             else:
                 logger.info(f"ℹ️ [WEBHOOK] user_id невалидный или отсутствует: '{user_id_str}', пропускаем users")
             
-            # 2. Создаем запись в paid_sessions (UPSERT)
             user_id_value = int(user_id_str) if user_id_str and user_id_str.isdigit() else None
             logger.info(f"💾 [WEBHOOK] Вставляем в paid_sessions: session_id={session_id}, user_id={user_id_value}, email={customer_email}")
             
@@ -543,7 +545,6 @@ async def stripe_webhook(request: Request):
                     updated_at = EXCLUDED.created_at
             """, session_id, user_id_value, customer_email, datetime.utcnow())
             
-            # Проверяем, что запись создалась
             check = await conn.fetchrow(
                 "SELECT session_id, customer_email FROM paid_sessions WHERE session_id = $1",
                 session_id
@@ -560,14 +561,12 @@ async def stripe_webhook(request: Request):
             logger.error(f"❌ [WEBHOOK DB ERROR] {type(db_err).__name__}: {db_err}")
             import traceback
             logger.error(f"📋 [WEBHOOK TRACEBACK]: {traceback.format_exc()}")
-            # Не возвращаем ошибку Stripe, чтобы он не переотправлял
 
     else:
         logger.info(f"ℹ️ [WEBHOOK] Игнорируем событие типа: {event['type']}")
 
     logger.info("🏁 [WEBHOOK] Завершение обработки")
     return Response(status_code=200)
-
 
 
 
@@ -686,7 +685,18 @@ async def payment_success_page(request: Request, session_id: str = None):
             
             try:
                 token = secrets.token_urlsafe(32)
-                expires_at = datetime.utcnow() + timedelta(minutes=15)
+                
+                # ВРЕМЯ ЖИЗНИ ТОКЕНА
+                from core.config import DEBUG
+                if DEBUG:
+                    expires_at = datetime.utcnow() + timedelta(minutes=15)
+                else:
+                    expires_at = datetime.utcnow() + timedelta(days=36500)  # 100 лет
+                
+                await conn.execute("""
+                    INSERT INTO paid_sessions (session_id, customer_email, magic_link_token, token_expires_at, download_count, created_at)
+                    VALUES ($1, $2, $3, $4, 0, $5)
+                """, session_id, email, token, expires_at, datetime.utcnow())
                 
                 await conn.execute("""
                     INSERT INTO paid_sessions (session_id, customer_email, magic_link_token, token_expires_at, download_count, created_at)
