@@ -424,13 +424,13 @@
             </label>
           </div>
 
-          <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 0;">
+          <div style="display: flex; flex-direction: column; gap: 12px;">
             <a href="https://buy.stripe.com/eVq5kFenBcaW1QA2kA1B601" target="_blank" class="stripe-btn-basic" style="background: linear-gradient(135deg, #635bff 0%, #4339ca 100%); color: white; text-decoration: none; padding: 14px; border-radius: 12px; font-weight: 500; display: block; text-align: center; opacity: 0.5; pointer-events: none; transition: 0.3s;">
               💳 Оплатить картой
             </a>
-            <button type="button" onclick="openRequisitesModal('9$')" class="req-btn" style="background: #333; color: white; border: 1px solid #555; padding: 14px; border-radius: 12px; width: 100%; margin-top: 12px; opacity: 0.5; pointer-events: none; transition: 0.3s;">
-              💳 Другие способы
-            </button>
+            <a href="https://botolink.pro/dekavetel" target="_blank" class="req-btn" style="background: linear-gradient(135deg, #333 0%, #444 100%); color: white; text-decoration: none; padding: 14px; border-radius: 12px; font-weight: 500; display: block; text-align: center; opacity: 0.5; pointer-events: none; transition: 0.3s; font-family: inherit; font-size: 16px; border: 1px solid #555;">
+              💳 Другие способы (РФ, PayPal, QR)
+            </a>
           </div>
         </div>
 
@@ -461,12 +461,12 @@
             </label>
           </div>
 
-          <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 0;">
+          <div style="display: flex; flex-direction: column; gap: 12px;">
             <a href="https://buy.stripe.com/3cIdRb4N1df03YI5wM1B602" target="_blank" class="stripe-btn-pro" style="background: linear-gradient(135deg, #635bff 0%, #4339ca 100%); color: white; text-decoration: none; padding: 14px; border-radius: 12px; font-weight: 500; display: block; text-align: center; opacity: 0.5; pointer-events: none; transition: 0.3s;">
               💳 Оплатить картой
             </a>
-            <a href="https://botolink.pro/dekavetel" target="_blank" class="req-btn" style="background: #333; color: white; text-decoration: none; padding: 14px; border-radius: 12px; font-weight: 500; display: block; text-align: center; margin-top: 12px; opacity: 0.5; pointer-events: none; transition: 0.3s;">
-              💳 Другие способы
+            <a href="https://botolink.pro/dekavetel" target="_blank" class="req-btn" style="background: linear-gradient(135deg, #333 0%, #444 100%); color: white; text-decoration: none; padding: 14px; border-radius: 12px; font-weight: 500; display: block; text-align: center; opacity: 0.5; pointer-events: none; transition: 0.3s; font-family: inherit; font-size: 16px; border: 1px solid #555;">
+              💳 Другие способы (РФ, PayPal, QR)
             </a>
           </div>
         </div>
@@ -944,6 +944,26 @@ if (!localStorage.getItem('cookiesAccepted')) {
     </div>`;
     document.body.appendChild(banner);
 }
+
+
+
+  // Этот скрипт оживляет все кнопки в карточке при нажатии на галочку
+  document.querySelectorAll('.offer-agree-basic, .offer-agree-pro').forEach(checkbox => {
+      checkbox.addEventListener('change', function() {
+          // Находим карточку, в которой лежит этот чекбокс
+          const card = this.closest('.price-card');
+          // Находим в этой карточке все ссылки и кнопки оплаты
+          const actionButtons = card.querySelectorAll('a[target="_blank"], button');
+
+          actionButtons.forEach(btn => {
+              // Если галочка стоит — кнопка яркая и кликабельная, если нет — тусклая
+              btn.style.opacity = this.checked ? '1' : '0.5';
+              btn.style.pointerEvents = this.checked ? 'auto' : 'none';
+          });
+      });
+  });
+
+
 </script>
 
 </body>
