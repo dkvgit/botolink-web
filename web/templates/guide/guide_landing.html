@@ -428,8 +428,8 @@
             <a href="https://buy.stripe.com/eVq5kFenBcaW1QA2kA1B601" target="_blank" class="stripe-btn-basic" style="background: linear-gradient(135deg, #635bff 0%, #4339ca 100%); color: white; text-decoration: none; padding: 14px; border-radius: 12px; font-weight: 500; display: block; text-align: center; opacity: 0.5; pointer-events: none; transition: 0.3s;">
               💳 Оплатить картой
             </a>
-            <button type="button" onclick="openCryptoModal('Базовый', '9$')" class="crypto-btn-basic" style="background: linear-gradient(135deg, #f7931a 0%, #d67e17 100%); color: white; border: none; padding: 14px; border-radius: 12px; font-weight: 500; cursor: pointer; width: 100%; display: block; font-family: inherit; font-size: 16px; opacity: 0.5; pointer-events: none; transition: 0.3s;">
-              ₿ Оплатить криптой
+            <button type="button" onclick="openRequisitesModal('Базовый', '9$')" class="req-btn-basic" style="background: linear-gradient(135deg, #333 0%, #444 100%); color: white; border: 1px solid #555; padding: 14px; border-radius: 12px; font-weight: 500; cursor: pointer; width: 100%; display: block; font-family: inherit; font-size: 16px; margin-top: 12px; transition: 0.3s;">
+              💳 Другие способы (РФ, PayPal, QR)
             </button>
           </div>
         </div>
@@ -465,8 +465,8 @@
             <a href="https://buy.stripe.com/3cIdRb4N1df03YI5wM1B602" target="_blank" class="stripe-btn-pro" style="background: linear-gradient(135deg, #635bff 0%, #4339ca 100%); color: white; text-decoration: none; padding: 14px; border-radius: 12px; font-weight: 500; display: block; text-align: center; opacity: 0.5; pointer-events: none; transition: 0.3s;">
               💳 Оплатить картой
             </a>
-            <button type="button" onclick="openCryptoModal('С поддержкой', '19$')" class="crypto-btn-pro" style="background: linear-gradient(135deg, #f7931a 0%, #d67e17 100%); color: white; border: none; padding: 14px; border-radius: 12px; font-weight: 500; cursor: pointer; width: 100%; display: block; font-family: inherit; font-size: 16px; opacity: 0.5; pointer-events: none; transition: 0.3s;">
-              ₿ Оплатить криптой
+            <button type="button" onclick="openRequisitesModal('Базовый', '19$')" class="req-btn-basic" style="background: linear-gradient(135deg, #333 0%, #444 100%); color: white; border: 1px solid #555; padding: 14px; border-radius: 12px; font-weight: 500; cursor: pointer; width: 100%; display: block; font-family: inherit; font-size: 16px; margin-top: 12px; transition: 0.3s;">
+              💳 Другие способы (РФ, PayPal, QR)
             </button>
           </div>
         </div>
@@ -528,6 +528,58 @@
       <a id="tgConfirmBtn" href="#" target="_blank" style="background: #24A1DE; color: white; text-decoration: none; padding: 15px; border-radius: 10px; font-weight: 600; display: block; text-align: center; box-shadow: 0 5px 15px rgba(36, 161, 222, 0.3);">✅ Я оплатил, отправить чек</a>
     </div>
   </div>
+
+
+  <!-- МОДАЛКА РЕКВИЗИТОВ -->
+  <div id="requisitesModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 10001; justify-content: center; align-items: center; padding: 20px; overflow-y: auto;">
+      <div style="background: #111; border: 1px solid #333; padding: 25px; border-radius: 20px; max-width: 500px; width: 100%; position: relative; color: white; box-shadow: 0 20px 50px rgba(0,0,0,0.5); margin: auto;">
+          <span onclick="closeRequisitesModal()" style="position: absolute; top: 15px; right: 20px; cursor: pointer; font-size: 28px; opacity: 0.5;">&times;</span>
+
+          <h3 style="text-align: center; margin-bottom: 20px; font-size: 20px;">💳 Способы оплаты</h3>
+
+          <div style="display: flex; flex-direction: column; gap: 15px; text-align: left;">
+
+              <!-- ПЕРЕВОДЫ -->
+              <div style="border-bottom: 1px solid #222; padding-bottom: 10px;">
+                  <p style="color: #635bff; font-weight: bold; margin-bottom: 8px;">💳 Переводы & Банки</p>
+                  <div style="font-size: 13px; line-height: 1.6; color: #ccc;">
+                      <b>PayPal:</b> <a href="https://botolink.pro/dekavetel" target="_blank" style="color: #fff;">Перейти к оплате</a><br>
+                      <b>Revolut / Wise:</b> Напишите в TG за реквизитами<br>
+                      <b>Сбербанк (RUB):</b> По номеру телефона (СБП)<br>
+                      <b>BIDV (Vietnam):</b> VietQR / Счёт
+                  </div>
+              </div>
+
+              <!-- КРИПТА -->
+              <div style="border-bottom: 1px solid #222; padding-bottom: 10px;">
+                  <p style="color: #f7931a; font-weight: bold; margin-bottom: 8px;">⚡ Криптовалюта</p>
+                  <div style="font-size: 13px; line-height: 1.6; color: #ccc;">
+                      <b>Bybit / Binance / OKX:</b> UID или прямая ссылка<br>
+                      <b>Metamask:</b> <code style="background: #000; padding: 2px 5px; color: #f7931a;">0x...ваша_адрес</code>
+                  </div>
+              </div>
+
+              <!-- ДОНАТ -->
+              <div style="padding-bottom: 10px;">
+                  <p style="color: #ff424d; font-weight: bold; margin-bottom: 8px;">🎨 Донат-сервисы</p>
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                      <a href="https://www.patreon.com/" target="_blank" style="background: #222; padding: 8px; border-radius: 6px; text-decoration: none; color: #fff; font-size: 12px; text-align: center;">Patreon</a>
+                      <a href="https://boosty.to/" target="_blank" style="background: #222; padding: 8px; border-radius: 6px; text-decoration: none; color: #fff; font-size: 12px; text-align: center;">Boosty</a>
+                  </div>
+              </div>
+
+          </div>
+
+          <p style="font-size: 12px; background: #1a1a1a; padding: 10px; border-radius: 8px; margin: 20px 0; border-left: 3px solid #635bff;">
+              К оплате: <b id="reqModalAmount" style="color: #fff;"></b><br>
+              Для получения реквизитов Сбера/BIDV напишите мне в Telegram.
+          </p>
+
+          <a href="https://t.me/dekavetel" target="_blank" style="background: #24A1DE; color: white; text-decoration: none; padding: 15px; border-radius: 12px; font-weight: 600; display: block; text-align: center;">💬 Написать в Telegram и прислать чек</a>
+      </div>
+  </div>
+
+
 </section>
 
 
@@ -546,6 +598,27 @@
 
 
 <script>
+
+
+function openRequisitesModal(tariff, amount) {
+    document.getElementById('reqModalAmount').innerText = amount;
+    document.getElementById('requisitesModal').style.display = 'flex';
+}
+
+function closeRequisitesModal() {
+    document.getElementById('requisitesModal').style.display = 'none';
+}
+
+// Закрытие при клике вне окна
+window.onclick = function(event) {
+    let cryptoModal = document.getElementById('cryptoModal');
+    let reqModal = document.getElementById('requisitesModal');
+    if (event.target == cryptoModal) closeCryptoModal();
+    if (event.target == reqModal) closeRequisitesModal();
+}
+
+
+
 function openCryptoModal(tariff, price) {
   document.getElementById('modalTitle').innerText = 'Тариф: ' + tariff;
   document.getElementById('modalAmount').innerText = price;
