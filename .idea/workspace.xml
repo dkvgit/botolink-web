@@ -220,14 +220,6 @@
       <workItem from="1774940860921" duration="18261000" />
       <workItem from="1774968693809" duration="5349000" />
     </task>
-    <task id="LOCAL-00077" summary="added local run logic">
-      <option name="closed" value="true" />
-      <created>1776863193526</created>
-      <option name="number" value="00077" />
-      <option name="presentableId" value="LOCAL-00077" />
-      <option name="project" value="LOCAL" />
-      <updated>1776863193527</updated>
-    </task>
     <task id="LOCAL-00078" summary="added local run logic">
       <option name="closed" value="true" />
       <created>1776863765760</created>
@@ -612,7 +604,15 @@
       <option name="project" value="LOCAL" />
       <updated>1777905013515</updated>
     </task>
-    <option name="localTasksCounter" value="126" />
+    <task id="LOCAL-00126" summary="added local run logic">
+      <option name="closed" value="true" />
+      <created>1777905510829</created>
+      <option name="number" value="00126" />
+      <option name="presentableId" value="LOCAL-00126" />
+      <option name="project" value="LOCAL" />
+      <updated>1777905510829</updated>
+    </task>
+    <option name="localTasksCounter" value="127" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
