@@ -1069,42 +1069,24 @@
                     {% elif link.link_type == 'phone' or link.link_type.startswith('phone_') %}
                     <div class="link-item finance-item">
                         <div class="finance-info">
-                            {% include 'icon_block.html' %}
-                            <div class="bank-details">
-                                {# Банк: название + страна #}
-                                <div class="bank-row">
-                                    <span class="link-title">
-                                        <span class="label-text">Банк:</span>
-                                        {% if link.pay_details and link.pay_details.bank_name %}
-                                            {{ link.pay_details.bank_name }}
-                                        {% else %}
-                                            не указан
-                                        {% endif %}
-                                    </span>
-                                    {% if link.pay_details and link.pay_details.country %}
-                                    <span class="country-text">{{ COUNTRY_NAMES[link.pay_details.country] }}</span>
-                                    {% endif %}
-                                </div>
-                                {# Подсказка + номер телефона #}
-                                {% if link.pay_details and link.pay_details.phone %}
-                                <div class="mt-4">
-                                    <span class="label-light">перевод по номеру • </span>
-                                    <code class="code-text">{{ link.pay_details.phone }}</code>
-                                </div>
-                                {% endif %}
+                            <div style="text-align: center; margin-bottom: 8px;">
+
                             </div>
-                        </div>
-                        <div class="action-group">
-                            {% if link.pay_details and link.pay_details.phone %}
-                            <button onclick="copyText('{{ link.pay_details.phone }}')" class="icon-btn"
-                                    title="Копировать номер">
-                                <i class="far fa-copy"></i>
-                            </button>
-                            <button onclick="openQRModal('{{ link.pay_details.phone }}', '{{ link.title }}', 'Phone')"
-                                    class="icon-btn" title="Показать QR-код">
-                                <i class="fa-solid fa-qrcode"></i>
-                            </button>
-                            {% endif %}
+                            <div class="bank-details" style="background: none;">
+                                <div class="bank-row" style="text-align: center; margin-bottom: 8px;">
+                                    <img src="/static/icons/sberbank.png" class="link-icon custom-link-icon" alt="Сбербанк" style="width: 40px; height: 40px;">
+                                    <span class="link-title">Сбербанк</span>
+                                </div>
+                                <div class="pair-container">
+                                    <span class="label-light">Имя:</span>
+                                    <code class="code-text">Давид С.</code>
+                                </div>
+                                <div class="pair-container" style="margin-top: 8px;">
+                                    <span class="label-light">по номеру телефона:</span>
+                                    <code class="code-text">+79817139802</code>
+                                    <i class="far fa-copy icon-btn" onclick="copyText('+79817139802')" title="Копировать"></i>
+                                </div>
+                            </div>
                         </div>
                     </div>
 

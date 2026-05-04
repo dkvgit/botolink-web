@@ -43,7 +43,7 @@ async def parse_and_validate(link_type: str, collected_data: dict) -> tuple:
     Универсальный парсер/валидатор для всех типов ссылок
     Возвращает (url, error_message)
     """
-    
+    print(f"🔥🔥🔥 parse_and_validate: link_type = '{link_type}'")
     # ===== СОЦСЕТИ =====
     if link_type == "youtube":
         channel_input = collected_data.get('channel_input', '')
@@ -905,7 +905,7 @@ async def parse_and_validate(link_type: str, collected_data: dict) -> tuple:
             
             
             
-            
+           
             
     # Универсальный сбор данных из того, что ввел юзер
     # Собираем все возможные поля, которые могут прийти из разных конфигов
@@ -975,6 +975,18 @@ async def parse_and_validate(link_type: str, collected_data: dict) -> tuple:
         if link_type == "iban" and len(val.replace(' ', '')) < 10:
             return None, "❌ Введен слишком короткий номер счета"
             
+        return "#", None
+    
+    
+    # ===== КРИПТОВАЛЮТЫ (USDT, BTC, ETH и т.д.) =====
+    elif link_type in ["usdt", "btc", "eth", "ton", "sol", "trx", "bnb", "doge", "ltc", "xrp", "ada", "dot", "matic"]:
+        # Ищем адрес в разных возможных полях
+        address = (val or
+                   collected_data.get('address', '') or
+                   collected_data.get('wallet_address', '') or
+                   collected_data.get('wallet', ''))
+        if not address:
+            return None, f"❌ Введите адрес кошелька {link_type.upper()}"
         return "#", None
     
     # Если ничего не подошло
