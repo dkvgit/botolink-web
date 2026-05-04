@@ -1189,7 +1189,7 @@
 
                     {# СЧЕТА НЕРЕЗИДЕНТА (non_res_vietnam) #}
                     {% elif link.link_type == 'non_res_vietnam' %}
-                    <div class="link-item finance-item clickable" onclick="openModal('modal_{{ link.id }}')">
+                    <div class="link-item finance-item">
                         <div class="finance-content">
                             <div class="bank-row">
                                 {% include 'icon_block.html' %}
@@ -1198,22 +1198,24 @@
                                 <span class="country-text">{{ COUNTRY_NAMES[link.pay_details.country] }}</span>
                                 {% endif %}
                             </div>
-                            {# Показываем ФИО получателя #}
+                            {# Показываем ФИО получателя с кнопкой копирования #}
                             {% if link.pay_details and link.pay_details.full_name %}
-                            <div>
+                            <div class="pair-container">
                                 <span class="label-light">получатель • </span>
                                 <code class="code-text">{{ link.pay_details.full_name }}</code>
+                                <i class="far fa-copy icon-btn" onclick="copyText('{{ link.pay_details.full_name }}')" title="Копировать"></i>
                             </div>
                             {% endif %}
-                            {# Показываем номер счета #}
+                            {# Показываем номер счета с кнопкой копирования #}
                             {% if link.pay_details and link.pay_details.account_number %}
-                            <div>
+                            <div class="pair-container">
                                 <span class="label-light">счет нерезидента • </span>
                                 <code class="code-text">{{ link.pay_details.account_number }}</code>
+                                <i class="far fa-copy icon-btn" onclick="copyText('{{ link.pay_details.account_number }}')" title="Копировать"></i>
                             </div>
                             {% endif %}
                         </div>
-                        <button class="details-btn ml-16" onclick="event.stopPropagation(); openModal('modal_{{ link.id }}')">Реквизиты</button>
+                        <button class="details-btn ml-16" onclick="openModal('modal_{{ link.id }}')">Реквизиты</button>
                     </div>
 
                     {# УНИВЕРСАЛЬНЫЕ ПЛАТЕЖНЫЕ СИСТЕМЫ (PayPal, ЮMoney, VK Pay, Монобанк, Kaspi, Payme, Click, TBC Pay,
@@ -1401,8 +1403,11 @@
                             </span>
 
                             <!-- ЛОГОТИП -->
-                            <img src="/static/icons/{{ link.link_type }}.png" class="link-icon custom-link-icon"
-                                 alt="{{ link.title }}">
+                            {% if link.link_type == 'non_res_vietnam' %}
+                                <img src="/static/icons/non_resident.png" class="link-icon custom-link-icon" alt="{{ link.title }}">
+                            {% else %}
+                                <img src="/static/icons/{{ link.link_type }}.png" class="link-icon custom-link-icon" alt="{{ link.title }}">
+                            {% endif %}
 
                             <!-- НАЗВАНИЕ -->
                             <span class="wallet-title-text">{{ link.title }}</span>
@@ -1712,7 +1717,7 @@
 <!-- ========== ПОДКЛЮЧЕНИЕ МОДАЛЬНЫХ ОКОН ========== -->
 <div id="modals-container">
     {% for link in links %}
-        {% if link.link_type in ['revolut', 'wise', 'iban', 'swift', 'ach_usa', 'wire_usa'] %}
+        {% if link.link_type in ['revolut', 'wise', 'iban', 'swift', 'ach_usa', 'wire_usa', 'non_res_vietnam'] %}
             {% include 'base/blocks/base_modal_bank.html' %}
         {% elif link.link_type in ['binance', 'bybit', 'okx', 'metamask', 'kucoin', 'gateio'] %}
             {% include 'base/blocks/base_modal_crypto.html' %}

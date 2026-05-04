@@ -37,7 +37,11 @@
 
                 <div style="display: flex; flex-direction: column; min-width: 0; flex-grow: 1;">
                     <span style="font-size: 0.95rem; font-weight: 700; color: #1e293b; letter-spacing: -0.3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                        {{ (link.title or 'Платеж') | title }}
+                        {% if link.link_type == 'non_res_vietnam' %}
+                            Банк BIDV
+                        {% else %}
+                            {{ (link.title or 'Платеж') | title }}
+                        {% endif %}
                     </span>
                     {% if country_code %}
                     <span style="font-size: 0.6rem; color: #94a3b8; text-transform: uppercase; font-weight: 800; letter-spacing: 0.5px;">{{ country_code }}</span>
@@ -76,14 +80,36 @@
 
             {% set qr_final_text = qr_payload | join('\n') | trim %}
 
-            {% if qr_final_text %}
-            <div style="text-align: center; margin-bottom: 20px;">
-                <div style="display: inline-flex; padding: 12px; background: #fff; border-radius: 20px; border: 1px solid #f1f5f9; box-shadow: 0 4px 15px rgba(0,0,0,0.04);">
-                    <div id="qr_{{ link.id }}"
-                         class="auto-qr"
-                         data-qr-text="{{ qr_final_text | e }}"
-                         data-qr-icon="{{ icon_path }}"
-                         style="width: 160px; height: 160px;">
+            {% if link.link_type == 'non_res_vietnam' %}
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <div style="display: inline-flex; padding: 12px; background: #fff; border-radius: 20px; border: 1px solid #f1f5f9; box-shadow: 0 4px 15px rgba(0,0,0,0.04);">
+                        <img src="/static/icons/bidv_qr.png" style="width: 160px; height: 160px; object-fit: contain; display: block;">
+                    </div>
+                </div>
+            {% elif qr_final_text %}
+                <!-- старый QR для остальных -->
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <div style="display: inline-flex; padding: 12px; background: #fff; border-radius: 20px; border: 1px solid #f1f5f9; box-shadow: 0 4px 15px rgba(0,0,0,0.04);">
+                        <div id="qr_{{ link.id }}"
+                             class="auto-qr"
+                             data-qr-text="{{ qr_final_text | e }}"
+                             data-qr-icon="{{ icon_path }}"
+                             style="width: 160px; height: 160px;">
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+            {# Для non_res_vietnam показываем ФИО отдельно #}
+            {% if link.link_type == 'non_res_vietnam' and link.pay_details.full_name %}
+            <div style="background: #f8fafc; border-radius: 16px; padding: 14px; border: 1px solid #f1f5f9; margin-bottom: 12px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="color: #94a3b8; font-size: 0.65rem; font-weight: 700; text-transform: uppercase;">Получатель</span>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 0.85rem; color: #334155; font-weight: 700; text-align: right; word-break: break-all;">
+                            {{ link.pay_details.full_name }}
+                        </span>
+                        <i class="far fa-copy copy-icon copy-trigger" style="color: #cbd5e1; font-size: 0.8rem; cursor: pointer; padding: 4px;" onclick="copyText('{{ link.pay_details.full_name }}', event)"></i>
                     </div>
                 </div>
             </div>
@@ -103,7 +129,7 @@
                     ('SWIFT/BIC', details.swift or details.bic),
                     ('Routing', details.routing),
                     ('МФО', details.mfo),
-                    ('Ссылка', final_url if is_http_link else none)
+
                 ] %}
 
                 {% for label, value in fields %}

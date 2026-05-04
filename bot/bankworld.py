@@ -37,6 +37,7 @@ logger = logging.getLogger(__name__)
 
 # Словарь для автоматической генерации меток (labels)
 FIELD_NAMES = {
+    "full_name": "👤 Имя и Фамилия",  # <-- ДОБАВЬ ЭТУ СТРОКУ
     "bank_name": "🏦 Название банка",
     "card_number": "💳 Номер карты",
     "card_holder": "👤 Имя на карте",
