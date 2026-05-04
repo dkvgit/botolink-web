@@ -428,8 +428,8 @@
             <a href="https://buy.stripe.com/eVq5kFenBcaW1QA2kA1B601" target="_blank" class="stripe-btn-basic" style="background: linear-gradient(135deg, #635bff 0%, #4339ca 100%); color: white; text-decoration: none; padding: 14px; border-radius: 12px; font-weight: 500; display: block; text-align: center; opacity: 0.5; pointer-events: none; transition: 0.3s;">
               💳 Оплатить картой
             </a>
-            <button type="button" onclick="openRequisitesModal('Базовый', '9$')" class="req-btn-basic" style="background: linear-gradient(135deg, #333 0%, #444 100%); color: white; border: 1px solid #555; padding: 14px; border-radius: 12px; font-weight: 500; cursor: pointer; width: 100%; display: block; font-family: inherit; font-size: 16px; margin-top: 12px; transition: 0.3s;">
-              💳 Другие способы (РФ, PayPal, QR)
+            <button type="button" onclick="openRequisitesModal('9$')" class="req-btn" style="background: #333; color: white; border: 1px solid #555; padding: 14px; border-radius: 12px; width: 100%; margin-top: 12px; opacity: 0.5; pointer-events: none; transition: 0.3s;">
+              💳 Другие способы
             </button>
           </div>
         </div>
@@ -465,8 +465,8 @@
             <a href="https://buy.stripe.com/3cIdRb4N1df03YI5wM1B602" target="_blank" class="stripe-btn-pro" style="background: linear-gradient(135deg, #635bff 0%, #4339ca 100%); color: white; text-decoration: none; padding: 14px; border-radius: 12px; font-weight: 500; display: block; text-align: center; opacity: 0.5; pointer-events: none; transition: 0.3s;">
               💳 Оплатить картой
             </a>
-            <button type="button" onclick="openRequisitesModal('Базовый', '19$')" class="req-btn-basic" style="background: linear-gradient(135deg, #333 0%, #444 100%); color: white; border: 1px solid #555; padding: 14px; border-radius: 12px; font-weight: 500; cursor: pointer; width: 100%; display: block; font-family: inherit; font-size: 16px; margin-top: 12px; transition: 0.3s;">
-              💳 Другие способы (РФ, PayPal, QR)
+            <button type="button" onclick="openRequisitesModal('19$')" class="req-btn" style="background: #333; color: white; border: 1px solid #555; padding: 14px; border-radius: 12px; width: 100%; margin-top: 12px; opacity: 0.5; pointer-events: none; transition: 0.3s;">
+              💳 Другие способы
             </button>
           </div>
         </div>
@@ -653,6 +653,28 @@ window.onclick = function(event) {
 }
 </script>
 <script>
+
+  document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+    cb.addEventListener('change', function() {
+      const card = this.closest('.price-card');
+      const btns = card.querySelectorAll('a, button');
+      btns.forEach(btn => {
+        btn.style.opacity = this.checked ? '1' : '0.5';
+        btn.style.pointerEvents = this.checked ? 'auto' : 'none';
+      });
+    });
+  });
+
+  function openRequisitesModal(price) {
+      document.getElementById('reqModalAmount').innerText = price;
+      document.getElementById('requisitesModal').style.display = 'flex';
+  }
+
+  function closeRequisitesModal() {
+      document.getElementById('requisitesModal').style.display = 'none';
+  }
+
+
 function openCryptoModal(tariff, price) {
   // Заполняем данные в модалке
   document.getElementById('modalTitle').innerText = 'Тариф: ' + tariff;
