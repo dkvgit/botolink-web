@@ -24,9 +24,15 @@
             {# ХЕДЕР: Лого с флагом + Кнопки #}
             <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
                 <div style="position: relative; width: 32px; height: 32px; flex-shrink: 0;">
-                    <img src="{{ icon_path }}"
-                         style="width: 100%; height: 100%; object-fit: contain;"
-                         onerror="this.src='/static/icons/link.png';">
+                    {% if link.link_type == 'non_res_vietnam' %}
+                        <img src="/static/icons/non_resident.png"
+                             style="width: 100%; height: 100%; object-fit: contain;"
+                             onerror="this.src='/static/icons/link.png';">
+                    {% else %}
+                        <img src="{{ icon_path }}"
+                             style="width: 100%; height: 100%; object-fit: contain;"
+                             onerror="this.src='/static/icons/link.png';">
+                    {% endif %}
 
                     {% if country_code %}
                     <img src="/static/icons/{{ country_code }}.png"

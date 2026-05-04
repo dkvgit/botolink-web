@@ -1193,7 +1193,13 @@
                         <div class="finance-content">
                             <div class="bank-row">
                                 {% include 'icon_block.html' %}
-                                <span class="link-title">{{ link.title }}</span>
+                                <span class="link-title">
+                                    {% if link.link_type == 'non_res_vietnam' %}
+                                        Банк BIDV (Vietnam)
+                                    {% else %}
+                                        {{ link.title }}
+                                    {% endif %}
+                                </span>
                                 {% if link.pay_details and link.pay_details.country %}
                                 <span class="country-text">{{ COUNTRY_NAMES[link.pay_details.country] }}</span>
                                 {% endif %}
