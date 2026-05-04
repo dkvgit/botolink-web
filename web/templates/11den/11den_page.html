@@ -1129,13 +1129,29 @@
                             </div>
                             <div>
                                 <span class="label-light">WIRE перевод • </span>
-                                <code class="code-text-sm">SWIFT: {{ link.pay_details.swift if link.pay_details and
-                                    link.pay_details.swift else '...' }}</code>
+                                <code class="code-text-sm">SWIFT: {{ link.pay_details.swift if link.pay_details and link.pay_details.swift else '...' }}</code>
                             </div>
                         </div>
-                        <button class="details-btn ml-16"
-                                onclick="event.stopPropagation(); trackDetailsClick('{{ link.id }}'); openModal('modal_{{ link.id }}')">
+                        <button class="details-btn ml-16" onclick="event.stopPropagation(); trackDetailsClick('{{ link.id }}'); openModal('modal_{{ link.id }}')">
                             Реквизиты
+                        </button>
+                    </div>
+
+                    {# МОДАЛЬНЫЕ ТИПЫ (Revolut, Wise, IBAN, SWIFT и т.д.) #}
+                    {% elif link.link_type in ['revolut', 'wise', 'iban', 'swift', 'ach_usa'] %}
+                    <div class="link-item finance-item">
+                        <div class="finance-content">
+                            <div class="finance-header">
+                                {% include 'icon_block.html' %}
+                                <span class="link-title">{{ link.title }}</span>
+                            </div>
+                            <div class="url-container">
+                                <span class="primary-text">{{ link.url.replace('https://', '').replace('http://', '') }}</span>
+                                <i class="far fa-copy icon-btn" onclick="copyText('{{ link.url }}')" title="Копировать ссылку"></i>
+                            </div>
+                        </div>
+                        <button class="details-btn" onclick="openModal('modal_{{ link.id }}')">
+                            Реквизиты<i class="fas fa-arrow-right"></i>
                         </button>
                     </div>
 
@@ -1183,7 +1199,7 @@
 
                     {# УНИВЕРСАЛЬНЫЕ ПЛАТЕЖНЫЕ СИСТЕМЫ (PayPal, ЮMoney, VK Pay, Монобанк, Kaspi, Payme, Click, TBC Pay,
                     Idram) #}
-                    {% elif link.link_type in ['paypal', 'revolut', 'yoomoney', 'vkpay', 'monobank', 'kaspi', 'payme', 'click', 'tbcpay', 'idram'] %}
+                    {% elif link.link_type in ['paypal', 'yoomoney', 'vkpay', 'monobank', 'kaspi', 'payme', 'click', 'tbcpay', 'idram'] %}
                     <div class="link-item finance-item">
                         <div class="finance-content">
                             <div class="finance-header">
@@ -1671,10 +1687,17 @@
 
 
 <!-- ========== ПОДКЛЮЧЕНИЕ МОДАЛЬНЫХ ОКОН ========== -->
-{% include '11den/11den_modal.html' %}      <!-- для крипты -->
-{% include '11den/11den_modal_bank.html' %}  <!-- для банков (Revolut, Wise, IBAN) -->
-{% include '11den/11den_modal_usa.html' %}   <!-- для американских карт -->
-
+<div id="modals-container">
+    {% for link in links %}
+        {% if link.link_type in ['revolut', 'wise', 'iban', 'swift'] %}
+            {% include '11den/11den_modal_bank.html' %}
+        {% elif link.link_type in ['binance', 'bybit', 'okx', 'metamask'] %}
+            {% include '11den/11den_modal.html' %}
+        {% elif link.link_type in ['card_usa', 'ach_usa', 'wire_usa'] %}
+            {% include '11den/11den_modal_usa.html' %}
+        {% endif %}
+    {% endfor %}
+</div>
 
 <!-- ДОПОЛНИТЕЛЬНАЯ ПРОВЕРКА: Добавим скрытый элемент для отладки (можно удалить после исправления) -->
 
