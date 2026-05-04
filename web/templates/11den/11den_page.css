@@ -2074,11 +2074,7 @@ body {
 }
 
 
-/* Стиль для модалки QR */
-.qr-modal {
-    max-width: 300px !important;
-    border-radius: 20px;
-}
+
 
 
 .modal-header {
@@ -2962,3 +2958,8 @@ body {
 }
 
 
+.auto-qr canvas {
+    width: 160px !important;
+    height: 160px !important;
+    display: block !important;
+}
