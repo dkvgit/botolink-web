@@ -7,6 +7,9 @@
     <list default="true" id="722a5f0e-b122-4002-a32f-b6e7799afca3" name="Changes" comment="added local run logic">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/bot/bankper.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot/bankper.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bot/constructor.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot/constructor.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bot/link_constructor.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot/link_constructor.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bot/parsers.py" beforeDir="false" afterPath="$PROJECT_DIR$/bot/parsers.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -222,14 +225,6 @@
       <workItem from="1774937818207" duration="518000" />
       <workItem from="1774940860921" duration="18261000" />
       <workItem from="1774968693809" duration="5349000" />
-    </task>
-    <task id="LOCAL-00082" summary="added local run logic">
-      <option name="closed" value="true" />
-      <created>1776870183399</created>
-      <option name="number" value="00082" />
-      <option name="presentableId" value="LOCAL-00082" />
-      <option name="project" value="LOCAL" />
-      <updated>1776870183399</updated>
     </task>
     <task id="LOCAL-00083" summary="added local run logic">
       <option name="closed" value="true" />
@@ -615,7 +610,15 @@
       <option name="project" value="LOCAL" />
       <updated>1777908345093</updated>
     </task>
-    <option name="localTasksCounter" value="131" />
+    <task id="LOCAL-00131" summary="added local run logic">
+      <option name="closed" value="true" />
+      <created>1777911892167</created>
+      <option name="number" value="00131" />
+      <option name="presentableId" value="LOCAL-00131" />
+      <option name="project" value="LOCAL" />
+      <updated>1777911892167</updated>
+    </task>
+    <option name="localTasksCounter" value="132" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -635,5 +638,16 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="added local run logic" />
     <option name="LAST_COMMIT_MESSAGE" value="added local run logic" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/bot/bankper.py</url>
+          <line>510</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

@@ -394,6 +394,7 @@ async def save_bank_link_to_db(update: Update, context: ContextTypes.DEFAULT_TYP
     
     # 1. ВЫЗЫВАЕМ ПАРСЕР (он возвращает финальный URL или ошибку)
     from bot.parsers import parse_and_validate
+    
     final_url, error = await parse_and_validate(bank_key, answers)
     
     if error and final_url is None:
@@ -521,6 +522,10 @@ async def start_bank_config_flow(update: Update, context: ContextTypes.DEFAULT_T
     context.user_data['flow_answers'] = {}
     context.user_data['current_bank_key'] = bank_key
     
+    # 👇👇👇 ДОБАВЬ ЭТУ СТРОКУ 👇👇👇
+    context.user_data['link_type'] = bank_key  # Сохраняем тип для save_link
+    # 👆👆👆👆👆👆👆👆👆👆👆👆👆👆
+    
     # 3. ЗАПОМИНАЕМ ID СООБЩЕНИЯ, чтобы потом его редактировать
     if update.callback_query:
         context.user_data['last_flow_msg_id'] = update.callback_query.message.message_id
@@ -531,7 +536,6 @@ async def start_bank_config_flow(update: Update, context: ContextTypes.DEFAULT_T
     
     # ВАЖНО: Возвращаем стейт 282 (где работает handle_flow_input для текста)
     return 282
-
 
 
 
@@ -748,7 +752,9 @@ async def handle_flow_input(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print("\n" + "=" * 60)
     print("📥 handle_flow_input ВЫЗВАН")
     
-    
+    # В handle_flow_input, первая строка после print
+    if 'flow_config' in context.user_data:
+        context.user_data['type_config'] = context.user_data['flow_config']
     # --- ВОТ ЭТО ДОБАВЬ ---
     try:
         await update.message.delete() # Удаляем ввод юзера, чтобы не мусорить

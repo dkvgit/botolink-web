@@ -104,7 +104,7 @@ CATEGORY_LINK_TYPES = {
     "transfers": [
         {"type": "revolut", "name": "Revolut", "icon": "revolut", "is_finance": True, "subtype": "revolut"},
         {"type": "wise", "name": "Wise", "icon": "wise", "is_finance": True, "subtype": "wise"},
-        {"type": "paypal", "name": "PayPal", "icon": "paypal", "is_finance": True, "needs_description": False},
+        {"type": "paypal", "name": "PayPal", "icon": "paypal", "is_finance": False , "needs_description": False},
         {"type": "yoomoney", "name": "ЮMoney", "icon": "yoomoney", "is_finance": True, "subtype": "yoomoney"},
         
         {"type": "sber", "name": "Сбер", "icon": "sber", "is_finance": True, "subtype": "sber"},
@@ -2081,6 +2081,10 @@ async def finish_link_creation(update: Update, context: ContextTypes.DEFAULT_TYP
     is_finance = context.user_data.get('link_info', {}).get('is_finance')
     
     pay_details = None
+    
+    
+    
+    
     
     # ПАТЧ 1: Фиксируем тип для финансовых инструментов
     if is_finance:

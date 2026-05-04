@@ -913,6 +913,7 @@ async def parse_and_validate(link_type: str, collected_data: dict) -> tuple:
            collected_data.get('link', '').strip() or
            collected_data.get('login', '').strip() or
            collected_data.get('iban', '').strip())
+    print(f"🔥 parse_and_validate вызван с link_type={link_type}")
     
     # ===== 1. ПРЯМЫЕ ССЫЛКИ (СРАЗУ НА ОПЛАТУ) =====
     if link_type == "paypal":
