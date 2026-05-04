@@ -654,15 +654,16 @@ window.onclick = function(event) {
 </script>
 <script>
 
-  document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-    cb.addEventListener('change', function() {
-      const card = this.closest('.price-card');
-      const btns = card.querySelectorAll('a, button');
-      btns.forEach(btn => {
-        btn.style.opacity = this.checked ? '1' : '0.5';
-        btn.style.pointerEvents = this.checked ? 'auto' : 'none';
+  document.querySelectorAll('.offer-agree-basic, .offer-agree-pro').forEach(checkbox => {
+      checkbox.addEventListener('change', function() {
+          // Находим все кнопки и ссылки внутри той же карточки, где лежит чекбокс
+          const buttons = this.closest('.price-card').querySelectorAll('.stripe-btn-basic, .crypto-btn-basic, .req-btn, .stripe-btn-pro, .crypto-btn-pro');
+
+          buttons.forEach(btn => {
+              btn.style.opacity = this.checked ? '1' : '0.5';
+              btn.style.pointerEvents = this.checked ? 'auto' : 'none';
+          });
       });
-    });
   });
 
   function openRequisitesModal(price) {
