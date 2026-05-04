@@ -1137,8 +1137,8 @@
                         </button>
                     </div>
 
-                    {# МОДАЛЬНЫЕ ТИПЫ (Revolut, Wise, IBAN, SWIFT и т.д.) #}
-                    {% elif link.link_type in ['revolut', 'wise', 'iban', 'swift', 'ach_usa'] %}
+                    {# МОДАЛЬНЫЕ ТИПЫ (Revolut, Wise, IBAN и т.д.) #}
+                    {% elif link.link_type in ['revolut', 'wise', 'iban', 'swift'] %}
                     <div class="link-item finance-item">
                         <div class="finance-content">
                             <div class="finance-header">
@@ -1689,11 +1689,11 @@
 <!-- ========== ПОДКЛЮЧЕНИЕ МОДАЛЬНЫХ ОКОН ========== -->
 <div id="modals-container">
     {% for link in links %}
-        {% if link.link_type in ['revolut', 'wise', 'iban', 'swift'] %}
+        {% if link.link_type in ['revolut', 'wise', 'iban', 'swift', 'ach_usa', 'wire_usa'] %}
             {% include '11den/11den_modal_bank.html' %}
-        {% elif link.link_type in ['binance', 'bybit', 'okx', 'metamask'] %}
+        {% elif link.link_type in ['binance', 'bybit', 'okx', 'metamask', 'kucoin', 'gateio'] %}
             {% include '11den/11den_modal.html' %}
-        {% elif link.link_type in ['card_usa', 'ach_usa', 'wire_usa'] %}
+        {% elif link.link_type in ['card_usa', 'account_usa'] %}
             {% include '11den/11den_modal_usa.html' %}
         {% endif %}
     {% endfor %}
