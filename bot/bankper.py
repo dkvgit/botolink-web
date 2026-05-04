@@ -741,7 +741,7 @@ async def handle_flow_skip(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return await render_flow_confirmation(update, context)
 
 
-# D:\aRabota\TelegaBoom\030_mylinkspace\bot\handlers.py
+
 
 async def handle_flow_input(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Обработка текстового ввода для пошагового конструктора (Соцсети/Email)"""

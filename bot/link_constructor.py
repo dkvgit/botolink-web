@@ -104,7 +104,7 @@ CATEGORY_LINK_TYPES = {
     "transfers": [
         {"type": "revolut", "name": "Revolut", "icon": "revolut", "is_finance": True, "subtype": "revolut"},
         {"type": "wise", "name": "Wise", "icon": "wise", "is_finance": True, "subtype": "wise"},
-        {"type": "paypal", "name": "PayPal", "icon": "paypal", "is_finance": False, "needs_description": False},
+        {"type": "paypal", "name": "PayPal", "icon": "paypal", "is_finance": True, "needs_description": False},
         {"type": "yoomoney", "name": "ЮMoney", "icon": "yoomoney", "is_finance": True, "subtype": "yoomoney"},
         
         {"type": "sber", "name": "Сбер", "icon": "sber", "is_finance": True, "subtype": "sber"},
