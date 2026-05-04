@@ -152,7 +152,10 @@ COUNTRY_METHODS = {
         {"id": "account_turkmenistan", "name": "Банковский счет", "fields": [f("bank_name"), f("account"), f("bic"), f("beneficiary")]}
     ],
     "vietnam": [
-        {"id": "non_res_vietnam", "name": "Счет нерезидента", "fields": [f("account_number")]},
+        {"id": "non_res_vietnam", "name": "Счет нерезидента", "fields": [
+            f("full_name"),
+            f("account_number")
+        ]},
         {"id": "card_vietnam", "name": "Банковская карта", "fields": [f("bank_name"), f("card_number")]},
         {"id": "account_vietnam", "name": "Банковский счет", "fields": [f("bank_name"), f("account"), f("bic"), f("beneficiary")]}
     ]

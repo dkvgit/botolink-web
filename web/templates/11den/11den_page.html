@@ -62,8 +62,25 @@
 
             <!-- Имя пользователя (приоритет: first_name, если нет - username) -->
 
+
+
+
+
+
             <!-- <h1 class="username">{{ user.first_name|string if user.first_name else page.username|string }}</h1> -->
-            <h1 class="username">Дополнительные Реквизиты Оплата Гайда Нячанг 2026</h1>
+            <h1 class="username">Дополнительные реквизиты<br>Оплата Гайда Нячанг 2026</h1>
+
+            <!-- Инструкция после оплаты -->
+            <div style="background: rgba(255,255,255,0.05); border-radius: 16px; padding: 12px 16px; margin-top: 20px; text-align: center; font-size: 13px; color: rgba(255,255,255,0.7);">
+                <p style="margin-bottom: 8px;">📌 <strong>После перевода денег:</strong></p>
+                <p style="margin-bottom: 5px;">➡️ Отправьте скрин/скан чека оплаты в Telegram: <a href="https://t.me/dekavetel" target="_blank" style="color: #00ff88; text-decoration: underline;">@dekavetel</a></p>
+                <p style="margin-bottom: 5px;">📧 Или на почту: <a href="mailto:dkvkabakov@gmail.com" style="color: #00ff88; text-decoration: underline;">dkvkabakov@gmail.com</a></p>
+                <p style="margin-top: 8px; font-size: 11px; color: rgba(255,255,255,0.5);">После подтверждения оплаты вы получите доступ к материалам гида.</p>
+            </div>
+
+
+
+
 
 
 
@@ -1181,6 +1198,13 @@
                                 <span class="country-text">{{ COUNTRY_NAMES[link.pay_details.country] }}</span>
                                 {% endif %}
                             </div>
+                            {# Показываем ФИО получателя #}
+                            {% if link.pay_details and link.pay_details.full_name %}
+                            <div>
+                                <span class="label-light">получатель • </span>
+                                <code class="code-text">{{ link.pay_details.full_name }}</code>
+                            </div>
+                            {% endif %}
                             {# Показываем номер счета #}
                             {% if link.pay_details and link.pay_details.account_number %}
                             <div>
@@ -1189,9 +1213,7 @@
                             </div>
                             {% endif %}
                         </div>
-                        <button class="details-btn ml-16"
-                                onclick="event.stopPropagation(); openModal('modal_{{ link.id }}')">Реквизиты
-                        </button>
+                        <button class="details-btn ml-16" onclick="event.stopPropagation(); openModal('modal_{{ link.id }}')">Реквизиты</button>
                     </div>
 
                     {# УНИВЕРСАЛЬНЫЕ ПЛАТЕЖНЫЕ СИСТЕМЫ (PayPal, ЮMoney, VK Pay, Монобанк, Kaspi, Payme, Click, TBC Pay,
@@ -1665,22 +1687,16 @@
         </div>
 
 
-        <!-- Статистика просмотров страницы -->
-
-                    <div class="stats">
-
-                        <span class="views"><i class="fas fa-eye"></i> {{ page.view_count or 0 }}</span>
-
-                    </div>
+        <!-- Статистика просмотров страницы и подвал в одном ряду -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 30px;">
+            <div class="stats" style="margin: 0;">
+                <span class="views"><i class="fas fa-eye"></i> {{ page.view_count or 0 }}</span>
+            </div>
 
 
-
-        <!-- Подвал страницы -->
-
-        <div class="footer">
-
-            <p>made in BotoLinkPro</p>
-
+            <div class="footer" style="margin: 0;">
+                <p>made in BotoLink.pro</p>
+            </div>
         </div>
 
     </div>
