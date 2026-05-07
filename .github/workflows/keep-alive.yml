@@ -9,3 +9,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: curl https://botolink-web.onrender.com
+      - run: curl https://easyvietnam-c7b6.onrender.com
