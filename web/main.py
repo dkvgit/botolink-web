@@ -165,6 +165,15 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+# 👇 ДОБАВЬТЕ ЭТО СЮДА
+@app.get("/ping")
+async def ping():
+    return {"status": "alive", "message": "FastAPI работает на HF"}
+# 👆 ДОБАВЬТЕ ЭТО
+
+# ==============ВРЕМЯНКА==========================================
+
+
 
 # ==============ВРЕМЯНКА==========================================
 
