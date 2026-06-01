@@ -1,4 +1,34 @@
+#=== Hugging Face Rules (CRITICAL) ===
+# Игнорируем все бинарники
+*.pdf
+*.png
+*.jpg
+*.jpeg
+*.ico
+*.zip
+*.gif
+*.webp
+
+# Папки с бинарными файлами (ваши точные пути!)
+app_data/
+favicon_io/
+
+# Папка static в корне
+static/
+static/avatars/
+static/favicon/
+static/previews/
+
+# Папка static внутри web
+web/static/
+web/static/avatars/
+web/static/favicon/
+web/static/icons/
+
+#=== IDE and Environment ===
 .venv/
 __pycache__/
 .env
 *.pyc
+.idea/
+*.iml
