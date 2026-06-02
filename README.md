@@ -1,4 +1,5 @@
----
+# Создайте README.md прямо в терминале
+echo "---
 title: "BotoLink"
 emoji: 🤖
 colorFrom: purple
@@ -10,4 +11,4 @@ pinned: false
 
 # BotoLink
 
-Telegram бот и веб-сервис для управления ссылками и гайдами.
+Telegram бот и веб-сервис для управления ссылками и гайдами." > README.md
