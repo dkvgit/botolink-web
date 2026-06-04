@@ -165,6 +165,15 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+
+from starlette.middleware.trustedhost import TrustedHostMiddleware
+
+app.add_middleware(
+    TrustedHostMiddleware,
+    allowed_hosts=["botolink.pro", "www.botolink.pro", "localhost", "127.0.0.1", "*.hf.space"]
+)
+
+
 # 👇 ДОБАВЬТЕ ЭТО СЮДА
 @app.get("/ping")
 def ping():
